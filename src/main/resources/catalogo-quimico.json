@@ -1,0 +1,481 @@
+{
+  "sustancias": [
+    {
+      "id": "H2",
+      "nombre": "Hidrógeno",
+      "formula": "H₂",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 2.016
+    },
+    {
+      "id": "O2",
+      "nombre": "Oxígeno",
+      "formula": "O₂",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 32.0
+    },
+    {
+      "id": "H2O",
+      "nombre": "Agua",
+      "formula": "H₂O",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "LIQUIDO",
+      "masaMolar": 18.015
+    },
+    {
+      "id": "C",
+      "nombre": "Carbono",
+      "formula": "C",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 12.011
+    },
+    {
+      "id": "CO2",
+      "nombre": "Dióxido de carbono",
+      "formula": "CO₂",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 44.01
+    },
+    {
+      "id": "Fe",
+      "nombre": "Hierro",
+      "formula": "Fe",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 55.845
+    },
+    {
+      "id": "N2",
+      "nombre": "Nitrógeno",
+      "formula": "N₂",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 28.014
+    },
+    {
+      "id": "NH3",
+      "nombre": "Amoníaco",
+      "formula": "NH₃",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 17.031
+    },
+    {
+      "id": "Na",
+      "nombre": "Sodio",
+      "formula": "Na",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 22.99
+    },
+    {
+      "id": "Cl2",
+      "nombre": "Cloro",
+      "formula": "Cl₂",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 70.906
+    },
+    {
+      "id": "NaCl",
+      "nombre": "Cloruro de sodio",
+      "formula": "NaCl",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 58.44
+    },
+    {
+      "id": "HCl",
+      "nombre": "Ácido clorhídrico",
+      "formula": "HCl",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 36.461
+    },
+    {
+      "id": "Fe2O3",
+      "nombre": "Óxido de hierro(III)",
+      "formula": "Fe₂O₃",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 159.69
+    },
+    {
+      "id": "CH4",
+      "nombre": "Metano",
+      "formula": "CH₄",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 16.043
+    },
+    {
+      "id": "S",
+      "nombre": "Azufre",
+      "formula": "S",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 32.065
+    },
+    {
+      "id": "H2S",
+      "nombre": "Sulfuro de hidrógeno",
+      "formula": "H₂S",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 34.082
+    },
+    {
+      "id": "Cu",
+      "nombre": "Cobre",
+      "formula": "Cu",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 63.546
+    },
+    {
+      "id": "CuO",
+      "nombre": "Óxido de cobre(II)",
+      "formula": "CuO",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 79.545
+    },
+    {
+      "id": "Ca",
+      "nombre": "Calcio",
+      "formula": "Ca",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 40.078
+    },
+    {
+      "id": "CaO",
+      "nombre": "Óxido de calcio",
+      "formula": "CaO",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 56.077
+    },
+    {
+      "id": "CaOH2",
+      "nombre": "Hidróxido de calcio",
+      "formula": "Ca(OH)₂",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 74.093
+    },
+    {
+      "id": "CaCO3",
+      "nombre": "Carbonato de calcio",
+      "formula": "CaCO₃",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 100.086
+    },
+    {
+      "id": "Si",
+      "nombre": "Silicio",
+      "formula": "Si",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 28.085
+    },
+    {
+      "id": "SiO2",
+      "nombre": "Dióxido de silicio",
+      "formula": "SiO₂",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 60.084
+    },
+    {
+      "id": "Mg",
+      "nombre": "Magnesio",
+      "formula": "Mg",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 24.305
+    },
+    {
+      "id": "MgO",
+      "nombre": "Óxido de magnesio",
+      "formula": "MgO",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 40.304
+    },
+    {
+      "id": "Al",
+      "nombre": "Aluminio",
+      "formula": "Al",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 26.982
+    },
+    {
+      "id": "Al2O3",
+      "nombre": "Óxido de aluminio",
+      "formula": "Al₂O₃",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 101.960
+    },
+    {
+      "id": "P",
+      "nombre": "Fósforo",
+      "formula": "P",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 30.974
+    },
+    {
+      "id": "Ca3PO42",
+      "nombre": "Fosfato de calcio",
+      "formula": "Ca₃(PO₄)₂",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 310.180
+    },
+    {
+      "id": "Ni",
+      "nombre": "Níquel",
+      "formula": "Ni",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 58.693
+    },
+    {
+      "id": "DIAMANTE",
+      "nombre": "Diamante",
+      "formula": "C (Diamante)",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 12.011
+    },
+    {
+      "id": "SO2",
+      "nombre": "Dióxido de azufre",
+      "formula": "SO₂",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "GASEOSO",
+      "masaMolar": 64.066
+    }
+  ],
+  "reacciones": [
+    {
+      "id": "R_H2O",
+      "nombre": "Formación de agua",
+      "reactivos": {
+        "H2": 2,
+        "O2": 1
+      },
+      "productos": {
+        "H2O": 2
+      }
+    },
+    {
+      "id": "R_CO2",
+      "nombre": "Combustión del carbono",
+      "reactivos": {
+        "C": 1,
+        "O2": 1
+      },
+      "productos": {
+        "CO2": 1
+      }
+    },
+    {
+      "id": "R_NH3",
+      "nombre": "Síntesis de amoníaco (Haber-Bosch)",
+      "reactivos": {
+        "N2": 1,
+        "H2": 3
+      },
+      "productos": {
+        "NH3": 2
+      }
+    },
+    {
+      "id": "R_NaCl",
+      "nombre": "Síntesis de cloruro de sodio",
+      "reactivos": {
+        "Na": 2,
+        "Cl2": 1
+      },
+      "productos": {
+        "NaCl": 2
+      }
+    },
+    {
+      "id": "R_HCl",
+      "nombre": "Síntesis de ácido clorhídrico",
+      "reactivos": {
+        "H2": 1,
+        "Cl2": 1
+      },
+      "productos": {
+        "HCl": 2
+      }
+    },
+    {
+      "id": "R_Fe2O3",
+      "nombre": "Oxidación del hierro (herrumbre)",
+      "reactivos": {
+        "Fe": 4,
+        "O2": 3
+      },
+      "productos": {
+        "Fe2O3": 2
+      }
+    },
+    {
+      "id": "R_CH4",
+      "nombre": "Combustión del metano",
+      "reactivos": {
+        "CH4": 1,
+        "O2": 2
+      },
+      "productos": {
+        "CO2": 1,
+        "H2O": 2
+      }
+    },
+    {
+      "id": "R_H2S",
+      "nombre": "Formación de sulfuro de hidrógeno",
+      "reactivos": {
+        "H2": 1,
+        "S": 1
+      },
+      "productos": {
+        "H2S": 1
+      }
+    },
+    {
+      "id": "R_CuO",
+      "nombre": "Formación de óxido de cobre(II)",
+      "reactivos": {
+        "Cu": 2,
+        "O2": 1
+      },
+      "productos": {
+        "CuO": 2
+      }
+    },
+    {
+      "id": "R_CaO",
+      "nombre": "Formación de óxido de calcio",
+      "reactivos": {
+        "Ca": 2,
+        "O2": 1
+      },
+      "productos": {
+        "CaO": 2
+      }
+    },
+    {
+      "id": "R_CaOH2",
+      "nombre": "Formación de hidróxido de calcio",
+      "reactivos": {
+        "CaO": 1,
+        "H2O": 1
+      },
+      "productos": {
+        "CaOH2": 1
+      }
+    },
+    {
+      "id": "R_CaCO3",
+      "nombre": "Precipitación de carbonato de calcio",
+      "reactivos": {
+        "CaOH2": 1,
+        "CO2": 1
+      },
+      "productos": {
+        "CaCO3": 1,
+        "H2O": 1
+      }
+    },
+    {
+      "id": "R_SiO2",
+      "nombre": "Formación de dióxido de silicio",
+      "reactivos": {
+        "Si": 1,
+        "O2": 1
+      },
+      "productos": {
+        "SiO2": 1
+      }
+    },
+    {
+      "id": "R_MgO",
+      "nombre": "Formación de óxido de magnesio",
+      "reactivos": {
+        "Mg": 2,
+        "O2": 1
+      },
+      "productos": {
+        "MgO": 2
+      }
+    },
+    {
+      "id": "R_Al2O3",
+      "nombre": "Formación de óxido de aluminio",
+      "reactivos": {
+        "Al": 4,
+        "O2": 3
+      },
+      "productos": {
+        "Al2O3": 2
+      }
+    },
+    {
+      "id": "R_Ca3PO42",
+      "nombre": "Formación de fosfato de calcio",
+      "reactivos": {
+        "CaO": 3,
+        "P": 2,
+        "O2": 2
+      },
+      "productos": {
+        "Ca3PO42": 1
+      }
+    },
+    {
+      "id": "R_DIAMANTE_HPHT",
+      "nombre": "Producción de diamante HPHT",
+      "reactivos": {
+        "C": 1
+      },
+      "productos": {
+        "DIAMANTE": 1
+      }
+    },
+    {
+      "id": "R_DIAMANTE_CVD",
+      "nombre": "Producción de diamante CVD",
+      "reactivos": {
+        "CH4": 1
+      },
+      "productos": {
+        "DIAMANTE": 1,
+        "H2": 2
+      }
+    },
+    {
+      "id": "R_SO2",
+      "nombre": "Oxidación del azufre",
+      "reactivos": {
+        "S": 1,
+        "O2": 1
+      },
+      "productos": {
+        "SO2": 1
+      }
+    }
+  ]
+}

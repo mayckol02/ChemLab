@@ -1,0 +1,22 @@
+package com.chemlab.model.enums;
+
+public enum TipoFalloReaccion {
+
+    NINGUNO,
+
+    REACTIVO_INEXISTENTE,
+
+    CANTIDAD_INSUFICIENTE,
+
+    REACCION_INVALIDA,
+
+    CONDICION_TEMPERATURA,
+
+    CONDICION_PRESION,
+
+    CONDICION_CATALIZADOR,
+
+    CONDICION_ATMOSFERA,
+
+    CONDICION_IGNICION
+}
