@@ -165,7 +165,7 @@ public final class SesionJuego {
                 estadoPrevio,
                 accion.name(),
                 estadoPosterior,
-                resultadoAccion.isExito()
+                resultadoAccion.isExitoso()
         ));
 
         for (ObservadorSesion obs : observadores) {

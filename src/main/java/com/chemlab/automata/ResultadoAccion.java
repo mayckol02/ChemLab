@@ -49,6 +49,11 @@ public final class ResultadoAccion {
         return transicionExitosa;
     }
 
+    /** Alias expresivo de {@link #isTransicionExitosa()}. */
+    public boolean isExito() {
+        return transicionExitosa;
+    }
+
     public EstadoQuimico getEstadoActual() {
         return estadoActual;
     }

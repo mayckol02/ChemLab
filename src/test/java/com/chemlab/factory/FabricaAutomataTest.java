@@ -69,6 +69,7 @@ class FabricaAutomataTest {
         automata.transicionar(AccionLaboratorio.CARGAR_REACTIVO, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
         automata.transicionar(AccionLaboratorio.MEZCLAR, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
         automata.transicionar(AccionLaboratorio.CALENTAR, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
+        automata.transicionar(AccionLaboratorio.FINALIZAR, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
         assertTrue(automata.esEstadoFinalActual());
         assertEquals("COMPLETADO", automata.getEstadoActual().getId());
     }
