@@ -415,25 +415,63 @@ public final class FabricaExperimento {
 
         if (reaccion.getId().contains("DIAMANTE_HPHT")) {
             tipoEq = TipoEquipo.REACTOR;
-            nombreEquipo = "Celda de Alta Presión HPHT (5 GPa)";
-            temp = 1400.0;
-            pres = 50000.0;
+            nombreEquipo = "Prensa Cúbica HPHT (5.5 GPa / 1500°C)";
+            temp = 1500.0;
+            pres = 55000.0;
             atm = Atmosfera.VACIO;
+            // Precargar catalizador Fe y Ni para el flujo solvente
+            catalogo.buscarSustancia("Ni").ifPresent(ni -> inventario.agregar(ni, 20.0, UnidadCantidad.GRAMOS));
+            catalogo.buscarSustancia("Fe").ifPresent(fe -> inventario.agregar(fe, 20.0, UnidadCantidad.GRAMOS));
         } else if (reaccion.getId().contains("DIAMANTE_CVD")) {
             tipoEq = TipoEquipo.CAMARA_SELLADA;
-            nombreEquipo = "Cámara de Plasma CVD";
-            temp = 900.0;
+            nombreEquipo = "Reactor CVD con Plasma de Microondas (2.45 GHz)";
+            temp = 1000.0;
             pres = 0.05;
             atm = Atmosfera.VACIO;
+            // Asegurar H2 presente para el plasma decapante
+            catalogo.buscarSustancia("H2").ifPresent(h2 -> inventario.agregar(h2, 20.0, UnidadCantidad.GRAMOS));
+        } else if (reaccion.getId().contains("CORROSION_FE")) {
+            tipoEq = TipoEquipo.BANDEJA;
+            nombreEquipo = "Bandeja de Corrosión Ambiental";
+            temp = 25.0;
+            pres = 1.0;
+            atm = Atmosfera.AIRE_HUMEDO;
+        } else if (reaccion.getId().contains("DISOLUCION_NACL")) {
+            tipoEq = TipoEquipo.MATRAZ;
+            nombreEquipo = "Vaso de Precipitados con Agitador Magnético";
+            temp = 25.0;
+            pres = 1.0;
+            atm = Atmosfera.AIRE;
+        } else if (reaccion.getId().contains("SEPARACION_NACL")) {
+            tipoEq = TipoEquipo.MATRAZ;
+            nombreEquipo = "Aparato de Evaporación y Cristalización";
+            temp = 100.0;
+            pres = 1.0;
+            atm = Atmosfera.AIRE;
+        } else if (reaccion.getId().contains("CALCINACION_CACO3")) {
+            tipoEq = TipoEquipo.HORNO;
+            nombreEquipo = "Horno Mufla de Calcinación (900°C)";
+            temp = 900.0;
+            pres = 1.0;
+            atm = Atmosfera.AIRE;
+        } else if (reaccion.getId().contains("REDOX_CU")) {
+            tipoEq = TipoEquipo.CAMARA_SELLADA;
+            nombreEquipo = "Tubo de Reducción Tubular (300°C)";
+            temp = 300.0;
+            pres = 1.0;
+            atm = Atmosfera.AIRE;
         } else if (reaccion.getId().contains("CH4") || reaccion.getId().contains("SO2") || reaccion.getId().contains("MgO")) {
             tipoEq = TipoEquipo.HORNO;
-            nombreEquipo = "Cámara de Combustión";
+            nombreEquipo = "Cámara de Combustión Sellada";
             temp = 400.0;
+            pres = 1.0;
             atm = Atmosfera.OXIGENO;
         } else if (reaccion.getId().contains("SiO2") || reaccion.getId().contains("Al2O3") || reaccion.getId().contains("Ca3PO42")) {
             tipoEq = TipoEquipo.HORNO;
-            nombreEquipo = "Horno de Calcinación";
+            nombreEquipo = "Horno de Oxidación Térmica (800°C)";
             temp = 800.0;
+            pres = 1.0;
+            atm = Atmosfera.OXIGENO;
         }
 
         Equipo equipo = new Equipo(

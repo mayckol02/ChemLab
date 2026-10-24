@@ -2,6 +2,7 @@ package com.chemlab.model.entity;
 
 import com.chemlab.model.enums.UnidadCantidad;
 import com.chemlab.model.value.Cantidad;
+import com.chemlab.service.ConversorQuimico;
 import com.chemlab.service.ConversorUnidades;
 
 import java.util.Collections;
@@ -13,10 +14,12 @@ public class Inventario {
 
     private final Map<Sustancia, Cantidad> cantidades;
     private final ConversorUnidades conversorUnidades;
+    private final ConversorQuimico conversorQuimico;
 
     public Inventario() {
         this.cantidades = new HashMap<>();
         this.conversorUnidades = new ConversorUnidades();
+        this.conversorQuimico = new ConversorQuimico();
     }
 
     public void agregar(
@@ -61,11 +64,11 @@ public class Inventario {
             return;
         }
 
-        Cantidad cantidadConvertida =
-                conversorUnidades.convertir(
-                        cantidad,
-                        cantidadActual.getUnidad()
-                );
+        Cantidad cantidadConvertida = convertirParaUnidadExistente(
+                sustancia,
+                cantidad,
+                cantidadActual.getUnidad()
+        );
 
         double nuevoValor =
                 cantidadActual.getValor()
@@ -78,6 +81,40 @@ public class Inventario {
                         cantidadActual.getUnidad()
                 )
         );
+    }
+
+    /**
+     * Mantiene una unidad estable por sustancia y permite sumar moles y masa
+     * usando la masa molar de esa sustancia. La conversión entre unidades de
+     * masa o volumen sigue delegada al conversor físico habitual.
+     */
+    private Cantidad convertirParaUnidadExistente(
+            Sustancia sustancia,
+            Cantidad cantidad,
+            UnidadCantidad unidadDestino
+    ) {
+        if (cantidad.getUnidad() == UnidadCantidad.MOLES
+                && esUnidadDeMasa(unidadDestino)) {
+            return conversorQuimico.convertirDesdeMoles(
+                    cantidad,
+                    sustancia,
+                    unidadDestino
+            );
+        }
+
+        if (cantidad.getUnidad() != UnidadCantidad.MOLES
+                && unidadDestino == UnidadCantidad.MOLES
+                && esUnidadDeMasa(cantidad.getUnidad())) {
+            return conversorQuimico.convertirAMoles(cantidad, sustancia);
+        }
+
+        return conversorUnidades.convertir(cantidad, unidadDestino);
+    }
+
+    private boolean esUnidadDeMasa(UnidadCantidad unidad) {
+        return unidad == UnidadCantidad.MILIGRAMOS
+                || unidad == UnidadCantidad.GRAMOS
+                || unidad == UnidadCantidad.KILOGRAMOS;
     }
 
     public void retirar(

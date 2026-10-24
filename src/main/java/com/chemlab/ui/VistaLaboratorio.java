@@ -9,6 +9,8 @@ import com.chemlab.factory.FabricaAutomata;
 import com.chemlab.factory.FabricaExperimento;
 import com.chemlab.factory.FabricaSesion;
 import com.chemlab.game.ObservadorSesion;
+import com.chemlab.game.procedure.ProtocoloProcedimiento;
+import com.chemlab.ui.components.IconoSustancia;
 import com.chemlab.game.SesionJuego;
 import com.chemlab.model.entity.Experimento;
 import com.chemlab.model.entity.Reaccion;
@@ -95,6 +97,18 @@ public final class VistaLaboratorio extends BorderPane
     // --- Control de reactivos seleccionados ---
     private final java.util.Set<String> elementosSeleccionados = new java.util.HashSet<>();
     private FlowPane selectorExp;
+
+    // --- Monitor de procedimiento real, reactivos y rutas ---
+    private VBox panelRutasSintesis;
+    private VBox panelMonitorProcedimiento;
+    private Label labelEquipoMonitor;
+    private Label labelTempMonitor;
+    private Label labelPresionMonitor;
+    private Label labelAtmosferaMonitor;
+    private Label labelCatalizadorMonitor;
+    private FlowPane gridTarjetasReactivos;
+    private Label labelNarrativaProcedimiento;
+    private Label labelProximaAccion;
 
     public VistaLaboratorio() {
         CatalogoQuimico catalogo = CatalogoQuimico.predeterminado();
@@ -208,6 +222,8 @@ public final class VistaLaboratorio extends BorderPane
                     s.getFormula() + "  " + s.getNombre()
             );
             cb.getStyleClass().add("checkbox-reactivo");
+            cb.setSelected(true);
+            elementosSeleccionados.add(s.getId());
             checkBoxesAlmacen.add(cb);
             cb.setOnAction(e -> {
                 if (cb.isSelected()) {
@@ -274,7 +290,7 @@ public final class VistaLaboratorio extends BorderPane
         return tabPane;
     }
 
-    private VBox construirPanelCentral() {
+    private ScrollPane construirPanelCentral() {
         VBox panel = new VBox(14);
         panel.getStyleClass().add("panel-principal");
         panel.setPadding(new Insets(20));
@@ -286,6 +302,12 @@ public final class VistaLaboratorio extends BorderPane
         // Estado del autómata
         labelEstadoAutomata = new Label("Esperando inicio…");
         labelEstadoAutomata.getStyleClass().add("texto-info");
+
+        // Rutas alternativas de síntesis (diamante HPHT vs CVD, CO2 combustión vs calcinación, etc.)
+        panelRutasSintesis = construirPanelRutasSintesis();
+
+        // Monitor de procedimiento físico y disposición de reactivos
+        panelMonitorProcedimiento = construirPanelMonitorProcedimiento();
 
         // Panel progreso del autómata (barra de estados)
         Label labelProgreso = new Label("PROGRESO DEL PROCESO");
@@ -345,6 +367,8 @@ public final class VistaLaboratorio extends BorderPane
         panel.getChildren().addAll(
                 labelNombreExperimento,
                 labelEstadoAutomata,
+                panelRutasSintesis,
+                panelMonitorProcedimiento,
                 labelProgreso,
                 panelProgresoAutomata,
                 labelGuia,
@@ -358,7 +382,196 @@ public final class VistaLaboratorio extends BorderPane
                 panelAcciones
         );
 
+        ScrollPane scrollCentro = new ScrollPane(panel);
+        scrollCentro.setFitToWidth(true);
+        scrollCentro.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+        return scrollCentro;
+    }
+
+    private VBox construirPanelRutasSintesis() {
+        VBox box = new VBox(6);
+        box.getStyleClass().add("box-rutas-sintesis");
+        box.setVisible(false);
+        box.setManaged(false);
+        return box;
+    }
+
+    private VBox construirPanelMonitorProcedimiento() {
+        VBox panel = new VBox(10);
+        panel.getStyleClass().add("panel-monitor-procedimiento");
+        panel.setPadding(new Insets(12));
+
+        HBox cabecera = new HBox(8);
+        cabecera.setAlignment(Pos.CENTER_LEFT);
+        Label titulo = new Label("🔬 MONITOR DE PROCEDIMIENTO EXPERIMENTAL Y DISPOSICIÓN FÍSICA");
+        titulo.setStyle("-fx-font-weight: bold; -fx-text-fill: #58a6ff; -fx-font-size: 13px;");
+        cabecera.getChildren().add(titulo);
+
+        FlowPane barraParametros = new FlowPane(8, 8);
+        barraParametros.getStyleClass().add("barra-parametros-equipo");
+
+        labelEquipoMonitor = new Label("Equipo: —");
+        labelEquipoMonitor.getStyleClass().add("pill-parametro");
+
+        labelTempMonitor = new Label("Temp: —");
+        labelTempMonitor.getStyleClass().add("pill-parametro");
+
+        labelPresionMonitor = new Label("Presión: —");
+        labelPresionMonitor.getStyleClass().add("pill-parametro");
+
+        labelAtmosferaMonitor = new Label("Atmósfera: —");
+        labelAtmosferaMonitor.getStyleClass().add("pill-parametro");
+
+        labelCatalizadorMonitor = new Label("Catalizador: —");
+        labelCatalizadorMonitor.getStyleClass().add("pill-parametro");
+
+        barraParametros.getChildren().addAll(
+                labelEquipoMonitor,
+                labelTempMonitor,
+                labelPresionMonitor,
+                labelAtmosferaMonitor,
+                labelCatalizadorMonitor
+        );
+
+        Label lblReactivos = new Label("ESTADO INDIVIDUAL DE ELEMENTOS / REACTIVOS (MANEJO FÍSICO Y ESPACIAL):");
+        lblReactivos.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #8b949e;");
+
+        gridTarjetasReactivos = new FlowPane(10, 10);
+        Label sinReactivos = new Label("Selecciona un experimento para ver cómo se maneja cada elemento.");
+        sinReactivos.getStyleClass().add("texto-secundario");
+        gridTarjetasReactivos.getChildren().add(sinReactivos);
+
+        labelNarrativaProcedimiento = new Label("Elige una síntesis para cargar el protocolo experimental.");
+        labelNarrativaProcedimiento.getStyleClass().add("box-narrativa-procedimiento");
+        labelNarrativaProcedimiento.setWrapText(true);
+
+        labelProximaAccion = new Label("Próxima acción: —");
+        labelProximaAccion.setStyle("-fx-font-size: 11px; -fx-text-fill: #7ee787; -fx-font-weight: bold;");
+
+        panel.getChildren().addAll(
+                cabecera,
+                barraParametros,
+                lblReactivos,
+                gridTarjetasReactivos,
+                labelNarrativaProcedimiento,
+                labelProximaAccion
+        );
+
         return panel;
+    }
+
+    private void actualizarPanelRutasSintesis(String idReaccion) {
+        panelRutasSintesis.getChildren().clear();
+        List<ProtocoloProcedimiento.InfoRutaSintesis> rutas = ProtocoloProcedimiento.obtenerRutasDisponibles(idReaccion);
+        if (rutas.size() <= 1) {
+            panelRutasSintesis.setVisible(false);
+            panelRutasSintesis.setManaged(false);
+            return;
+        }
+
+        panelRutasSintesis.setVisible(true);
+        panelRutasSintesis.setManaged(true);
+
+        HBox cabecera = new HBox(8);
+        cabecera.setAlignment(Pos.CENTER_LEFT);
+        Label titulo = new Label("🔄 RUTAS ALTERNATIVAS DE SÍNTESIS DISPONIBLES");
+        titulo.setStyle("-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #e3b341;");
+        cabecera.getChildren().add(titulo);
+
+        Label desc = new Label("Este compuesto puede sintetizarse por diferentes métodos químicos/físicos:");
+        desc.setStyle("-fx-font-size: 11px; -fx-text-fill: #8b949e;");
+
+        FlowPane botonesRuta = new FlowPane(8, 8);
+        CatalogoQuimico cat = CatalogoQuimico.predeterminado();
+
+        for (var ruta : rutas) {
+            boolean esActual = ruta.idReaccion().equalsIgnoreCase(idReaccion);
+            Button btnRuta = new Button((esActual ? "▶ (Ruta actual) " : "⚡ Cambiar a: ") + ruta.nombreRuta());
+            btnRuta.getStyleClass().add("boton-cambiar-ruta");
+            if (esActual) {
+                btnRuta.setStyle("-fx-background-color: #238636; -fx-text-fill: white; -fx-font-weight: bold;");
+            } else {
+                btnRuta.setStyle("-fx-background-color: #21262d; -fx-text-fill: #58a6ff; -fx-border-color: #388bfd;");
+                btnRuta.setOnAction(e -> {
+                    if (sesion.isActiva()) {
+                        log("⚠ Finaliza el experimento en curso antes de cambiar de ruta.");
+                        return;
+                    }
+                    cat.buscarReaccion(ruta.idReaccion()).ifPresent(this::seleccionarExperimentoPorReaccion);
+                });
+            }
+            btnRuta.setTooltip(new Tooltip(ruta.metodo() + "\n" + ruta.equipo() + "\n" + ruta.descripcionCientifica()));
+            botonesRuta.getChildren().add(btnRuta);
+        }
+
+        panelRutasSintesis.getChildren().addAll(cabecera, desc, botonesRuta);
+    }
+
+    private void actualizarMonitorProcedimiento(String idReaccion, String estadoAutomataId) {
+        if (idReaccion == null || idReaccion.isBlank()) {
+            limpiarMonitorProcedimiento();
+            return;
+        }
+
+        ProtocoloProcedimiento.InfoPasoProcedimiento info =
+                ProtocoloProcedimiento.obtenerProtocoloPaso(idReaccion, estadoAutomataId);
+
+        labelEquipoMonitor.setText("🏭 Equipo: " + info.equipoTecnico());
+        labelTempMonitor.setText(String.format("🌡 Temp: %.0f / %.0f °C", info.temperaturaActual(), info.temperaturaObjetivo()));
+        labelPresionMonitor.setText(String.format("⚙ Presión: %.1f / %.1f atm", info.presionActual(), info.presionObjetivo()));
+        labelAtmosferaMonitor.setText("💨 Atmósfera: " + info.atmosferaRequerida());
+        labelCatalizadorMonitor.setText("⚗ Cat/Medio: " + info.catalizadorEstado());
+
+        labelNarrativaProcedimiento.setText(info.explicacionManejo());
+        labelProximaAccion.setText("👉 Próxima acción requerida: " + info.accionSiguienteSugerida());
+
+        gridTarjetasReactivos.getChildren().clear();
+        for (ProtocoloProcedimiento.InfoReactivoFase rf : info.reactivosFases()) {
+            VBox card = new VBox(3);
+            card.getStyleClass().add("card-reactivo-fase");
+            card.setPadding(new Insets(6, 8, 6, 8));
+
+            HBox fila1 = new HBox(6);
+            fila1.setAlignment(Pos.CENTER_LEFT);
+            Label formula = new Label(rf.formula());
+            formula.setStyle("-fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-font-size: 13px;");
+
+            Label badgeManejo = new Label(rf.estadoManejo().name().replace("_", " "));
+            badgeManejo.getStyleClass().addAll("badge-manejo", "badge-manejo-" + rf.estadoManejo().name().toLowerCase());
+            fila1.getChildren().addAll(formula, badgeManejo);
+
+            Label lblRol = new Label("Rol: " + rf.rol() + " | Fase: " + rf.faseFisica());
+            lblRol.setStyle("-fx-font-size: 10px; -fx-text-fill: #8b949e;");
+
+            Label lblDisp = new Label("Disposición: " + rf.descripcionUbicacion());
+            lblDisp.setStyle("-fx-font-size: 10px; -fx-text-fill: #c9d1d9; -fx-font-style: italic;");
+            lblDisp.setWrapText(true);
+            lblDisp.setMaxWidth(220);
+
+            card.getChildren().addAll(fila1, lblRol, lblDisp);
+            gridTarjetasReactivos.getChildren().add(card);
+        }
+
+        actualizarPanelRutasSintesis(idReaccion);
+    }
+
+    private void limpiarMonitorProcedimiento() {
+        if (labelEquipoMonitor == null) return;
+        labelEquipoMonitor.setText("Equipo: —");
+        labelTempMonitor.setText("Temp: —");
+        labelPresionMonitor.setText("Presión: —");
+        labelAtmosferaMonitor.setText("Atmósfera: —");
+        labelCatalizadorMonitor.setText("Catalizador: —");
+        labelNarrativaProcedimiento.setText("Selecciona un experimento para visualizar el protocolo experimental detallado.");
+        labelProximaAccion.setText("Próxima acción: —");
+        gridTarjetasReactivos.getChildren().clear();
+        Label sinReactivos = new Label("Selecciona un experimento para ver cómo se maneja cada elemento.");
+        sinReactivos.getStyleClass().add("texto-secundario");
+        gridTarjetasReactivos.getChildren().add(sinReactivos);
+        if (panelRutasSintesis != null) {
+            panelRutasSintesis.setVisible(false);
+            panelRutasSintesis.setManaged(false);
+        }
     }
 
     private Button crearBotonExperimento(
@@ -380,10 +593,10 @@ public final class VistaLaboratorio extends BorderPane
         for (Reaccion r : cat.obtenerReacciones()) {
             if (puedeHacer(r.getId(), cat)) {
                 String ecuacion = formatearEcuacion(r);
-                String icono = obtenerIconoReaccion(r.getId());
-                Button btn = new Button(icono + " " + r.getNombre());
+                String etiqueta = obtenerEtiquetaBoton(r);
+                Button btn = new Button(etiqueta);
                 btn.getStyleClass().add("boton-secundario");
-                btn.setTooltip(new Tooltip(ecuacion));
+                btn.setTooltip(new Tooltip(r.getNombre() + "\n" + ecuacion));
                 btn.setOnAction(e -> seleccionarExperimentoPorReaccion(r));
                 selectorExp.getChildren().add(btn);
             }
@@ -394,6 +607,36 @@ public final class VistaLaboratorio extends BorderPane
             vacio.getStyleClass().add("texto-secundario");
             selectorExp.getChildren().add(vacio);
         }
+    }
+
+    private String obtenerEtiquetaBoton(Reaccion r) {
+        String icono = obtenerIconoReaccion(r.getId());
+        String id = r.getId();
+        if ("R_DIAMANTE_HPHT".equalsIgnoreCase(id)) {
+            return "💎 Diamante [Ruta HPHT: 5.5 GPa / Fundente]";
+        }
+        if ("R_DIAMANTE_CVD".equalsIgnoreCase(id)) {
+            return "💎 Diamante [Ruta CVD: Plasma Microondas]";
+        }
+        if ("R_CO2".equalsIgnoreCase(id)) {
+            return "💨 CO₂ [Combustión Directa C]";
+        }
+        if ("R_COMBUSTION_CH4".equalsIgnoreCase(id)) {
+            return "🔥 CO₂ + H₂O [Combustión Metano]";
+        }
+        if ("R_CALCINACION_CACO3".equalsIgnoreCase(id)) {
+            return "🏛 CaO + CO₂ [Calcinación CaCO₃]";
+        }
+        if ("R_OXIDACION_CA".equalsIgnoreCase(id)) {
+            return "🏛 CaO [Oxidación Directa Ca]";
+        }
+        if ("R_DISOLUCION_NACL".equalsIgnoreCase(id)) {
+            return "🧂 NaCl(ac) [Disolución e Hidratación]";
+        }
+        if ("R_SEPARACION_NACL".equalsIgnoreCase(id)) {
+            return "⚡ NaCl Cristalino [Evaporación/Crecimiento]";
+        }
+        return icono + " " + r.getNombre();
     }
 
     private void seleccionarExperimentoPorReaccion(Reaccion r) {
@@ -415,6 +658,7 @@ public final class VistaLaboratorio extends BorderPane
         actualizarGuiaProceso(automataSeleccionado);
         actualizarProgresoAutomata(automataSeleccionado, false);
         actualizarDisponibilidadAcciones();
+        actualizarMonitorProcedimiento(r.getId(), automataSeleccionado != null ? automataSeleccionado.getEstadoActual().getId() : "q0");
     }
 
     private String formatearEcuacion(Reaccion r) {
@@ -554,6 +798,8 @@ public final class VistaLaboratorio extends BorderPane
         actualizarInventario(experimentoSeleccionado);
         actualizarGuiaProceso(automataSeleccionado);
         actualizarProgresoAutomata(automataSeleccionado, false);
+        actualizarDisponibilidadAcciones();
+        actualizarMonitorProcedimiento(reaccionSeleccionada.getId(), automataSeleccionado != null ? automataSeleccionado.getEstadoActual().getId() : "q0");
     }
 
     private void accionIniciar() {
@@ -603,6 +849,9 @@ public final class VistaLaboratorio extends BorderPane
             log("  Reacción: " + reaccionSeleccionada.getNombre());
             actualizarProgresoAutomata(sesion.getAutomataActual(), true);
             actualizarDisponibilidadAcciones();
+            String reaccionId = reaccionSeleccionada != null ? reaccionSeleccionada.getId() : (experimentoSeleccionado != null ? experimentoSeleccionado.getId() : "");
+            String estadoId = sesion.getAutomataActual() != null ? sesion.getAutomataActual().getEstadoActual().getId() : "q0";
+            actualizarMonitorProcedimiento(reaccionId, estadoId);
         });
     }
 
@@ -617,6 +866,10 @@ public final class VistaLaboratorio extends BorderPane
             );
             // Actualizar barra de progreso del autómata
             actualizarProgresoAutomata(sesion.getAutomataActual(), true);
+            actualizarDisponibilidadAcciones();
+            String reaccionId = reaccionSeleccionada != null ? reaccionSeleccionada.getId() : "";
+            String estadoId = resultado.getEstadoActual() != null ? resultado.getEstadoActual().getId() : "";
+            actualizarMonitorProcedimiento(reaccionId, estadoId);
         });
     }
 
@@ -644,6 +897,9 @@ public final class VistaLaboratorio extends BorderPane
             // Actualizar cuaderno y contador
             actualizarHistorial();
             actualizarContadorExitos();
+
+            String reaccionId = reaccionSeleccionada != null ? reaccionSeleccionada.getId() : "";
+            actualizarMonitorProcedimiento(reaccionId, "qF");
 
             // Habilitar nuevo experimento
             botonIniciar.setDisable(false);
@@ -821,6 +1077,8 @@ public final class VistaLaboratorio extends BorderPane
         sinGuia.getStyleClass().add("texto-secundario");
         sinGuia.setWrapText(true);
         panelGuiaProceso.getChildren().add(sinGuia);
+
+        limpiarMonitorProcedimiento();
     }
 
     /**

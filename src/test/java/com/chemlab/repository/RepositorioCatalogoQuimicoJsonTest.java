@@ -17,8 +17,8 @@ class RepositorioCatalogoQuimicoJsonTest {
 
         CatalogoQuimico catalogo = repositorio.cargar();
 
-        assertEquals(33, catalogo.obtenerSustancias().size());
-        assertEquals(19, catalogo.obtenerReacciones().size());
+        assertEquals(36, catalogo.obtenerSustancias().size());
+        assertEquals(25, catalogo.obtenerReacciones().size());
 
         Sustancia agua = catalogo.buscarSustancia("H2O")
                 .orElseThrow();

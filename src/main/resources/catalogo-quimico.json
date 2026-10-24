@@ -222,7 +222,7 @@
       "formula": "Al₂O₃",
       "tipo": "COMPUESTO",
       "estadoMateria": "SOLIDO",
-      "masaMolar": 101.960
+      "masaMolar": 101.96
     },
     {
       "id": "P",
@@ -238,7 +238,7 @@
       "formula": "Ca₃(PO₄)₂",
       "tipo": "COMPUESTO",
       "estadoMateria": "SOLIDO",
-      "masaMolar": 310.180
+      "masaMolar": 310.18
     },
     {
       "id": "Ni",
@@ -263,6 +263,30 @@
       "tipo": "COMPUESTO",
       "estadoMateria": "GASEOSO",
       "masaMolar": 64.066
+    },
+    {
+      "id": "GRAFITO",
+      "nombre": "Grafito",
+      "formula": "C (Grafito)",
+      "tipo": "ELEMENTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 12.011
+    },
+    {
+      "id": "NaCl_AC",
+      "nombre": "Solución salina (NaCl ac)",
+      "formula": "NaCl (ac)",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "LIQUIDO",
+      "masaMolar": 58.44
+    },
+    {
+      "id": "FeOH3",
+      "nombre": "Herrumbre / Hidróxido de hierro",
+      "formula": "Fe(OH)₃",
+      "tipo": "COMPUESTO",
+      "estadoMateria": "SOLIDO",
+      "masaMolar": 106.867
     }
   ],
   "reacciones": [
@@ -475,6 +499,74 @@
       },
       "productos": {
         "SO2": 1
+      }
+    },
+    {
+      "id": "R_CORROSION_FE",
+      "nombre": "Corrosión del hierro (herrumbre en medio acuoso)",
+      "reactivos": {
+        "Fe": 4,
+        "O2": 3,
+        "H2O": 6
+      },
+      "productos": {
+        "FeOH3": 4
+      }
+    },
+    {
+      "id": "R_CALCINACION_CACO3",
+      "nombre": "Calcinación de carbonato de calcio (Ruta 2 CaO y CO₂)",
+      "reactivos": {
+        "CaCO3": 1
+      },
+      "productos": {
+        "CaO": 1,
+        "CO2": 1
+      }
+    },
+    {
+      "id": "R_DISOLUCION_NACL",
+      "nombre": "Disolución de cloruro de sodio en agua",
+      "reactivos": {
+        "NaCl": 1,
+        "H2O": 1
+      },
+      "productos": {
+        "NaCl_AC": 1
+      }
+    },
+    {
+      "id": "R_SEPARACION_NACL",
+      "nombre": "Separación de solución salina por evaporación",
+      "reactivos": {
+        "NaCl_AC": 1
+      },
+      "productos": {
+        "NaCl": 1,
+        "H2O": 1
+      }
+    },
+    {
+      "id": "R_REDOX_CU",
+      "nombre": "Reducción redox de óxido de cobre con hidrógeno",
+      "reactivos": {
+        "CuO": 1,
+        "H2": 1
+      },
+      "productos": {
+        "Cu": 1,
+        "H2O": 1
+      }
+    },
+    {
+      "id": "R_OXIDO_METALICO",
+      "nombre": "Formación general de óxido metálico",
+      "reactivos": {
+        "Cu": 2,
+        "O2": 1
+      },
+      "productos": {
+        "CuO": 2
       }
     }
   ]

@@ -24,8 +24,8 @@ class CatalogoQuimicoTest {
     @Test
     void debeCrearElCatalogoPredeterminado() {
         // Universo químico completo
-        assertEquals(33, catalogo.obtenerSustancias().size());
-        assertEquals(19, catalogo.obtenerReacciones().size());
+        assertEquals(36, catalogo.obtenerSustancias().size());
+        assertEquals(25, catalogo.obtenerReacciones().size());
 
         assertTrue(catalogo.buscarSustancia("H2O").isPresent());
         assertTrue(catalogo.buscarReaccion("R_H2O").isPresent());

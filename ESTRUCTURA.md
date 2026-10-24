@@ -1,15 +1,34 @@
-# Estructura inicial de ChemLab
+# Estructura de ChemLab
 
-Esta primera versión establece únicamente la base técnica y organizativa.
+El proyecto mantiene el dominio químico separado de la simulación 2D y de JavaFX. Las reglas y el autómata siguen siendo la autoridad sobre el resultado; la vista representa las acciones y el laboratorio.
 
-## Próximo orden de implementación
+## Paquetes principales
 
-1. Enumeraciones del dominio.
-2. Entidades: Sustancia, Inventario, Equipo, CondicionesExperimentales, ResultadoQuimico, Objetivo, Experimento, etc.
-3. Reglas químicas mediante Strategy.
-4. Máquina de estados del experimento/autómata.
-5. MotorQuimico.
-6. Casos de uso del juego.
-7. Interfaz 2D JavaFX.
-8. Persistencia de datos.
-9. Pruebas y validación integral.
+- `model/`: entidades, valores y enumeraciones del dominio.
+- `automata/`: estados, transiciones y ejecución de las acciones químicas.
+- `factory/`: creación de experimentos, sesiones y autómatas.
+- `repository/`: persistencia y carga del catálogo.
+- `game/`: sesión y observadores del juego, sin dibujo.
+- `game/world/`: jugador, mapa, colisiones y estaciones físicas.
+- `game/procedure/`: protocolo de manejo y planificación de rutas entre puestos.
+- `ui/game/`: pantalla jugable y renderer del mapa.
+- `ui/workbench/`: estación de trabajo inmersiva y controles del procedimiento.
+- `ui/workbench/VisualizadorReaccion`: metadatos visuales para colores, fenómenos y fases de productos, aislados de las reglas del autómata.
+- `ui/components/`: componentes visuales reutilizables, como los recipientes de sustancias.
+
+## Interacción en los puestos
+
+Al acercarse al puesto correcto y pulsar **F**, se abre una vista de mesa completa con herramientas específicas para ese equipo. En los pasos de carga, los reactivos se arrastran desde la consola hasta el recipiente ilustrado. En los pasos operativos, se hace clic sobre el mando o la herramienta del aparato. El renderer anima calor, llama, enfriamiento, agitación, plasma, presión e ignición, mientras el autómata aplica el cambio químico real.
+
+`PlanificadorEstacionesProcedimiento` decide cuándo el protocolo necesita otro equipo. La sesión cierra la mesa actual y guía al jugador al siguiente puesto. `VistaJuego2D` coordina la sesión y la entrada; `VistaPuestoLaboratorio` presenta la estación y recoge la interacción; `RenderizadorLaboratorio2D` dibuja el mapa.
+
+## Controles
+
+- **WASD** o flechas: mover al personaje.
+- **F**: abrir el puesto cercano cuando corresponde al paso actual.
+- Arrastrar un reactivo al aparato o accionar la herramienta resaltada.
+- **E**: inventario y cuaderno.
+- **M**: almacén y selección de práctica.
+- **Esc**: cerrar el puesto o el menú actual.
+
+La organización admite incorporar estaciones y herramientas nuevas sin trasladar reglas químicas al renderer. Los patrones existentes (Factory, Strategy, State, Observer y Repository) se conservan en sus capas actuales; cada paquete nuevo mantiene una responsabilidad concreta.

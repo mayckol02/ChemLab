@@ -399,20 +399,154 @@ public final class FabricaAutomata {
         return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
     }
 
+    public static AutomataQuimico crearAutomataCorrosionHierro() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Preparación de placa de hierro");
+        EstadoQuimico preparado = new EstadoQuimico("PREPARADO", "Hierro en bandeja de exposición");
+        EstadoQuimico humedecido = new EstadoQuimico("HUMEDECIDO", "Película de agua y electrolito añadida");
+        EstadoQuimico oxidandose = new EstadoQuimico("OXIDANDOSE", "Corrosión electroquímica en medio húmedo");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Herrumbre Fe(OH)₃ formada");
+
+        List<EstadoQuimico> estados = List.of(preparacion, preparado, humedecido, oxidandose, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), preparado),
+                new TransicionQuimica(preparado, AccionLaboratorio.AGREGAR_AGUA, CondicionesRequeridas.sinCondicionesEspeciales(), humedecido),
+                new TransicionQuimica(humedecido, AccionLaboratorio.ESPERAR, CondicionesRequeridas.sinCondicionesEspeciales(), oxidandose),
+                new TransicionQuimica(oxidandose, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataCalcinacionCaliza() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Preparación de piedra caliza");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "CaCO₃ en crisol térmico");
+        EstadoQuimico calcinando = new EstadoQuimico("CALCINANDO", "Descomposición térmica a 900°C");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Cal viva (CaO) y CO₂ liberados");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, calcinando, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.CALENTAR, CondicionesRequeridas.sinCondicionesEspeciales(), calcinando),
+                new TransicionQuimica(calcinando, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataDisolucionNaCl() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Preparación de sal y solvente");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Cristales de NaCl en fondo de vaso");
+        EstadoQuimico humedecido = new EstadoQuimico("HUMEDECIDO", "Agua agregada (sistema bifásico)");
+        EstadoQuimico disolviendo = new EstadoQuimico("DISOLVIENDO", "Agitación y solvatación iónica");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Solución salina homogénea formada");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, humedecido, disolviendo, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.AGREGAR_AGUA, CondicionesRequeridas.sinCondicionesEspeciales(), humedecido),
+                new TransicionQuimica(humedecido, AccionLaboratorio.MEZCLAR, CondicionesRequeridas.sinCondicionesEspeciales(), disolviendo),
+                new TransicionQuimica(disolviendo, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataSeparacionSolucion() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Solución salina en matraz");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Sistema de evaporación montado");
+        EstadoQuimico metodoElegido = new EstadoQuimico("METODO_ELEGIDO", "Método de evaporación/cristalización seleccionado");
+        EstadoQuimico evaporando = new EstadoQuimico("EVAPORANDO", "Ebullición a 100°C y escape de vapor");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Cristales de sal recuperados y agua separada");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, metodoElegido, evaporando, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.SELECCIONAR_METODO, CondicionesRequeridas.sinCondicionesEspeciales(), metodoElegido),
+                new TransicionQuimica(metodoElegido, AccionLaboratorio.CALENTAR, CondicionesRequeridas.sinCondicionesEspeciales(), evaporando),
+                new TransicionQuimica(evaporando, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataRedox() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Preparación de CuO y H₂");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Reactivos en tubo de reducción");
+        EstadoQuimico mezclado = new EstadoQuimico("MEZCLADO", "Flujo de hidrógeno purgado");
+        EstadoQuimico reaccionando = new EstadoQuimico("REACCIONANDO", "Reducción térmica a 300°C (transferencia e⁻)");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Cobre metálico rojizo brillante recuperado");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, mezclado, reaccionando, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.MEZCLAR, CondicionesRequeridas.sinCondicionesEspeciales(), mezclado),
+                new TransicionQuimica(mezclado, AccionLaboratorio.CALENTAR, CondicionesRequeridas.sinCondicionesEspeciales(), reaccionando),
+                new TransicionQuimica(reaccionando, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataOxidoMetalico() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Metal preparado");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Metal y O₂ listos en cámara");
+        EstadoQuimico oxidando = new EstadoQuimico("OXIDANDO", "Oxidación térmica activada");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Óxido metálico formado");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, oxidando, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.CALENTAR, CondicionesRequeridas.sinCondicionesEspeciales(), oxidando),
+                new TransicionQuimica(oxidando, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataCombustionCarbono() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Preparación de carbono");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Carbono en cápsula de combustión");
+        EstadoQuimico mezclado = new EstadoQuimico("MEZCLADO", "Atmósfera de O₂ puro inyectada");
+        EstadoQuimico ignicion = new EstadoQuimico("IGNICION", "Combustión viva a 500°C");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Dióxido de carbono (CO₂) obtenido");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, mezclado, ignicion, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.MEZCLAR, CondicionesRequeridas.sinCondicionesEspeciales(), mezclado),
+                new TransicionQuimica(mezclado, AccionLaboratorio.ACTIVAR_IGNICION, CondicionesRequeridas.sinCondicionesEspeciales(), ignicion),
+                new TransicionQuimica(ignicion, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
+    public static AutomataQuimico crearAutomataSintesisNaCl() {
+        EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Preparación de Na y Cl₂");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Sodio metálico en cámara sellada");
+        EstadoQuimico contacto = new EstadoQuimico("CONTACTO", "Gas cloro introducido");
+        EstadoQuimico reaccionando = new EstadoQuimico("REACCIONANDO", "Reacción vigorosa de halogenación");
+        EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Cristales de NaCl sintetizados");
+
+        List<EstadoQuimico> estados = List.of(preparacion, cargado, contacto, reaccionando, completado);
+        List<TransicionQuimica> transiciones = List.of(
+                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(cargado, AccionLaboratorio.MEZCLAR, CondicionesRequeridas.sinCondicionesEspeciales(), contacto),
+                new TransicionQuimica(contacto, AccionLaboratorio.ACTIVAR_IGNICION, CondicionesRequeridas.sinCondicionesEspeciales(), reaccionando),
+                new TransicionQuimica(reaccionando, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)
+        );
+        return new AutomataQuimico(preparacion, estados, transiciones, List.of(completado));
+    }
+
     public static AutomataQuimico crearAutomataParaReaccion(String idReaccion) {
         return switch (idReaccion) {
             case "R_H2O" -> crearAutomataEstandar();
-            case "R_CO2" -> crearAutomataSimple();
+            case "R_CO2" -> crearAutomataCombustionCarbono();
             case "R_NH3" -> crearAutomataHaberBosch();
-            case "R_NaCl" -> crearAutomataSimple();
+            case "R_NaCl" -> crearAutomataSintesisNaCl();
             case "R_HCl" -> crearAutomataSintesisHCl();
             case "R_Fe2O3" -> crearAutomataOxidacionHierro();
+            case "R_CORROSION_FE" -> crearAutomataCorrosionHierro();
             case "R_CH4" -> crearAutomataCombustionMetano();
             case "R_H2S" -> crearAutomataSulfuroHidrogeno();
             case "R_CuO" -> crearAutomataOxidacionCobre();
             case "R_CaO" -> crearAutomataOxidoCalcio();
             case "R_CaOH2" -> crearAutomataHidratacionCalcio();
             case "R_CaCO3" -> crearAutomataPrecipitacionCarbonato();
+            case "R_CALCINACION_CACO3" -> crearAutomataCalcinacionCaliza();
             case "R_SiO2" -> crearAutomataOxidoSilicio();
             case "R_MgO" -> crearAutomataOxidoMagnesio();
             case "R_Al2O3" -> crearAutomataOxidoAluminio();
@@ -420,6 +554,10 @@ public final class FabricaAutomata {
             case "R_DIAMANTE_HPHT" -> crearAutomataDiamanteHPHT();
             case "R_DIAMANTE_CVD" -> crearAutomataDiamanteCVD();
             case "R_SO2" -> crearAutomataOxidacionAzufre();
+            case "R_DISOLUCION_NACL" -> crearAutomataDisolucionNaCl();
+            case "R_SEPARACION_NACL" -> crearAutomataSeparacionSolucion();
+            case "R_REDOX_CU" -> crearAutomataRedox();
+            case "R_OXIDO_METALICO" -> crearAutomataOxidoMetalico();
             default -> crearAutomataEstandar();
         };
     }
