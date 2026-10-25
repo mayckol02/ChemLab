@@ -561,6 +561,242 @@
     -fx-padding: 10;
 }
 
+.game-grammar-view {
+    -fx-background-color: #081923;
+    -fx-background-radius: 8;
+}
+
+.game-grammar-definition {
+    -fx-background-color: rgba(17, 48, 59, 0.76);
+    -fx-background-radius: 8;
+    -fx-border-color: #315a65;
+    -fx-border-radius: 8;
+    -fx-text-fill: #d8eeea;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 11px;
+    -fx-padding: 10 12;
+}
+
+.game-grammar-rule {
+    -fx-background-color: rgba(14, 35, 46, 0.9);
+    -fx-background-radius: 6;
+    -fx-text-fill: #aee8dc;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 11px;
+    -fx-padding: 7 10;
+}
+
+.game-grammar-derivation-step {
+    -fx-text-fill: #d5eee8;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 10px;
+}
+
+.game-grammar-success {
+    -fx-text-fill: #71e3c1;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.game-grammar-pending {
+    -fx-text-fill: #f2c36e;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.game-grammar-workshop {
+    -fx-background-color: transparent;
+}
+
+.game-grammar-selector {
+    -fx-background-color: #0d202a;
+    -fx-background-radius: 8;
+    -fx-border-color: #3b6972;
+    -fx-border-radius: 8;
+    -fx-text-fill: #e0f5ef;
+}
+
+.game-grammar-selector .list-cell {
+    -fx-background-color: #102630;
+    -fx-text-fill: #d7efea;
+}
+
+.game-grammar-exercise-panel {
+    -fx-background-color: rgba(7, 23, 33, 0.82);
+    -fx-background-radius: 9;
+    -fx-border-color: #274b58;
+    -fx-border-radius: 9;
+    -fx-padding: 10;
+}
+
+.game-grammar-state-card {
+    -fx-background-color: rgba(11, 37, 48, 0.92);
+    -fx-background-radius: 8;
+    -fx-border-color: #32616a;
+    -fx-border-radius: 8;
+    -fx-padding: 9 12;
+}
+
+.game-grammar-micro {
+    -fx-text-fill: #72cfc2;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+.game-grammar-state-value {
+    -fx-text-fill: #e0f6ef;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+.game-grammar-production-option {
+    -fx-background-color: #102a36;
+    -fx-background-radius: 7;
+    -fx-border-color: #355c68;
+    -fx-border-radius: 7;
+    -fx-text-fill: #d3eee6;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 10px;
+    -fx-padding: 8 10;
+    -fx-cursor: hand;
+}
+
+.game-grammar-production-option:hover {
+    -fx-background-color: #17444d;
+    -fx-border-color: #62d9c4;
+}
+
+.game-grammar-production-option:disabled {
+    -fx-opacity: 0.58;
+}
+
+.game-grammar-word {
+    -fx-background-color: rgba(12, 48, 52, 0.9);
+    -fx-background-radius: 7;
+    -fx-text-fill: #a9f3dd;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 9px;
+    -fx-padding: 8;
+}
+
+.game-grammar-feedback {
+    -fx-font-size: 10px;
+    -fx-wrap-text: true;
+}
+
+.game-grammar-error {
+    -fx-text-fill: #f0a698;
+}
+
+.game-grammar-hint {
+    -fx-text-fill: #e4c778;
+}
+
+.game-grammar-good {
+    -fx-text-fill: #75e0bf;
+}
+
+.game-grammar-scroll, .game-grammar-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.game-formal-languages-workshop {
+    -fx-background-color: transparent;
+}
+
+.game-grammar-subtab {
+    -fx-background-color: #102630;
+    -fx-background-radius: 7;
+    -fx-border-color: #31525e;
+    -fx-border-radius: 7;
+    -fx-text-fill: #b7cdd0;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 9px;
+    -fx-padding: 8 11;
+    -fx-cursor: hand;
+}
+
+.game-grammar-subtab:hover, .game-grammar-subtab-selected {
+    -fx-background-color: #17434a;
+    -fx-border-color: #62d9c4;
+    -fx-text-fill: #dff9ef;
+}
+
+.game-formula-analyzer {
+    -fx-background-color: transparent;
+}
+
+.game-formula-scroll, .game-formula-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.game-formula-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.game-formula-result-panel {
+    -fx-background-color: rgba(7, 23, 33, 0.82);
+    -fx-background-radius: 9;
+    -fx-border-color: #274b58;
+    -fx-border-radius: 9;
+    -fx-padding: 10;
+}
+
+.game-formula-tree, .game-formula-tree .virtual-flow, .game-formula-tree .tree-cell {
+    -fx-background-color: #0b1b24;
+    -fx-text-fill: #d5ece6;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 10px;
+}
+
+.game-formula-tree .tree-cell:filled:selected {
+    -fx-background-color: #17434a;
+}
+
+.game-grammar-example {
+    -fx-background-color: #132f3a;
+    -fx-background-radius: 7;
+    -fx-border-color: #355967;
+    -fx-border-radius: 7;
+    -fx-text-fill: #aee8dc;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 10px;
+    -fx-padding: 6 9;
+    -fx-cursor: hand;
+}
+
+.game-grammar-example:hover {
+    -fx-background-color: #1a4850;
+    -fx-border-color: #62d9c4;
+}
+
+.game-formula-status {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.game-formula-atom-card {
+    -fx-background-color: #11323d;
+    -fx-background-radius: 8;
+    -fx-border-color: #347280;
+    -fx-border-radius: 8;
+    -fx-padding: 8 12;
+}
+
+.game-formula-atom-symbol {
+    -fx-text-fill: #82e4cd;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.game-formula-atom-count {
+    -fx-text-fill: #d7ece6;
+    -fx-font-size: 10px;
+}
+
 .game-automaton-scroll, .game-automaton-scroll > .viewport {
     -fx-background-color: transparent;
     -fx-background: transparent;

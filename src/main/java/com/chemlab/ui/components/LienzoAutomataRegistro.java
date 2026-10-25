@@ -33,16 +33,25 @@ public final class LienzoAutomataRegistro extends Canvas {
     private final List<Arista> aristas;
 
     public LienzoAutomataRegistro(RegistroExperimento registro) {
-        this.registro = registro;
-        AutomataQuimico automata = registro.getIdProceso() == null
-                ? FabricaAutomata.crearAutomataEstandar()
-                : FabricaAutomata.crearAutomataParaReaccion(registro.getIdProceso());
+        this(registro, crearAutomata(registro));
+    }
+
+    public LienzoAutomataRegistro(RegistroExperimento registro, AutomataQuimico automata) {
+        this.registro = java.util.Objects.requireNonNull(registro, "El registro es obligatorio");
+        java.util.Objects.requireNonNull(automata, "El autómata es obligatorio");
         nodos = construirNodos(automata);
         aristas = construirAristas(automata);
         int filas = Math.max(1, (int) Math.ceil((double) nodos.size() / ESTADOS_POR_FILA));
         setWidth(ANCHO);
         setHeight(145 + filas * 165);
         dibujar(automata);
+    }
+
+    private static AutomataQuimico crearAutomata(RegistroExperimento registro) {
+        java.util.Objects.requireNonNull(registro, "El registro es obligatorio");
+        return registro.getIdProceso() == null
+                ? FabricaAutomata.crearAutomataEstandar()
+                : FabricaAutomata.crearAutomataParaReaccion(registro.getIdProceso());
     }
 
     private List<Nodo> construirNodos(AutomataQuimico automata) {

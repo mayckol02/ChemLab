@@ -1,6 +1,6 @@
 # ChemLab
 
-Juego/laboratorio químico educativo desarrollado con **Java 21 + JavaFX + Maven**.
+Juego/laboratorio químico educativo desarrollado con **Java 25 + JavaFX + Maven**.
 
 La aplicación inicia ahora en un prototipo 2D jugable: puedes recorrer el laboratorio, acercarte a los puestos y ejecutar desde ellos los procesos del dominio químico.
 
@@ -12,6 +12,7 @@ El proyecto se organizará por responsabilidades, evitando que la interfaz gráf
 - `model/enums/`: enumeraciones del dominio.
 - `engine/`: motor y reglas de ejecución de experimentos.
 - `automata/`: autómata químico, estados y transiciones.
+- `grammar/`: gramáticas regulares para protocolos, conversión a autómatas y el parser libre de contexto de fórmulas; consulta [GRAMATICAS_Y_AUTOMATAS.md](GRAMATICAS_Y_AUTOMATAS.md).
 - `game/`: sesión, coordinación, mapa, personaje y estaciones del juego.
 - `ui/`: interfaz 2D JavaFX.
 - `factory/`: creación controlada de objetos complejos.
@@ -33,6 +34,8 @@ El proyecto se organizará por responsabilidades, evitando que la interfaz gráf
 No se aplicarán patrones "por obligación"; cada uno se introducirá cuando reduzca acoplamiento o facilite la extensión.
 
 La vista 2D observa `SesionJuego`; los puestos se construyen a partir del equipo asignado por `FabricaExperimento`, y las acciones siguen pasando por los autómatas y el motor químico existentes. `ui/game/RenderizadorLaboratorio2D` dibuja el mapa y al personaje; `ui/game/VistaJuego2D` coordina controles y menús.
+
+El cuaderno E incluye prácticas de gramáticas regulares para los protocolos de agua y diamante CVD, con el autómata equivalente avanzando en paralelo, y un analizador libre de contexto de fórmulas que muestra su árbol de derivación y el conteo de átomos. Los detalles y límites están en [GRAMATICAS_Y_AUTOMATAS.md](GRAMATICAS_Y_AUTOMATAS.md).
 
 Al pulsar F, `ui/workbench/VistaPuestoLaboratorio` abre una mesa completa con el equipo propio de la estación. Los reactivos se arrastran al recipiente dibujado sobre la mesa; los procesos se inician accionando los mandos o herramientas visibles. Calor, llama, frío, mezcla, presión, plasma e ignición se animan en el instrumento. `game/procedure/PlanificadorEstacionesProcedimiento` determina cuándo mover el proceso a otro puesto. `ui/components/IconoSustancia` representa cada reactivo según su estado físico, y el cuaderno E conserva su diseño digital separado del almacén M.
 
@@ -58,7 +61,7 @@ Al pulsar F, `ui/workbench/VistaPuestoLaboratorio` abre una mesa completa con el
 
 ## Ejecución
 
-Requisitos: **JDK 21** y **Maven 3.9+**.
+Requisitos: **JDK 25** y **Maven 3.9+**.
 
 ```bash
 mvn clean test

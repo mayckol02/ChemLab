@@ -3,6 +3,9 @@ package com.chemlab.factory;
 import com.chemlab.automata.AutomataQuimico;
 import com.chemlab.automata.EstadoQuimico;
 import com.chemlab.automata.TransicionQuimica;
+import com.chemlab.grammar.CompiladorGramaticaRegular;
+import com.chemlab.grammar.GramaticaRegular;
+import com.chemlab.grammar.GramaticasProtocolos;
 import com.chemlab.model.entity.CondicionesRequeridas;
 import com.chemlab.model.enums.AccionLaboratorio;
 
@@ -532,8 +535,9 @@ public final class FabricaAutomata {
     }
 
     public static AutomataQuimico crearAutomataParaReaccion(String idReaccion) {
+        GramaticaRegular gramatica = GramaticasProtocolos.buscar(idReaccion).orElse(null);
+        if (gramatica != null) return CompiladorGramaticaRegular.compilar(gramatica);
         return switch (idReaccion) {
-            case "R_H2O" -> crearAutomataEstandar();
             case "R_CO2" -> crearAutomataCombustionCarbono();
             case "R_NH3" -> crearAutomataHaberBosch();
             case "R_NaCl" -> crearAutomataSintesisNaCl();
@@ -552,7 +556,6 @@ public final class FabricaAutomata {
             case "R_Al2O3" -> crearAutomataOxidoAluminio();
             case "R_Ca3PO42" -> crearAutomataFosfatoCalcio();
             case "R_DIAMANTE_HPHT" -> crearAutomataDiamanteHPHT();
-            case "R_DIAMANTE_CVD" -> crearAutomataDiamanteCVD();
             case "R_SO2" -> crearAutomataOxidacionAzufre();
             case "R_DISOLUCION_NACL" -> crearAutomataDisolucionNaCl();
             case "R_SEPARACION_NACL" -> crearAutomataSeparacionSolucion();

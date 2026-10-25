@@ -1,17 +1,20 @@
 # Estructura de ChemLab
 
-El proyecto mantiene el dominio químico separado de la simulación 2D y de JavaFX. Las reglas y el autómata siguen siendo la autoridad sobre el resultado; la vista representa las acciones y el laboratorio.
+El proyecto mantiene el dominio químico separado de la simulación 2D y de JavaFX. Las gramáticas describen secuencias válidas para algunos protocolos y se compilan a autómatas; el autómata valida el orden de las acciones durante la ejecución, y el motor químico calcula el resultado.
 
 ## Paquetes principales
 
 - `model/`: entidades, valores y enumeraciones del dominio.
 - `automata/`: estados, transiciones y ejecución de las acciones químicas.
+- `grammar/`: producciones regulares de protocolos, derivación de rutas y conversión entre gramáticas y autómatas.
+- `grammar/formula/`: parser libre de contexto para fórmulas, con árbol de derivación y conteo de átomos.
 - `factory/`: creación de experimentos, sesiones y autómatas.
 - `repository/`: persistencia y carga del catálogo.
 - `game/`: sesión y observadores del juego, sin dibujo.
 - `game/world/`: jugador, mapa, colisiones y estaciones físicas.
 - `game/procedure/`: protocolo de manejo y planificación de rutas entre puestos.
 - `ui/game/`: pantalla jugable y renderer del mapa.
+- `ui/grammar/`: taller de derivación que mantiene sincronizados el símbolo no terminal y el estado del autómata.
 - `ui/workbench/`: estación de trabajo inmersiva y controles del procedimiento.
 - `ui/workbench/VisualizadorReaccion`: metadatos visuales para colores, fenómenos y fases de productos, aislados de las reglas del autómata.
 - `ui/components/`: componentes visuales reutilizables, como los recipientes de sustancias.

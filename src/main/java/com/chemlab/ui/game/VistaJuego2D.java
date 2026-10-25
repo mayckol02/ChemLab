@@ -15,6 +15,12 @@ import com.chemlab.game.ProductoAlmacenado;
 import com.chemlab.game.procedure.PlanificadorEstacionesProcedimiento;
 import com.chemlab.game.procedure.ProtocoloProcedimiento;
 import com.chemlab.game.SesionJuego;
+import com.chemlab.grammar.AdaptadorAutomataAGramatica;
+import com.chemlab.grammar.GramaticaRegular;
+import com.chemlab.grammar.GramaticasProtocolos;
+import com.chemlab.grammar.ProduccionRegular;
+import com.chemlab.grammar.ResultadoDerivacion;
+import com.chemlab.grammar.SimboloNoTerminal;
 import com.chemlab.model.entity.CuadernoLaboratorio;
 import com.chemlab.model.entity.Experimento;
 import com.chemlab.model.entity.Reaccion;
@@ -27,6 +33,7 @@ import com.chemlab.model.value.Cantidad;
 import com.chemlab.ui.components.CursorGuante;
 import com.chemlab.ui.components.IconoSustancia;
 import com.chemlab.ui.components.LienzoAutomataRegistro;
+import com.chemlab.ui.grammar.VistaTallerLenguajesFormales;
 import com.chemlab.ui.workbench.PanelInteraccionProcedimiento;
 import com.chemlab.ui.workbench.VistaPuestoLaboratorio;
 import javafx.animation.AnimationTimer;
@@ -70,7 +77,7 @@ import java.util.Set;
 public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
     private enum Menu { ALMACEN, CUADERNO }
-    private enum SeccionCuaderno { INVENTARIO, HISTORIAL }
+    private enum SeccionCuaderno { INVENTARIO, HISTORIAL, GRAMATICAS }
 
     private static final DateTimeFormatter FECHA_REGISTRO =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -133,6 +140,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private VBox contenidoCuaderno;
     private Button botonInventarioCuaderno;
     private Button botonHistorialCuaderno;
+    private Button botonGramaticaCuaderno;
     private Label detalleExperimento;
     private Button botonIniciarExperimento;
     private StackPane cabecera;
@@ -546,6 +554,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         contenidoCuaderno = null;
         botonInventarioCuaderno = null;
         botonHistorialCuaderno = null;
+        botonGramaticaCuaderno = null;
         requestFocus();
     }
 
@@ -887,8 +896,10 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         tabs.getStyleClass().add("game-notebook-tabs");
         Button botonInventario = new Button("▤  MATERIALES");
         Button botonHistorial = new Button("⌁  EXPERIMENTOS");
+        Button botonGramatica = new Button("⌘  GRAMÁTICAS");
         botonInventario.getStyleClass().add("game-notebook-tab");
         botonHistorial.getStyleClass().add("game-notebook-tab");
+        botonGramatica.getStyleClass().add("game-notebook-tab");
         VBox contenido = new VBox(10);
         contenido.getStyleClass().add("game-notebook-screen");
         contenido.setPadding(new Insets(12));
@@ -897,33 +908,50 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         contenidoCuaderno = contenido;
         botonInventarioCuaderno = botonInventario;
         botonHistorialCuaderno = botonHistorial;
+        botonGramaticaCuaderno = botonGramatica;
         botonInventario.setOnAction(evento -> {
             seccionCuaderno = SeccionCuaderno.INVENTARIO;
-            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial);
+            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
         });
         botonHistorial.setOnAction(evento -> {
             seccionCuaderno = SeccionCuaderno.HISTORIAL;
-            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial);
+            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
         });
-        tabs.getChildren().addAll(botonInventario, botonHistorial);
-        Label pie = new Label("CHEMLAB OS  ·  ARCHIVO LOCAL CIFRADO  ·  SELECCIONA UN REGISTRO PARA ABRIR SU AUTÓMATA");
+        botonGramatica.setOnAction(evento -> {
+            seccionCuaderno = SeccionCuaderno.GRAMATICAS;
+            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
+        });
+        tabs.getChildren().addAll(botonInventario, botonHistorial, botonGramatica);
+        Label pie = new Label("CHEMLAB OS  ·  BITÁCORA Y TALLER DE LENGUAJES FORMALES");
         pie.getStyleClass().add("game-notebook-micro");
         tarjeta.getChildren().addAll(metadatos, tabs, contenido, pie);
-        mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial);
+        mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
         getChildren().add(overlay);
         overlayMenu = overlay;
     }
 
-    private void mostrarSeccionCuaderno(VBox contenido, Button inventario, Button historial) {
+    private void mostrarSeccionCuaderno(
+            VBox contenido,
+            Button inventario,
+            Button historial,
+            Button gramatica
+    ) {
         contenido.getChildren().clear();
         inventario.getStyleClass().setAll("game-notebook-tab");
         historial.getStyleClass().setAll("game-notebook-tab");
+        gramatica.getStyleClass().setAll("game-notebook-tab");
         if (seccionCuaderno == SeccionCuaderno.INVENTARIO) {
             inventario.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
             contenido.getChildren().add(construirVistaInventario());
-        } else {
+        } else if (seccionCuaderno == SeccionCuaderno.HISTORIAL) {
             historial.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
             contenido.getChildren().add(construirVistaHistorial());
+        } else {
+            gramatica.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
+            VistaTallerLenguajesFormales taller =
+                    new VistaTallerLenguajesFormales(GramaticasProtocolos.obtenerTodas());
+            VBox.setVgrow(taller, Priority.ALWAYS);
+            contenido.getChildren().add(taller);
         }
     }
 
@@ -1058,7 +1086,8 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         volver.getStyleClass().add("game-notebook-back-button");
         volver.setOnAction(evento -> {
             seccionCuaderno = SeccionCuaderno.HISTORIAL;
-            mostrarSeccionCuaderno(contenidoCuaderno, botonInventarioCuaderno, botonHistorialCuaderno);
+            mostrarSeccionCuaderno(contenidoCuaderno, botonInventarioCuaderno,
+                    botonHistorialCuaderno, botonGramaticaCuaderno);
         });
 
         Label titulo = new Label(registro.getNombreExperimento());
@@ -1068,17 +1097,151 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         descripcion.getStyleClass().add("game-notebook-micro");
         VBox encabezado = new VBox(4, volver, titulo, descripcion);
 
-        LienzoAutomataRegistro lienzo = new LienzoAutomataRegistro(registro);
-        ScrollPane desplazamiento = new ScrollPane(lienzo);
-        desplazamiento.setFitToWidth(false);
+        AutomataQuimico automata = registro.getIdProceso() == null
+                ? FabricaAutomata.crearAutomataEstandar()
+                : FabricaAutomata.crearAutomataParaReaccion(registro.getIdProceso());
+        boolean esGramaticaFuente = GramaticasProtocolos.buscar(registro.getIdProceso()).isPresent();
+        GramaticaRegular gramatica = GramaticasProtocolos.buscar(registro.getIdProceso())
+                .orElseGet(() -> AdaptadorAutomataAGramatica.convertir(
+                        registro.getIdProceso() == null ? "PROTOCOLO_ESTANDAR" : registro.getIdProceso(), automata));
+        List<AccionLaboratorio> acciones = registro.getPasosTransicion().stream()
+                .map(RegistroExperimento.PasoTransicion::accion)
+                .map(this::accionDesdeRegistro)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+        ResultadoDerivacion derivacion = gramatica.derivar(acciones);
+
+        LienzoAutomataRegistro lienzo = new LienzoAutomataRegistro(registro, automata);
+        ScrollPane desplazamientoAutomata = new ScrollPane(lienzo);
+        prepararScrollRepresentacion(desplazamientoAutomata, false);
+        ScrollPane desplazamientoGramatica = new ScrollPane(
+                construirVistaGramatica(gramatica, derivacion, acciones.size(), esGramaticaFuente));
+        prepararScrollRepresentacion(desplazamientoGramatica, true);
+
+        Button botonAutomata = new Button("AUTÓMATA");
+        Button botonGramatica = new Button("GRAMÁTICA Y DERIVACIÓN");
+        botonAutomata.getStyleClass().add("game-notebook-tab");
+        botonGramatica.getStyleClass().add("game-notebook-tab");
+        HBox pestañas = new HBox(8, botonAutomata, botonGramatica);
+        pestañas.setAlignment(Pos.CENTER_LEFT);
+
+        StackPane representacion = new StackPane(desplazamientoAutomata, desplazamientoGramatica);
+        VBox.setVgrow(representacion, Priority.ALWAYS);
+        Runnable mostrarAutomata = () -> {
+            desplazamientoAutomata.setVisible(true);
+            desplazamientoAutomata.setManaged(true);
+            desplazamientoGramatica.setVisible(false);
+            desplazamientoGramatica.setManaged(false);
+            botonAutomata.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
+            botonGramatica.getStyleClass().setAll("game-notebook-tab");
+        };
+        Runnable mostrarGramatica = () -> {
+            desplazamientoAutomata.setVisible(false);
+            desplazamientoAutomata.setManaged(false);
+            desplazamientoGramatica.setVisible(true);
+            desplazamientoGramatica.setManaged(true);
+            botonAutomata.getStyleClass().setAll("game-notebook-tab");
+            botonGramatica.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
+        };
+        botonAutomata.setOnAction(evento -> mostrarAutomata.run());
+        botonGramatica.setOnAction(evento -> mostrarGramatica.run());
+        mostrarAutomata.run();
+
+        VBox detalle = new VBox(10, encabezado, pestañas, representacion);
+        detalle.getStyleClass().add("game-automaton-detail");
+        contenidoCuaderno.getChildren().setAll(detalle);
+    }
+
+    private void prepararScrollRepresentacion(ScrollPane desplazamiento, boolean ajustarAncho) {
+        desplazamiento.setFitToWidth(ajustarAncho);
         desplazamiento.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         desplazamiento.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         desplazamiento.setPrefViewportHeight(390);
         desplazamiento.getStyleClass().add("game-automaton-scroll");
-        VBox.setVgrow(desplazamiento, Priority.ALWAYS);
-        VBox detalle = new VBox(10, encabezado, desplazamiento);
-        detalle.getStyleClass().add("game-automaton-detail");
-        contenidoCuaderno.getChildren().setAll(detalle);
+    }
+
+    private AccionLaboratorio accionDesdeRegistro(String accion) {
+        try {
+            return AccionLaboratorio.valueOf(accion);
+        } catch (IllegalArgumentException | NullPointerException ignorada) {
+            return null;
+        }
+    }
+
+    private VBox construirVistaGramatica(
+            GramaticaRegular gramatica,
+            ResultadoDerivacion derivacion,
+            int totalAcciones,
+            boolean esGramaticaFuente
+    ) {
+        VBox contenido = new VBox(10);
+        contenido.setPadding(new Insets(14));
+        contenido.getStyleClass().add("game-grammar-view");
+
+        Label explicacion = new Label(esGramaticaFuente
+                ? "Esta gramática define el protocolo y se compiló para generar el autómata que ejecutó la práctica."
+                : "Esta gramática regular se obtuvo del autómata existente; ambos describen las mismas rutas de acciones.");
+        explicacion.getStyleClass().add("game-menu-subtitle");
+        explicacion.setWrapText(true);
+
+        String noTerminales = gramatica.getNoTerminales().stream()
+                .map(SimboloNoTerminal::id).reduce((a, b) -> a + ", " + b).orElse("∅");
+        String terminales = gramatica.getTerminales().stream().sorted()
+                .map(Enum::name).reduce((a, b) -> a + ", " + b).orElse("∅");
+        Label definicion = new Label("G = (N, Σ, P, S)\nN = {" + noTerminales + "}\nΣ = {" + terminales
+                + "}\nS = " + gramatica.getInicial().id());
+        definicion.getStyleClass().add("game-grammar-definition");
+        definicion.setWrapText(true);
+
+        VBox producciones = new VBox(5);
+        Label tituloProducciones = new Label("PRODUCCIONES");
+        tituloProducciones.getStyleClass().add("game-section-title");
+        producciones.getChildren().add(tituloProducciones);
+        for (ProduccionRegular produccion : gramatica.getProducciones()) {
+            Label regla = new Label(formatearProduccion(produccion));
+            regla.getStyleClass().add("game-grammar-rule");
+            regla.setWrapText(true);
+            producciones.getChildren().add(regla);
+        }
+
+        VBox pasos = new VBox(5);
+        Label tituloDerivacion = new Label("DERIVACIÓN DEL EXPERIMENTO");
+        tituloDerivacion.getStyleClass().add("game-section-title");
+        pasos.getChildren().add(tituloDerivacion);
+        if (derivacion.produccionesAplicadas().isEmpty()) {
+            Label inicial = new Label(gramatica.getInicial().id() + " (símbolo inicial; aún no hay acciones registradas)");
+            inicial.getStyleClass().add("game-grammar-rule");
+            pasos.getChildren().add(inicial);
+        } else {
+            for (int indice = 0; indice < derivacion.produccionesAplicadas().size(); indice++) {
+                Label paso = new Label((indice + 1) + ".  "
+                        + formatearProduccion(derivacion.produccionesAplicadas().get(indice)));
+                paso.getStyleClass().add("game-grammar-derivation-step");
+                paso.setWrapText(true);
+                pasos.getChildren().add(paso);
+            }
+        }
+        String estadoDerivacion = derivacion.aceptada()
+                ? "Secuencia aceptada por la gramática."
+                : derivacion.esPrefijoValido(totalAcciones)
+                ? derivacion.mensaje()
+                : "La derivación se detuvo tras " + derivacion.accionesConsumidas() + " acciones: " + derivacion.mensaje();
+        Label resultado = new Label(estadoDerivacion);
+        resultado.getStyleClass().add(derivacion.aceptada()
+                ? "game-grammar-success" : "game-grammar-pending");
+        resultado.setWrapText(true);
+
+        Label relacion = new Label("Cada producción A → acción B corresponde a una transición del autómata: A —acción→ B. ε marca un estado final.");
+        relacion.getStyleClass().add("game-menu-subtitle");
+        relacion.setWrapText(true);
+        contenido.getChildren().addAll(explicacion, definicion, producciones, pasos, resultado, relacion);
+        return contenido;
+    }
+
+    private String formatearProduccion(ProduccionRegular produccion) {
+        if (produccion.esEpsilon()) return produccion.origen().id() + " → ε";
+        return produccion.origen().id() + " → " + produccion.terminal().name()
+                + (produccion.siguiente() == null ? "" : " " + produccion.siguiente().id());
     }
 
     private void dibujarMundo() {
