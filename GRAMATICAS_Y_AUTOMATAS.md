@@ -1,64 +1,36 @@
-# Gramáticas y autómatas en ChemLab
+# Gramáticas y autómatas: implementación interna
 
-## Por qué se usan los dos
+Este documento técnico describe los mecanismos internos de validación. La interfaz de juego los presenta como procedimientos químicos; el jugador no necesita conocer gramáticas, producciones, derivaciones ni autómatas para realizar experimentos.
 
-Una gramática describe cómo se pueden construir secuencias válidas. Un autómata consume esas acciones una por una y determina si la práctica puede avanzar desde su estado actual. En ChemLab, los símbolos terminales son acciones del laboratorio, como `CARGAR_REACTIVO`, `INICIAR_PLASMA` o `FINALIZAR`.
+## Protocolos de acciones
 
-La gramática aporta una descripción declarativa del protocolo y permite enseñar sus derivaciones. El autómata conserva el papel que ya tenía en el juego: validar el orden de las acciones y mantener el estado de ejecución. El motor químico sigue comprobando reactivos, condiciones y productos mediante estequiometría. La gramática no reemplaza esa parte.
+`com.chemlab.grammar` modela protocolos como gramáticas regulares deterministas. Una producción `A → acción B` se compila como una transición `A —acción→ B`; una producción `A → ε` identifica el final del procedimiento. `CompiladorGramaticaRegular` convierte la definición a los mismos estados y transiciones que consumen las acciones de `SesionJuego`.
 
-## Relación formal
+Las definiciones fuente actuales son síntesis de agua (`R_H2O`) y crecimiento de diamante CVD (`R_DIAMANTE_CVD`) en `GramaticasProtocolos`. Las demás reacciones conservan los autómatas definidos por `FabricaAutomata`. En ambos casos, el autómata de la sesión controla el orden permitido de las acciones. El motor químico sigue verificando reactivos, condiciones y productos; el protocolo no reemplaza la química ni la estequiometría.
 
-La primera versión usa gramáticas regulares deterministas lineales por la derecha. Una producción `A → acción B` corresponde a una transición `A —acción→ B`. La producción `A → ε` marca un estado final. También se admiten producciones `A → acción`, que pasan a un estado final sintético.
+## Análisis de fórmulas
 
-Por ejemplo, el protocolo CVD se expresa así:
+`AnalizadorFormulaQuimica` usa un parser descendente recursivo para reconocer elementos, subíndices y grupos anidados, por ejemplo `Ca₃(PO₄)₂`. Normaliza subíndices Unicode, verifica símbolos de elementos y calcula el conteo de átomos. En el cuaderno, `VistaCuadernoQuimico` reutiliza el árbol del análisis, añade los nombres y cantidades de los elementos, y presenta la formación del nombre mediante `NomenclaturaQuimica`.
 
-```text
-PREPARACION → CARGAR_REACTIVO CARGADO
-CARGADO → INICIAR_PLASMA PLASMA
-PLASMA → CALENTAR DEPOSICION
-DEPOSICION → FINALIZAR COMPLETADO
-COMPLETADO → ε
-```
+`TablaPeriodica` es el registro inmutable compartido por el parser y la nomenclatura. Cada elemento se define una sola vez con símbolo, nombre, clasificación y, cuando está configurado, sus números de oxidación. Para agregar un elemento reconocido o actualizar esos datos se modifica únicamente esa tabla.
 
-Una derivación completa produce la palabra de acciones:
+La nomenclatura aplica reglas explícitas y acotadas: Stock para óxidos binarios de elementos con estados de oxidación configurados, prefijos para ciertos óxidos moleculares de no metales y nombres exactos del catálogo cuando no corresponde una regla más específica. Para fórmulas fuera de esas reglas y sin coincidencia de catálogo, la pantalla informa que no hay nomenclatura implementada; no genera nombres especulativos.
 
-```text
-CARGAR_REACTIVO · INICIAR_PLASMA · CALENTAR · FINALIZAR
-```
+El parser limita la entrada a 128 caracteres, 16 niveles de anidamiento y un millón de átomos por elemento. No admite coeficientes externos, cargas, hidratos, puntos de adición ni anotaciones de fase como `(ac)`.
 
-El compilador convierte estas producciones a `EstadoQuimico` y `TransicionQuimica`. Por eso el protocolo sigue ejecutándose con el mismo autómata y las mismas acciones visibles en el puesto.
+## Correspondencia con la interfaz
 
-## Gramática libre de contexto para fórmulas
+- `VistaCuadernoQuimico` presenta los protocolos de todas las reacciones del catálogo recorriendo las transiciones alcanzables de `FabricaAutomata`; para las dos reacciones basadas en gramáticas, esas transiciones se compilan desde `GramaticasProtocolos`. El progreso se marca usando el estado activo o las transiciones del último intento.
+- El mismo cuaderno analiza fórmulas de materiales descubiertos, reactivos del experimento seleccionado y productos almacenados; presenta el árbol de fórmula, los nombres de los elementos y la explicación de nomenclatura aplicable.
+- La comparación agrupa todos los productos de las reacciones del catálogo y asocia sus rutas de síntesis, incluyendo compuestos con una única ruta. Usa las fichas químicas de `ProtocoloProcedimiento` cuando existen; para otras rutas genera una ficha desde la reacción registrada. El autómata general se construye con las transiciones alcanzables de `FabricaAutomata` e indica si cada ruta es ejecutable en el juego.
+- El detalle del historial ofrece una pestaña **Ruta** con el diagrama del autómata del experimento y una pestaña **Etapas** con el recorrido químico traducido.
 
-Los protocolos y las fórmulas son dos lenguajes distintos. Las acciones de un protocolo se describen con gramática regular y su autómata las valida durante el juego. Las fórmulas pueden anidar grupos, por ejemplo `Ca₃(PO₄)₂`; para reconocer esa recursión se usa una gramática libre de contexto y un parser descendente recursivo.
+## Flujo de ejecución
 
-La gramática didáctica del analizador es:
+1. El jugador inicia una reacción desde el almacén y se selecciona su autómata.
+2. `VistaPuestoLaboratorio` presenta la estación y la acción disponible según el estado actual.
+3. `SesionJuego` envía la acción al ejecutor y al autómata; una acción no habilitada no avanza el proceso.
+4. La acción aceptada se registra y, cuando corresponde, el motor químico evalúa reactivos, condiciones y productos.
+5. El cuaderno muestra la etapa química resultante y conserva el resultado en el historial.
 
-```text
-Fórmula → Secuencia
-Secuencia → Término Secuencia | Término
-Término → Elemento Subíndice? | ( Secuencia ) Subíndice?
-Elemento → Mayúscula Minúscula?
-Subíndice → Dígito+
-```
-
-El parser normaliza subíndices Unicode (`₂`) a dígitos (`2`), valida que el símbolo sea uno de los elementos químicos reconocidos, construye un árbol de derivación y calcula el conteo de átomos respetando los multiplicadores de grupo. Por ejemplo, `Ca₃(PO₄)₂` produce Ca: 3, P: 2 y O: 8.
-
-Esta gramática libre de contexto no se compila al autómata de protocolos. El árbol de derivación lleva el seguimiento de grupos anidados, mientras que el autómata de acciones sigue validando las rutas de los experimentos.
-
-## Integración implementada
-
-- `com.chemlab.grammar` contiene los símbolos no terminales, las producciones, la gramática, el derivador, el compilador a autómata y el adaptador en dirección inversa.
-- Las gramáticas fuente de síntesis de agua (`R_H2O`) y diamante CVD (`R_DIAMANTE_CVD`) se compilan al solicitar su autómata en `FabricaAutomata`.
-- Los protocolos existentes que todavía están definidos directamente como autómatas pueden convertirse a una gramática regular equivalente para su consulta educativa.
-- El historial del cuaderno ofrece las vistas **Autómata** y **Gramática y derivación**. La segunda muestra `N`, `Σ`, `P`, el símbolo inicial, las producciones y las reglas aplicadas a la ruta registrada.
-- La pestaña **Gramáticas** del cuaderno tiene dos módulos: **Protocolos · regular** y **Fórmulas · libre de contexto**.
-- El taller de protocolos permite practicar agua y CVD. El jugador elige producciones, construye una derivación y observa el no terminal y el estado del autómata en paralelo. Una producción aplicada desde el no terminal incorrecto se rechaza con una explicación.
-- El analizador de fórmulas muestra la gramática, el árbol de derivación y el conteo de átomos. Incluye ejemplos como `Ca(OH)₂`, `Ca₃(PO₄)₂` y `Al₂(SO₄)₃`.
-- Las rutas incompletas se muestran como prefijos válidos cuando sus acciones registradas se derivan correctamente; la última producción pendiente queda indicada.
-
-## Alcance y límites de esta versión
-
-El modelo exige que una acción desde un mismo no terminal determine una única producción. Esto corresponde al autómata determinista que ya usa el juego. `ε` se permite en un estado sin salidas, que representa el final del protocolo. Las condiciones como temperatura, presión, inventario y disponibilidad de materiales siguen en la lógica del experimento; no se codifican en la gramática de secuencias.
-
-Los talleres son educativos y no guardan gramáticas nuevas. El analizador de fórmulas admite grupos con paréntesis, elementos y subíndices positivos; limita la entrada a 128 caracteres, 16 niveles de anidamiento y un millón de átomos por elemento. Aún no admite coeficientes estequiométricos externos, cargas iónicas, hidratos, puntos de adición ni anotaciones de fase como `(ac)` o nombres de alótropos. Esas expresiones requieren ampliar la gramática y definir cómo afectan el conteo.
+Las definiciones formales de los protocolos son fuente de las transiciones de las reacciones que las usan; la interfaz no crea una secuencia paralela ni permite saltarse la validación del juego.

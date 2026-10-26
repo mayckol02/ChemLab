@@ -6,15 +6,15 @@ El proyecto mantiene el dominio químico separado de la simulación 2D y de Java
 
 - `model/`: entidades, valores y enumeraciones del dominio.
 - `automata/`: estados, transiciones y ejecución de las acciones químicas.
-- `grammar/`: producciones regulares de protocolos, derivación de rutas y conversión entre gramáticas y autómatas.
-- `grammar/formula/`: parser libre de contexto para fórmulas, con árbol de derivación y conteo de átomos.
+- `grammar/`: definiciones internas de secuencias de acciones, su compilación a autómatas y analizadores químicos.
+- `grammar/formula/`: análisis de fórmulas y conteo de átomos; el árbol sintáctico se conserva como detalle interno.
 - `factory/`: creación de experimentos, sesiones y autómatas.
 - `repository/`: persistencia y carga del catálogo.
 - `game/`: sesión y observadores del juego, sin dibujo.
 - `game/world/`: jugador, mapa, colisiones y estaciones físicas.
 - `game/procedure/`: protocolo de manejo y planificación de rutas entre puestos.
 - `ui/game/`: pantalla jugable y renderer del mapa.
-- `ui/grammar/`: taller de derivación que mantiene sincronizados el símbolo no terminal y el estado del autómata.
+- `ui/notebook/`: protocolos de síntesis, composición de muestras y comparación de rutas presentados en lenguaje químico.
 - `ui/workbench/`: estación de trabajo inmersiva y controles del procedimiento.
 - `ui/workbench/VisualizadorReaccion`: metadatos visuales para colores, fenómenos y fases de productos, aislados de las reglas del autómata.
 - `ui/components/`: componentes visuales reutilizables, como los recipientes de sustancias.
@@ -35,3 +35,5 @@ Al acercarse al puesto correcto y pulsar **F**, se abre una vista de mesa comple
 - **Esc**: cerrar el puesto o el menú actual.
 
 La organización admite incorporar estaciones y herramientas nuevas sin trasladar reglas químicas al renderer. Los patrones existentes (Factory, Strategy, State, Observer y Repository) se conservan en sus capas actuales; cada paquete nuevo mantiene una responsabilidad concreta.
+
+El cuaderno no expone gramáticas ni autómatas como tareas para el jugador. Los protocolos formales alimentan la guía química y validan las acciones en la sesión; el motor de reacciones mantiene el cálculo de reactivos y productos.
