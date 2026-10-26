@@ -555,7 +555,118 @@
     -fx-cursor: hand;
 }
 
-.game-automaton-detail {
+.game-chemistry-notebook {
+    -fx-spacing: 8;
+}
+
+.game-chemistry-tabs {
+    -fx-padding: 2 0 6 0;
+    -fx-border-color: transparent transparent #225061 transparent;
+}
+
+.game-chemistry-tab {
+    -fx-background-color: rgba(12, 34, 48, 0.9);
+    -fx-background-radius: 6 6 0 0;
+    -fx-border-color: #24495b;
+    -fx-border-radius: 6 6 0 0;
+    -fx-text-fill: #86afbd;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 9 12;
+    -fx-cursor: hand;
+}
+
+.game-chemistry-tab-selected {
+    -fx-background-color: #123b4b;
+    -fx-border-color: #53ddd2;
+    -fx-text-fill: #c7fff7;
+}
+
+.game-chemistry-scroll,
+.game-chemistry-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.game-chemistry-scroll > .scroll-bar:vertical {
+    -fx-pref-width: 8;
+}
+
+.game-chemistry-card {
+    -fx-background-color: rgba(9, 31, 44, 0.78);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(53, 123, 143, 0.48);
+    -fx-border-radius: 8;
+    -fx-padding: 9 11;
+}
+
+.game-chemistry-card-current {
+    -fx-border-color: #53ddd2;
+    -fx-effect: dropshadow(gaussian, rgba(55, 222, 210, 0.2), 9, 0.16, 0, 0);
+}
+
+.game-chemistry-title {
+    -fx-text-fill: #b9fff4;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.game-chemistry-equation {
+    -fx-background-color: rgba(17, 48, 59, 0.76);
+    -fx-background-radius: 7;
+    -fx-text-fill: #d8eea9;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 11px;
+    -fx-padding: 8 10;
+}
+
+.game-chemistry-stage-title {
+    -fx-text-fill: #aee8dc;
+    -fx-font-weight: bold;
+}
+
+.game-chemistry-status {
+    -fx-background-color: rgba(17, 48, 59, 0.76);
+    -fx-background-radius: 7;
+    -fx-text-fill: #d8eeea;
+    -fx-padding: 8 10;
+}
+
+.game-chemistry-status-good {
+    -fx-text-fill: #82f0ce;
+}
+
+.game-chemistry-status-error {
+    -fx-text-fill: #f0a593;
+}
+
+.game-chemistry-atom {
+    -fx-background-color: rgba(14, 57, 68, 0.9);
+    -fx-background-radius: 7;
+    -fx-border-color: #39868b;
+    -fx-border-radius: 7;
+    -fx-text-fill: #c7fff7;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 12px;
+    -fx-padding: 8 12;
+}
+
+.game-chemistry-analysis-tree,
+.game-chemistry-analysis-tree .virtual-flow,
+.game-chemistry-analysis-tree .tree-cell {
+    -fx-background-color: #0b1b24;
+    -fx-text-fill: #d5ece6;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 10px;
+}
+
+.game-chemistry-analysis-tree .tree-cell:filled:selected {
+    -fx-background-color: #17434a;
+}
+
+.game-chemistry-record-detail {
     -fx-background-color: rgba(4, 17, 27, 0.72);
     -fx-background-radius: 9;
     -fx-padding: 10;
@@ -795,12 +906,6 @@
 .game-formula-atom-count {
     -fx-text-fill: #d7ece6;
     -fx-font-size: 10px;
-}
-
-.game-automaton-scroll, .game-automaton-scroll > .viewport {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-    -fx-border-color: transparent;
 }
 
 .game-notebook-chip {

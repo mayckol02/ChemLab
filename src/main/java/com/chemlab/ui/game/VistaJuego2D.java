@@ -15,12 +15,6 @@ import com.chemlab.game.ProductoAlmacenado;
 import com.chemlab.game.procedure.PlanificadorEstacionesProcedimiento;
 import com.chemlab.game.procedure.ProtocoloProcedimiento;
 import com.chemlab.game.SesionJuego;
-import com.chemlab.grammar.AdaptadorAutomataAGramatica;
-import com.chemlab.grammar.GramaticaRegular;
-import com.chemlab.grammar.GramaticasProtocolos;
-import com.chemlab.grammar.ProduccionRegular;
-import com.chemlab.grammar.ResultadoDerivacion;
-import com.chemlab.grammar.SimboloNoTerminal;
 import com.chemlab.model.entity.CuadernoLaboratorio;
 import com.chemlab.model.entity.Experimento;
 import com.chemlab.model.entity.Reaccion;
@@ -30,10 +24,9 @@ import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.TipoEquipo;
 import com.chemlab.model.enums.UnidadCantidad;
 import com.chemlab.model.value.Cantidad;
-import com.chemlab.ui.components.CursorGuante;
 import com.chemlab.ui.components.IconoSustancia;
 import com.chemlab.ui.components.LienzoAutomataRegistro;
-import com.chemlab.ui.grammar.VistaTallerLenguajesFormales;
+import com.chemlab.ui.notebook.VistaCuadernoQuimico;
 import com.chemlab.ui.workbench.PanelInteraccionProcedimiento;
 import com.chemlab.ui.workbench.VistaPuestoLaboratorio;
 import javafx.animation.AnimationTimer;
@@ -46,6 +39,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.Cursor;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -77,7 +71,7 @@ import java.util.Set;
 public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
     private enum Menu { ALMACEN, CUADERNO }
-    private enum SeccionCuaderno { INVENTARIO, HISTORIAL, GRAMATICAS }
+    private enum SeccionCuaderno { INVENTARIO, HISTORIAL, QUIMICA }
 
     private static final DateTimeFormatter FECHA_REGISTRO =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -140,7 +134,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private VBox contenidoCuaderno;
     private Button botonInventarioCuaderno;
     private Button botonHistorialCuaderno;
-    private Button botonGramaticaCuaderno;
+    private Button botonQuimicaCuaderno;
     private Label detalleExperimento;
     private Button botonIniciarExperimento;
     private StackPane cabecera;
@@ -253,6 +247,12 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
     private void alPresionarTecla(KeyEvent evento) {
         KeyCode tecla = evento.getCode();
+        if ((tecla == KeyCode.E || tecla == KeyCode.M)
+                && (evento.getTarget() instanceof TextInputControl
+                || getScene() != null && getScene().getFocusOwner() instanceof TextInputControl)) {
+            teclasPresionadas.remove(tecla);
+            return;
+        }
         boolean primeraPulsacion = teclasPresionadas.add(tecla);
         if (!primeraPulsacion) {
             evento.consume();
@@ -532,16 +532,13 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             return;
         }
         teclasPresionadas.removeAll(TECLAS_MOVIMIENTO);
-        if (menuAbierto == menu) {
-            cerrarMenu();
+        if (menuAbierto == menu) return;
+        if (menuAbierto != null) cerrarMenu();
+        cerrarPanelAcciones();
+        if (menu == Menu.ALMACEN) {
+            abrirMenuAlmacen();
         } else {
-            if (menuAbierto != null) cerrarMenu();
-            cerrarPanelAcciones();
-            if (menu == Menu.ALMACEN) {
-                abrirMenuAlmacen();
-            } else {
-                abrirMenuCuaderno();
-            }
+            abrirMenuCuaderno();
         }
     }
 
@@ -554,7 +551,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         contenidoCuaderno = null;
         botonInventarioCuaderno = null;
         botonHistorialCuaderno = null;
-        botonGramaticaCuaderno = null;
+        botonQuimicaCuaderno = null;
         requestFocus();
     }
 
@@ -896,10 +893,10 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         tabs.getStyleClass().add("game-notebook-tabs");
         Button botonInventario = new Button("▤  MATERIALES");
         Button botonHistorial = new Button("⌁  EXPERIMENTOS");
-        Button botonGramatica = new Button("⌘  GRAMÁTICAS");
+        Button botonQuimica = new Button("⚗  CUADERNO QUÍMICO");
         botonInventario.getStyleClass().add("game-notebook-tab");
         botonHistorial.getStyleClass().add("game-notebook-tab");
-        botonGramatica.getStyleClass().add("game-notebook-tab");
+        botonQuimica.getStyleClass().add("game-notebook-tab");
         VBox contenido = new VBox(10);
         contenido.getStyleClass().add("game-notebook-screen");
         contenido.setPadding(new Insets(12));
@@ -908,24 +905,24 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         contenidoCuaderno = contenido;
         botonInventarioCuaderno = botonInventario;
         botonHistorialCuaderno = botonHistorial;
-        botonGramaticaCuaderno = botonGramatica;
+        botonQuimicaCuaderno = botonQuimica;
         botonInventario.setOnAction(evento -> {
             seccionCuaderno = SeccionCuaderno.INVENTARIO;
-            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
+            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonQuimica);
         });
         botonHistorial.setOnAction(evento -> {
             seccionCuaderno = SeccionCuaderno.HISTORIAL;
-            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
+            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonQuimica);
         });
-        botonGramatica.setOnAction(evento -> {
-            seccionCuaderno = SeccionCuaderno.GRAMATICAS;
-            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
+        botonQuimica.setOnAction(evento -> {
+            seccionCuaderno = SeccionCuaderno.QUIMICA;
+            mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonQuimica);
         });
-        tabs.getChildren().addAll(botonInventario, botonHistorial, botonGramatica);
-        Label pie = new Label("CHEMLAB OS  ·  BITÁCORA Y TALLER DE LENGUAJES FORMALES");
+        tabs.getChildren().addAll(botonInventario, botonHistorial, botonQuimica);
+        Label pie = new Label("CHEMLAB OS  ·  CUADERNO DE SÍNTESIS Y ANÁLISIS");
         pie.getStyleClass().add("game-notebook-micro");
         tarjeta.getChildren().addAll(metadatos, tabs, contenido, pie);
-        mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonGramatica);
+        mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonQuimica);
         getChildren().add(overlay);
         overlayMenu = overlay;
     }
@@ -934,12 +931,12 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             VBox contenido,
             Button inventario,
             Button historial,
-            Button gramatica
+            Button quimica
     ) {
         contenido.getChildren().clear();
         inventario.getStyleClass().setAll("game-notebook-tab");
         historial.getStyleClass().setAll("game-notebook-tab");
-        gramatica.getStyleClass().setAll("game-notebook-tab");
+        quimica.getStyleClass().setAll("game-notebook-tab");
         if (seccionCuaderno == SeccionCuaderno.INVENTARIO) {
             inventario.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
             contenido.getChildren().add(construirVistaInventario());
@@ -947,11 +944,19 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             historial.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
             contenido.getChildren().add(construirVistaHistorial());
         } else {
-            gramatica.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
-            VistaTallerLenguajesFormales taller =
-                    new VistaTallerLenguajesFormales(GramaticasProtocolos.obtenerTodas());
-            VBox.setVgrow(taller, Priority.ALWAYS);
-            contenido.getChildren().add(taller);
+            quimica.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
+            List<Experimento> experimentos = new ArrayList<>();
+            if (experimentoSeleccionado != null) experimentos.add(experimentoSeleccionado);
+            if (experimentoVisible != null && experimentoVisible != experimentoSeleccionado) {
+                experimentos.add(experimentoVisible);
+            }
+            List<Sustancia> productos = resultadosAlmacenados.stream()
+                    .map(ProductoAlmacenado::sustancia)
+                    .toList();
+            VistaCuadernoQuimico cuadernoQuimico =
+                    new VistaCuadernoQuimico(catalogo, sesion, experimentos, productos);
+            VBox.setVgrow(cuadernoQuimico, Priority.ALWAYS);
+            contenido.getChildren().add(cuadernoQuimico);
         }
     }
 
@@ -1044,8 +1049,9 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                 pasos.setVisible(false);
                 String acciones = registro.getPasosTransicion().stream()
                         .map(RegistroExperimento.PasoTransicion::accion)
+                        .map(this::nombreAccionQuimica)
                         .reduce((anterior, actual) -> anterior + " → " + actual)
-                        .orElse("Sin acciones registradas");
+                        .orElse("Sin etapas registradas");
                 Label detallePasos = new Label(acciones);
                 detallePasos.setWrapText(false);
                 detallePasos.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
@@ -1071,177 +1077,132 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                 abrirRegistro.setMaxHeight(108);
                 abrirRegistro.setAlignment(Pos.CENTER_LEFT);
                 abrirRegistro.setGraphic(tarjeta);
-                abrirRegistro.setAccessibleText("Abrir autómata del experimento " + registro.getNombreExperimento());
+                abrirRegistro.setAccessibleText("Ver etapas del experimento " + registro.getNombreExperimento());
                 abrirRegistro.getStyleClass().add("game-notebook-entry-button");
-                abrirRegistro.setOnAction(evento -> mostrarAutomataEnCuaderno(registro));
+                abrirRegistro.setOnAction(evento -> mostrarDetalleExperimentoEnCuaderno(registro));
                 vista.getChildren().add(abrirRegistro);
             }
         }
         return crearScroll(vista);
     }
 
-    private void mostrarAutomataEnCuaderno(RegistroExperimento registro) {
+    private void mostrarDetalleExperimentoEnCuaderno(RegistroExperimento registro) {
         if (contenidoCuaderno == null) return;
         Button volver = new Button("‹  VOLVER A EXPERIMENTOS");
         volver.getStyleClass().add("game-notebook-back-button");
         volver.setOnAction(evento -> {
             seccionCuaderno = SeccionCuaderno.HISTORIAL;
             mostrarSeccionCuaderno(contenidoCuaderno, botonInventarioCuaderno,
-                    botonHistorialCuaderno, botonGramaticaCuaderno);
+                    botonHistorialCuaderno, botonQuimicaCuaderno);
         });
 
         Label titulo = new Label(registro.getNombreExperimento());
         titulo.getStyleClass().add("game-notebook-summary");
-        Label descripcion = new Label("AUTÓMATA DE " + registro.getIdProceso()
-                + "  ·  " + (registro.isExitoso() ? "PROCESO COMPLETADO" : "RUTA RECORRIDA HASTA EL ABANDONO"));
+        Label descripcion = new Label((registro.isExitoso()
+                ? "PROCESO COMPLETADO" : "INTENTO INTERRUMPIDO")
+                + "  ·  " + registro.getPasosTransicion().size() + " etapas registradas");
         descripcion.getStyleClass().add("game-notebook-micro");
-        VBox encabezado = new VBox(4, volver, titulo, descripcion);
 
         AutomataQuimico automata = registro.getIdProceso() == null
                 ? FabricaAutomata.crearAutomataEstandar()
                 : FabricaAutomata.crearAutomataParaReaccion(registro.getIdProceso());
-        boolean esGramaticaFuente = GramaticasProtocolos.buscar(registro.getIdProceso()).isPresent();
-        GramaticaRegular gramatica = GramaticasProtocolos.buscar(registro.getIdProceso())
-                .orElseGet(() -> AdaptadorAutomataAGramatica.convertir(
-                        registro.getIdProceso() == null ? "PROTOCOLO_ESTANDAR" : registro.getIdProceso(), automata));
-        List<AccionLaboratorio> acciones = registro.getPasosTransicion().stream()
-                .map(RegistroExperimento.PasoTransicion::accion)
-                .map(this::accionDesdeRegistro)
-                .filter(java.util.Objects::nonNull)
-                .toList();
-        ResultadoDerivacion derivacion = gramatica.derivar(acciones);
+        LienzoAutomataRegistro lienzoRuta = new LienzoAutomataRegistro(registro, automata);
+        ScrollPane desplazamientoRuta = new ScrollPane(lienzoRuta);
+        desplazamientoRuta.setFitToWidth(false);
+        desplazamientoRuta.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        desplazamientoRuta.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        desplazamientoRuta.setPrefViewportHeight(390);
+        desplazamientoRuta.getStyleClass().add("game-automaton-scroll");
 
-        LienzoAutomataRegistro lienzo = new LienzoAutomataRegistro(registro, automata);
-        ScrollPane desplazamientoAutomata = new ScrollPane(lienzo);
-        prepararScrollRepresentacion(desplazamientoAutomata, false);
-        ScrollPane desplazamientoGramatica = new ScrollPane(
-                construirVistaGramatica(gramatica, derivacion, acciones.size(), esGramaticaFuente));
-        prepararScrollRepresentacion(desplazamientoGramatica, true);
+        VBox etapas = new VBox(8);
+        etapas.getChildren().add(new Label("RECORRIDO DEL EXPERIMENTO"));
+        if (registro.getPasosTransicion().isEmpty()) {
+            etapas.getChildren().add(new Label("No se alcanzó a completar ninguna etapa."));
+        } else {
+            for (int indice = 0; indice < registro.getPasosTransicion().size(); indice++) {
+                RegistroExperimento.PasoTransicion paso = registro.getPasosTransicion().get(indice);
+                Label etapa = new Label((paso.valida() ? "✓  " : "○  ")
+                        + (indice + 1) + ". " + nombreEstadoQuimico(paso.estadoDestino())
+                        + " · " + nombreAccionQuimica(paso.accion()));
+                etapa.setWrapText(true);
+                etapa.getStyleClass().add("game-chemistry-stage-title");
+                etapas.getChildren().add(etapa);
+            }
+        }
+        VBox detalleEtapas = new VBox(10, etapas);
+        if (registro.getResultado() != null && !registro.getResultado().getProductos().isEmpty()) {
+            detalleEtapas.getChildren().add(new Label("Productos obtenidos: "
+                    + registro.getResultado().getProductos().keySet().stream()
+                    .map(producto -> producto.getFormula() + " · " + producto.getNombre())
+                    .reduce((a, b) -> a + "  |  " + b).orElse("")));
+        }
 
-        Button botonAutomata = new Button("AUTÓMATA");
-        Button botonGramatica = new Button("GRAMÁTICA Y DERIVACIÓN");
-        botonAutomata.getStyleClass().add("game-notebook-tab");
-        botonGramatica.getStyleClass().add("game-notebook-tab");
-        HBox pestañas = new HBox(8, botonAutomata, botonGramatica);
-        pestañas.setAlignment(Pos.CENTER_LEFT);
-
-        StackPane representacion = new StackPane(desplazamientoAutomata, desplazamientoGramatica);
-        VBox.setVgrow(representacion, Priority.ALWAYS);
-        Runnable mostrarAutomata = () -> {
-            desplazamientoAutomata.setVisible(true);
-            desplazamientoAutomata.setManaged(true);
-            desplazamientoGramatica.setVisible(false);
-            desplazamientoGramatica.setManaged(false);
-            botonAutomata.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
-            botonGramatica.getStyleClass().setAll("game-notebook-tab");
+        Button botonRuta = new Button("RUTA");
+        Button botonEtapas = new Button("ETAPAS");
+        botonRuta.getStyleClass().add("game-notebook-tab");
+        botonEtapas.getStyleClass().add("game-notebook-tab");
+        HBox pestañas = new HBox(8, botonRuta, botonEtapas);
+        ScrollPane desplazamientoEtapas = crearScroll(detalleEtapas);
+        StackPane paneles = new StackPane(desplazamientoRuta, desplazamientoEtapas);
+        VBox.setVgrow(paneles, Priority.ALWAYS);
+        Runnable mostrarRuta = () -> {
+            desplazamientoRuta.setVisible(true);
+            desplazamientoRuta.setManaged(true);
+            desplazamientoEtapas.setVisible(false);
+            desplazamientoEtapas.setManaged(false);
+            botonRuta.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
+            botonEtapas.getStyleClass().setAll("game-notebook-tab");
         };
-        Runnable mostrarGramatica = () -> {
-            desplazamientoAutomata.setVisible(false);
-            desplazamientoAutomata.setManaged(false);
-            desplazamientoGramatica.setVisible(true);
-            desplazamientoGramatica.setManaged(true);
-            botonAutomata.getStyleClass().setAll("game-notebook-tab");
-            botonGramatica.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
+        Runnable mostrarEtapas = () -> {
+            desplazamientoRuta.setVisible(false);
+            desplazamientoRuta.setManaged(false);
+            desplazamientoEtapas.setVisible(true);
+            desplazamientoEtapas.setManaged(true);
+            botonRuta.getStyleClass().setAll("game-notebook-tab");
+            botonEtapas.getStyleClass().setAll("game-notebook-tab", "game-notebook-tab-selected");
         };
-        botonAutomata.setOnAction(evento -> mostrarAutomata.run());
-        botonGramatica.setOnAction(evento -> mostrarGramatica.run());
-        mostrarAutomata.run();
-
-        VBox detalle = new VBox(10, encabezado, pestañas, representacion);
-        detalle.getStyleClass().add("game-automaton-detail");
+        botonRuta.setOnAction(evento -> mostrarRuta.run());
+        botonEtapas.setOnAction(evento -> mostrarEtapas.run());
+        VBox encabezado = new VBox(5, volver, titulo, descripcion, pestañas);
+        VBox detalle = new VBox(10, encabezado, paneles);
+        detalle.setMinHeight(0);
+        mostrarRuta.run();
+        detalle.getStyleClass().add("game-chemistry-record-detail");
         contenidoCuaderno.getChildren().setAll(detalle);
     }
 
-    private void prepararScrollRepresentacion(ScrollPane desplazamiento, boolean ajustarAncho) {
-        desplazamiento.setFitToWidth(ajustarAncho);
-        desplazamiento.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        desplazamiento.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        desplazamiento.setPrefViewportHeight(390);
-        desplazamiento.getStyleClass().add("game-automaton-scroll");
-    }
-
-    private AccionLaboratorio accionDesdeRegistro(String accion) {
+    private String nombreAccionQuimica(String accion) {
         try {
-            return AccionLaboratorio.valueOf(accion);
-        } catch (IllegalArgumentException | NullPointerException ignorada) {
-            return null;
+            return switch (AccionLaboratorio.valueOf(accion)) {
+                case CARGAR_REACTIVO -> "preparar y cargar reactivos";
+                case MEZCLAR -> "mezclar reactivos";
+                case INICIAR_PLASMA -> "activar plasma";
+                case CALENTAR -> "aplicar calor";
+                case COMPRIMIR -> "comprimir el sistema";
+                case AGREGAR_CATALIZADOR -> "añadir catalizador";
+                case AGREGAR_AGUA -> "añadir agua";
+                case ACTIVAR_IGNICION -> "activar ignición";
+                case FINALIZAR -> "recuperar el producto";
+                default -> accion.replace('_', ' ').toLowerCase(Locale.ROOT);
+            };
+        } catch (IllegalArgumentException | NullPointerException error) {
+            return "acción de laboratorio";
         }
     }
 
-    private VBox construirVistaGramatica(
-            GramaticaRegular gramatica,
-            ResultadoDerivacion derivacion,
-            int totalAcciones,
-            boolean esGramaticaFuente
-    ) {
-        VBox contenido = new VBox(10);
-        contenido.setPadding(new Insets(14));
-        contenido.getStyleClass().add("game-grammar-view");
-
-        Label explicacion = new Label(esGramaticaFuente
-                ? "Esta gramática define el protocolo y se compiló para generar el autómata que ejecutó la práctica."
-                : "Esta gramática regular se obtuvo del autómata existente; ambos describen las mismas rutas de acciones.");
-        explicacion.getStyleClass().add("game-menu-subtitle");
-        explicacion.setWrapText(true);
-
-        String noTerminales = gramatica.getNoTerminales().stream()
-                .map(SimboloNoTerminal::id).reduce((a, b) -> a + ", " + b).orElse("∅");
-        String terminales = gramatica.getTerminales().stream().sorted()
-                .map(Enum::name).reduce((a, b) -> a + ", " + b).orElse("∅");
-        Label definicion = new Label("G = (N, Σ, P, S)\nN = {" + noTerminales + "}\nΣ = {" + terminales
-                + "}\nS = " + gramatica.getInicial().id());
-        definicion.getStyleClass().add("game-grammar-definition");
-        definicion.setWrapText(true);
-
-        VBox producciones = new VBox(5);
-        Label tituloProducciones = new Label("PRODUCCIONES");
-        tituloProducciones.getStyleClass().add("game-section-title");
-        producciones.getChildren().add(tituloProducciones);
-        for (ProduccionRegular produccion : gramatica.getProducciones()) {
-            Label regla = new Label(formatearProduccion(produccion));
-            regla.getStyleClass().add("game-grammar-rule");
-            regla.setWrapText(true);
-            producciones.getChildren().add(regla);
-        }
-
-        VBox pasos = new VBox(5);
-        Label tituloDerivacion = new Label("DERIVACIÓN DEL EXPERIMENTO");
-        tituloDerivacion.getStyleClass().add("game-section-title");
-        pasos.getChildren().add(tituloDerivacion);
-        if (derivacion.produccionesAplicadas().isEmpty()) {
-            Label inicial = new Label(gramatica.getInicial().id() + " (símbolo inicial; aún no hay acciones registradas)");
-            inicial.getStyleClass().add("game-grammar-rule");
-            pasos.getChildren().add(inicial);
-        } else {
-            for (int indice = 0; indice < derivacion.produccionesAplicadas().size(); indice++) {
-                Label paso = new Label((indice + 1) + ".  "
-                        + formatearProduccion(derivacion.produccionesAplicadas().get(indice)));
-                paso.getStyleClass().add("game-grammar-derivation-step");
-                paso.setWrapText(true);
-                pasos.getChildren().add(paso);
-            }
-        }
-        String estadoDerivacion = derivacion.aceptada()
-                ? "Secuencia aceptada por la gramática."
-                : derivacion.esPrefijoValido(totalAcciones)
-                ? derivacion.mensaje()
-                : "La derivación se detuvo tras " + derivacion.accionesConsumidas() + " acciones: " + derivacion.mensaje();
-        Label resultado = new Label(estadoDerivacion);
-        resultado.getStyleClass().add(derivacion.aceptada()
-                ? "game-grammar-success" : "game-grammar-pending");
-        resultado.setWrapText(true);
-
-        Label relacion = new Label("Cada producción A → acción B corresponde a una transición del autómata: A —acción→ B. ε marca un estado final.");
-        relacion.getStyleClass().add("game-menu-subtitle");
-        relacion.setWrapText(true);
-        contenido.getChildren().addAll(explicacion, definicion, producciones, pasos, resultado, relacion);
-        return contenido;
-    }
-
-    private String formatearProduccion(ProduccionRegular produccion) {
-        if (produccion.esEpsilon()) return produccion.origen().id() + " → ε";
-        return produccion.origen().id() + " → " + produccion.terminal().name()
-                + (produccion.siguiente() == null ? "" : " " + produccion.siguiente().id());
+    private String nombreEstadoQuimico(String estado) {
+        if (estado == null || estado.isBlank()) return "etapa del proceso";
+        return switch (estado) {
+            case "PREPARACION", "Preparación" -> "Reactivos en preparación";
+            case "PREPARADO" -> "Reactivos preparados";
+            case "CARGADO" -> "Equipo cargado";
+            case "MEZCLADO" -> "Reactivos mezclados";
+            case "PLASMA", "EN_PLASMA" -> "Plasma activo";
+            case "DEPOSICION" -> "Deposición en curso";
+            case "REACCIONANDO" -> "Reacción en curso";
+            case "COMPLETADO" -> "Producto sintetizado";
+            default -> estado.replace('_', ' ');
+        };
     }
 
     private void dibujarMundo() {
@@ -1265,14 +1226,6 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private void alPresionarPunteroMundo(MouseEvent evento) {
         if (!evento.isPrimaryButtonDown() || !puedeInteractuarConMundo()) return;
         actualizarCursorMundo(evento);
-        int indiceProducto = renderizador.productoBajoPuntero(
-                evento.getX(), evento.getY(), productosEnMesa);
-        boolean puedeRecoger = productoEnMano == null && indiceProducto >= 0
-                && productosEnMesa.get(indiceProducto).estacionOrigen()
-                .distanciaHasta(jugador.getX(), jugador.getY()) <= 82;
-        if (resaltarAlmacen || puedeRecoger || productoEnMano != null) {
-            renderizador.setCursor(CursorGuante.cerrado());
-        }
     }
 
     private void alSoltarPunteroMundo(MouseEvent evento) {
@@ -1289,15 +1242,9 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             renderizador.setCursor(Cursor.DEFAULT);
             return;
         }
-        int indiceProducto = renderizador.productoBajoPuntero(
-                evento.getX(), evento.getY(), productosEnMesa);
-        boolean puedeRecoger = productoEnMano == null && indiceProducto >= 0
-                && productosEnMesa.get(indiceProducto).estacionOrigen()
-                .distanciaHasta(jugador.getX(), jugador.getY()) <= 82;
         boolean sobreAlmacen = renderizador.punteroSobreAlmacen(evento.getX(), evento.getY());
         resaltarAlmacen = productoEnMano != null && sobreAlmacen && renderizador.jugadorJuntoAlAlmacen();
-        renderizador.setCursor(puedeRecoger || resaltarAlmacen || productoEnMano != null
-                ? CursorGuante.abierto() : Cursor.DEFAULT);
+        renderizador.setCursor(Cursor.DEFAULT);
     }
 
     private void alHacerClicEnMundo(MouseEvent evento) {

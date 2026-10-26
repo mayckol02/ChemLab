@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Analizador descendente recursivo para la gramática libre de contexto de
@@ -15,33 +14,18 @@ public final class AnalizadorFormulaQuimica {
     private static final int LONGITUD_MAXIMA = 128;
     private static final int PROFUNDIDAD_MAXIMA = 16;
     private static final int MAX_ATOMOS = 1_000_000;
-    private static final Set<String> ELEMENTOS = Set.of(
-            "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne",
-            "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
-            "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-            "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
-            "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-            "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
-            "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
-            "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
-            "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
-            "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm",
-            "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds",
-            "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"
-    );
-
     public ResultadoAnalisisFormula analizar(String entrada) {
         if (entrada == null || entrada.isBlank()) {
             throw new FormulaInvalidaException("Escribe una fórmula química.", 0);
         }
         String original = entrada.trim();
-        String normalizada = normalizarSubindices(original);
-        if (normalizada.length() > LONGITUD_MAXIMA) {
+        if (original.length() > LONGITUD_MAXIMA) {
             throw new FormulaInvalidaException("La fórmula supera el límite de " + LONGITUD_MAXIMA + " caracteres.",
                     LONGITUD_MAXIMA);
         }
 
-        Analizador parser = new Analizador(normalizada);
+        EntradaNormalizada preparada = prepararEntrada(original);
+        Analizador parser = new Analizador(preparada.formula());
         ResultadoSecuencia secuencia = parser.analizarSecuencia(0);
         if (!parser.termino()) {
             char inesperado = parser.actual();
@@ -52,8 +36,49 @@ public final class AnalizadorFormulaQuimica {
         }
 
         NodoDerivacionFormula raiz = new NodoDerivacionFormula(
-                "Fórmula → Secuencia", original, List.of(secuencia.arbol()));
-        return new ResultadoAnalisisFormula(original, normalizada, raiz, secuencia.atomos());
+                "Fórmula → Coeficiente? Secuencia Fase?", original, List.of(secuencia.arbol()));
+        return new ResultadoAnalisisFormula(original, preparada.formula(), raiz, secuencia.atomos(),
+                preparada.coeficiente(), preparada.fase());
+    }
+
+    private EntradaNormalizada prepararEntrada(String entrada) {
+        String formulaEntrada = entrada.trim();
+        String fase = "";
+        String minuscula = formulaEntrada.toLowerCase(java.util.Locale.ROOT);
+        for (String sufijo : List.of("(ac)", "(aq)", "(s)", "(l)", "(g)")) {
+            if (minuscula.endsWith(sufijo)) {
+                formulaEntrada = formulaEntrada.substring(0, formulaEntrada.length() - sufijo.length()).trim();
+                fase = sufijo;
+                break;
+            }
+        }
+
+        String formula = normalizarSubindices(formulaEntrada);
+        int posicion = 0;
+        while (posicion < formula.length() && esDigitoAscii(formula.charAt(posicion))) posicion++;
+        int coeficiente = 1;
+        if (posicion > 0) {
+            try {
+                coeficiente = Integer.parseInt(formula.substring(0, posicion));
+            } catch (NumberFormatException error) {
+                throw new FormulaInvalidaException("El coeficiente es demasiado grande.", 0);
+            }
+            if (coeficiente < 1) {
+                throw new FormulaInvalidaException("El coeficiente debe ser un entero positivo.", 0);
+            }
+            if (coeficiente > MAX_ATOMOS) {
+                throw new FormulaInvalidaException("El coeficiente supera el límite permitido.", 0);
+            }
+            formula = formula.substring(posicion);
+        }
+        if (formula.isBlank()) {
+            throw new FormulaInvalidaException("Después del coeficiente se esperaba una fórmula química.", posicion);
+        }
+        return new EntradaNormalizada(formula, coeficiente, fase);
+    }
+
+    private boolean esDigitoAscii(char caracter) {
+        return caracter >= '0' && caracter <= '9';
     }
 
     private String normalizarSubindices(String texto) {
@@ -139,7 +164,7 @@ public final class AnalizadorFormulaQuimica {
             posicion++;
             if (!termino() && esMinuscula(actual())) posicion++;
             String simbolo = entrada.substring(inicio, posicion);
-            if (!ELEMENTOS.contains(simbolo)) {
+            if (!TablaPeriodica.contiene(simbolo)) {
                 throw new FormulaInvalidaException("'" + simbolo + "' no es un símbolo de elemento reconocido.", inicio);
             }
             ResultadoSubindice subindice = analizarSubindice();
@@ -237,4 +262,6 @@ public final class AnalizadorFormulaQuimica {
     }
 
     private record ResultadoSubindice(int valor, NodoDerivacionFormula arbol) {}
+
+    private record EntradaNormalizada(String formula, int coeficiente, String fase) {}
 }

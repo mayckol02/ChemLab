@@ -1,7 +1,6 @@
 package com.chemlab.ui.workbench;
 
 import com.chemlab.ui.components.IconoSustancia;
-import com.chemlab.ui.components.CursorGuante;
 import com.chemlab.model.entity.Experimento;
 import com.chemlab.model.entity.Reaccion;
 import com.chemlab.model.entity.Sustancia;
@@ -9,6 +8,7 @@ import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.TipoEquipo;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -126,7 +126,7 @@ public final class PanelInteraccionProcedimiento extends VBox {
             Sustancia sustancia = buscarSustancia(id);
             Button ficha = new Button();
             ficha.getStyleClass().add("game-item-chip");
-            ficha.setCursor(CursorGuante.abierto());
+            ficha.setCursor(Cursor.DEFAULT);
             HBox contenidoFicha = new HBox(7);
             contenidoFicha.setAlignment(Pos.CENTER_LEFT);
             if (sustancia != null) {
@@ -145,11 +145,11 @@ public final class PanelInteraccionProcedimiento extends VBox {
                 ClipboardContent contenido = new ClipboardContent();
                 contenido.putString(id);
                 dragboard.setContent(contenido);
-                if (getScene() != null) getScene().setCursor(CursorGuante.cerrado());
+                if (getScene() != null) getScene().setCursor(Cursor.DEFAULT);
                 evento.consume();
             });
             ficha.setOnDragDone(evento -> {
-                if (getScene() != null) getScene().setCursor(CursorGuante.abierto());
+                if (getScene() != null) getScene().setCursor(Cursor.DEFAULT);
                 evento.consume();
             });
             fichas.getChildren().add(ficha);
@@ -208,7 +208,7 @@ public final class PanelInteraccionProcedimiento extends VBox {
 
         botonConfirmar = new Button(textoConfirmacion(accion));
         botonConfirmar.getStyleClass().add("game-start-button");
-        botonConfirmar.setCursor(CursorGuante.abierto());
+        botonConfirmar.setCursor(Cursor.DEFAULT);
         botonConfirmar.setDisable(!elementosRequeridos.isEmpty() || accion == AccionLaboratorio.CARGAR_REACTIVO);
         botonConfirmar.setOnAction(evento -> confirmarCarga());
 
@@ -305,7 +305,7 @@ public final class PanelInteraccionProcedimiento extends VBox {
         instruccion.getStyleClass().add("game-menu-subtitle");
         botonIniciar = new Button(textoBoton(accion));
         botonIniciar.getStyleClass().add("game-action-button");
-        botonIniciar.setCursor(CursorGuante.abierto());
+        botonIniciar.setCursor(Cursor.DEFAULT);
         botonIniciar.setOnAction(evento -> accionarHerramientaInterna());
         barraProgreso.setMaxWidth(Double.MAX_VALUE);
         barraProgreso.setMinHeight(11);

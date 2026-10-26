@@ -6,11 +6,11 @@ import com.chemlab.model.entity.Reaccion;
 import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.EstadoMateria;
 import com.chemlab.model.enums.TipoEquipo;
-import com.chemlab.ui.components.CursorGuante;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -81,7 +81,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         this.perfilVisual = VisualizadorReaccion.crear(reaccion);
 
         getStyleClass().add("workbench-overlay");
-        setCursor(CursorGuante.abierto());
+        setCursor(Cursor.DEFAULT);
         setPadding(new Insets(15, 18, 15, 18));
         setTop(construirCabecera(alCerrar, alAbandonar));
         setCenter(construirAreaTrabajo(transiciones, alSeleccionarTransicion));
@@ -105,11 +105,11 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         telemetria.getStyleClass().add("workbench-online");
         Button abandonar = new Button("Abandonar práctica");
         abandonar.getStyleClass().add("workbench-quiet-button");
-        abandonar.setCursor(CursorGuante.abierto());
+        abandonar.setCursor(Cursor.DEFAULT);
         abandonar.setOnAction(evento -> alAbandonar.run());
         Button cerrar = new Button("Volver al laboratorio  ·  Esc");
         cerrar.getStyleClass().add("workbench-close-button");
-        cerrar.setCursor(CursorGuante.abierto());
+        cerrar.setCursor(Cursor.DEFAULT);
         cerrar.setOnAction(evento -> alCerrar.run());
         HBox cabecera = new HBox(12, identidad, espacio, telemetria, abandonar, cerrar);
         cabecera.setAlignment(Pos.CENTER_LEFT);
@@ -158,7 +158,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
             for (TransicionQuimica transicion : transiciones) {
                 Button opcion = new Button(nombreAccion(transicion.getAccion()));
                 opcion.getStyleClass().add("workbench-action-choice");
-                opcion.setCursor(CursorGuante.abierto());
+                opcion.setCursor(Cursor.DEFAULT);
                 opcion.setOnAction(evento -> alSeleccionarTransicion.accept(transicion));
                 selector.getChildren().add(opcion);
             }
@@ -176,10 +176,10 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         fichaMuestra.getStyleClass().add("workbench-transfer-item");
         fichaMuestra.setWrapText(true);
         fichaMuestra.setMaxWidth(Double.MAX_VALUE);
-        fichaMuestra.setCursor(CursorGuante.abierto());
+        fichaMuestra.setCursor(Cursor.DEFAULT);
         fichaMuestra.setOnDragDetected(evento -> iniciarArrastreDeMuestra(evento));
         fichaMuestra.setOnDragDone(evento -> {
-            if (getScene() != null) getScene().setCursor(CursorGuante.abierto());
+            if (getScene() != null) getScene().setCursor(Cursor.DEFAULT);
             evento.consume();
         });
         estadoTraslado.getStyleClass().add("workbench-transfer-status");
@@ -273,7 +273,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         ClipboardContent contenido = new ClipboardContent();
         contenido.putString("CHEMLAB_MUESTRA_TRANSFERIBLE");
         dragboard.setContent(contenido);
-        if (getScene() != null) getScene().setCursor(CursorGuante.cerrado());
+        if (getScene() != null) getScene().setCursor(Cursor.DEFAULT);
         evento.consume();
     }
 
@@ -409,7 +409,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         }
 
         private void alMoverMouse(MouseEvent evento) {
-            setCursor(CursorGuante.abierto());
+            setCursor(Cursor.DEFAULT);
         }
 
         private void alArrastrarSobreEquipo(DragEvent evento) {

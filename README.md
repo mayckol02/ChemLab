@@ -12,7 +12,7 @@ El proyecto se organizará por responsabilidades, evitando que la interfaz gráf
 - `model/enums/`: enumeraciones del dominio.
 - `engine/`: motor y reglas de ejecución de experimentos.
 - `automata/`: autómata químico, estados y transiciones.
-- `grammar/`: gramáticas regulares para protocolos, conversión a autómatas y el parser libre de contexto de fórmulas; consulta [GRAMATICAS_Y_AUTOMATAS.md](GRAMATICAS_Y_AUTOMATAS.md).
+- `grammar/`: definición interna de protocolos de síntesis y análisis de fórmulas.
 - `game/`: sesión, coordinación, mapa, personaje y estaciones del juego.
 - `ui/`: interfaz 2D JavaFX.
 - `factory/`: creación controlada de objetos complejos.
@@ -35,7 +35,7 @@ No se aplicarán patrones "por obligación"; cada uno se introducirá cuando red
 
 La vista 2D observa `SesionJuego`; los puestos se construyen a partir del equipo asignado por `FabricaExperimento`, y las acciones siguen pasando por los autómatas y el motor químico existentes. `ui/game/RenderizadorLaboratorio2D` dibuja el mapa y al personaje; `ui/game/VistaJuego2D` coordina controles y menús.
 
-El cuaderno E incluye prácticas de gramáticas regulares para los protocolos de agua y diamante CVD, con el autómata equivalente avanzando en paralelo, y un analizador libre de contexto de fórmulas que muestra su árbol de derivación y el conteo de átomos. Los detalles y límites están en [GRAMATICAS_Y_AUTOMATAS.md](GRAMATICAS_Y_AUTOMATAS.md).
+El cuaderno E presenta protocolos para todos los procesos del catálogo, análisis de muestras descubiertas y comparación de rutas para todos los compuestos producidos, incluidos los que tienen una sola ruta. La gramática y el autómata siguen validando los pasos internamente, sin pedir al jugador que los estudie. Consulta el funcionamiento en [Gramaticas a quimica.md](Gramaticas%20a%20quimica.md).
 
 Al pulsar F, `ui/workbench/VistaPuestoLaboratorio` abre una mesa completa con el equipo propio de la estación. Los reactivos se arrastran al recipiente dibujado sobre la mesa; los procesos se inician accionando los mandos o herramientas visibles. Calor, llama, frío, mezcla, presión, plasma e ignición se animan en el instrumento. `game/procedure/PlanificadorEstacionesProcedimiento` determina cuándo mover el proceso a otro puesto. `ui/components/IconoSustancia` representa cada reactivo según su estado físico, y el cuaderno E conserva su diseño digital separado del almacén M.
 
