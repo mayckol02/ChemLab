@@ -453,14 +453,16 @@ public final class FabricaAutomata {
 
     public static AutomataQuimico crearAutomataSeparacionSolucion() {
         EstadoQuimico preparacion = new EstadoQuimico("PREPARACION", "Solución salina en matraz");
-        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Sistema de evaporación montado");
+        EstadoQuimico sistemaMontado = new EstadoQuimico("SISTEMA_MONTADO", "Sistema de evaporación instalado");
+        EstadoQuimico cargado = new EstadoQuimico("CARGADO", "Solución salina en el sistema de evaporación");
         EstadoQuimico metodoElegido = new EstadoQuimico("METODO_ELEGIDO", "Método de evaporación/cristalización seleccionado");
         EstadoQuimico evaporando = new EstadoQuimico("EVAPORANDO", "Ebullición a 100°C y escape de vapor");
         EstadoQuimico completado = new EstadoQuimico("COMPLETADO", "Cristales de sal recuperados y agua separada");
 
-        List<EstadoQuimico> estados = List.of(preparacion, cargado, metodoElegido, evaporando, completado);
+        List<EstadoQuimico> estados = List.of(preparacion, sistemaMontado, cargado, metodoElegido, evaporando, completado);
         List<TransicionQuimica> transiciones = List.of(
-                new TransicionQuimica(preparacion, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
+                new TransicionQuimica(preparacion, AccionLaboratorio.MONTAR_EQUIPO, CondicionesRequeridas.sinCondicionesEspeciales(), sistemaMontado),
+                new TransicionQuimica(sistemaMontado, AccionLaboratorio.CARGAR_REACTIVO, CondicionesRequeridas.sinCondicionesEspeciales(), cargado),
                 new TransicionQuimica(cargado, AccionLaboratorio.SELECCIONAR_METODO, CondicionesRequeridas.sinCondicionesEspeciales(), metodoElegido),
                 new TransicionQuimica(metodoElegido, AccionLaboratorio.CALENTAR, CondicionesRequeridas.sinCondicionesEspeciales(), evaporando),
                 new TransicionQuimica(evaporando, AccionLaboratorio.FINALIZAR, CondicionesRequeridas.sinCondicionesEspeciales(), completado)

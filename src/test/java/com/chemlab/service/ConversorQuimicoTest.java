@@ -72,6 +72,16 @@ class ConversorQuimicoTest {
     }
 
     @Test
+    void debeConservarUnaCantidadQueYaEstaEnMoles() {
+        Sustancia agua = crearAgua();
+        Cantidad cantidad = new Cantidad(2, UnidadCantidad.MOLES);
+
+        Cantidad resultado = new ConversorQuimico().convertirAMoles(cantidad, agua);
+
+        assertSame(cantidad, resultado);
+    }
+
+    @Test
     void debeConvertirMolesAGramos() {
 
         Sustancia agua = crearAgua();
@@ -120,6 +130,17 @@ class ConversorQuimicoTest {
                 resultado.getValor(),
                 0.000001
         );
+    }
+
+    @Test
+    void debeConservarMolesAlConvertirDesdeMolesAHaciaMoles() {
+        Sustancia agua = crearAgua();
+        Cantidad cantidad = new Cantidad(2, UnidadCantidad.MOLES);
+
+        Cantidad resultado = new ConversorQuimico().convertirDesdeMoles(
+                cantidad, agua, UnidadCantidad.MOLES);
+
+        assertSame(cantidad, resultado);
     }
 
     @Test

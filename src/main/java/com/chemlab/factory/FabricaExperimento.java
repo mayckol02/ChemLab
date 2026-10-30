@@ -498,6 +498,20 @@ public final class FabricaExperimento {
         );
     }
 
+    public Experimento crearExperimentoVacioParaReaccion(
+            com.chemlab.model.entity.Reaccion reaccion
+    ) {
+        Experimento configuracion = crearExperimentoParaReaccion(reaccion);
+        return new Experimento(
+                configuracion.getId(),
+                configuracion.getNombre(),
+                configuracion.getObjetivo(),
+                new Inventario(),
+                configuracion.getEquipo(),
+                new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE)
+        );
+    }
+
     private static String generarId() {
         return "EXP-" + UUID.randomUUID()
                 .toString()

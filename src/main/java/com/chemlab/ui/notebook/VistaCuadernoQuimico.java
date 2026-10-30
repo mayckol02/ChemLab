@@ -597,7 +597,7 @@ public final class VistaCuadernoQuimico extends VBox {
         tarjetas.add(textoSecundario("El inicio se ramifica por cada método disponible; cada rama muestra los estados y acciones "
                 + "del autómata real de esa ruta y converge en el producto objetivo."));
         if (!rutas.isEmpty()) {
-            ScrollPane diagrama = crearScroll(new LienzoAutomataRutas(rutas));
+            ScrollPane diagrama = crearScroll(new LienzoAutomataRutas(rutas, sesion));
             diagrama.setFitToWidth(false);
             diagrama.setPrefViewportHeight(Math.min(410, 120 + rutas.size() * 108));
             tarjetas.add(diagrama);
@@ -680,6 +680,7 @@ public final class VistaCuadernoQuimico extends VBox {
 
     private String textoAccion(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO -> "Monta y configura el equipo antes de procesar la muestra.";
             case CARGAR_REACTIVO -> "Prepara y carga los reactivos en el equipo indicado.";
             case MEZCLAR -> "Mezcla los reactivos para homogeneizar el sistema.";
             case INICIAR_PLASMA -> "Activa el plasma en la cámara de reacción.";

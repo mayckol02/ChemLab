@@ -22,6 +22,10 @@ public class ConversorQuimico {
                 "La sustancia no puede ser null"
         );
 
+        if (cantidad.getUnidad() == UnidadCantidad.MOLES) {
+            return cantidad;
+        }
+
         if (!esMasa(cantidad.getUnidad())) {
             throw new IllegalArgumentException(
                     "Para convertir a moles se necesita una unidad de masa"
@@ -63,6 +67,10 @@ public class ConversorQuimico {
             throw new IllegalArgumentException(
                     "La cantidad de entrada debe estar expresada en moles"
             );
+        }
+
+        if (unidadDestino == UnidadCantidad.MOLES) {
+            return cantidad;
         }
 
         if (!esMasa(unidadDestino)) {

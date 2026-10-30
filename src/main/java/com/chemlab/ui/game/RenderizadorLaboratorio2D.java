@@ -1,21 +1,21 @@
 package com.chemlab.ui.game;
 
+import java.util.List;
+import java.util.Locale;
+
+import com.chemlab.game.ProductoAlmacenado;
 import com.chemlab.game.world.EstacionLaboratorio;
 import com.chemlab.game.world.JugadorLaboratorio;
 import com.chemlab.game.world.MapaLaboratorio;
-import com.chemlab.game.ProductoAlmacenado;
 import com.chemlab.model.entity.Sustancia;
-import com.chemlab.model.enums.EstadoMateria;
 import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.TipoEquipo;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
-import java.util.List;
-import java.util.Locale;
 
 /** Dibuja el escenario y el personaje sin gestionar entradas ni estado de sesión. */
 public final class RenderizadorLaboratorio2D extends Canvas {
@@ -649,7 +649,13 @@ public final class RenderizadorLaboratorio2D extends Canvas {
         gc.setFill(Color.web("#000000", 0.3));
         gc.fillOval(-20, 10 + rebote, 40, 12);
         dibujarPiernasJugador(gc, paso, perfil);
-        dibujarBrazosJugador(gc, balanceo);
+        if (perfil) {
+            dibujarBrazoJugador(gc, -1, -balanceo);
+        } else {
+            dibujarBrazosDeFrenteYEspalda(gc, balanceo);
+        }
+        dibujarTrajeJugador(gc, perfil, frente);
+        if (perfil) dibujarBrazoJugador(gc, 1, balanceo);
         if (perfil) {
             gc.save();
             if (!perfilDerecho) gc.scale(-1, 1);
@@ -664,133 +670,139 @@ public final class RenderizadorLaboratorio2D extends Canvas {
     }
 
     private void dibujarPiernasJugador(GraphicsContext gc, double paso, boolean perfil) {
-        gc.setFill(Color.web("#263946"));
+        Color contorno = Color.web("#17120e");
+        Color traje = Color.web("#f5df08");
+        Color bota = Color.web("#87613e");
         if (perfil) {
-            gc.fillRoundRect(-9 + paso * 2, -3, 9, 24, 4, 4);
-            gc.fillRoundRect(0 - paso * 2, -1, 9, 22, 4, 4);
-            gc.setFill(Color.web("#172832"));
-            gc.fillRoundRect(-12 + paso * 2, 16, 14, 7, 4, 4);
-            gc.fillRoundRect(-1 - paso * 2, 17, 14, 7, 4, 4);
+            double piernaA = -8 + paso * 2;
+            double piernaB = -paso * 2;
+            bloque(gc, contorno, piernaA - 2, -5, 12, 27);
+            bloque(gc, traje, piernaA, -3, 8, 21);
+            bloque(gc, contorno, piernaB - 2, -3, 12, 25);
+            bloque(gc, traje, piernaB, -1, 8, 19);
+            bloque(gc, contorno, piernaA - 5, 17, 17, 9);
+            bloque(gc, bota, piernaA - 3, 19, 13, 5);
+            bloque(gc, contorno, piernaB - 3, 17, 17, 9);
+            bloque(gc, bota, piernaB - 1, 19, 13, 5);
         } else {
             double zancadaIzquierda = Math.max(0, paso) * 4;
             double zancadaDerecha = Math.max(0, -paso) * 4;
-            gc.fillRoundRect(-13 - paso * 1.5, -3, 11, 23 + zancadaIzquierda, 5, 5);
-            gc.fillRoundRect(2 + paso * 1.5, -3, 11, 23 + zancadaDerecha, 5, 5);
-            gc.setFill(Color.web("#172832"));
-            gc.fillRoundRect(-17 - paso * 1.5, 16 + zancadaIzquierda, 17, 7, 4, 4);
-            gc.fillRoundRect(0 + paso * 1.5, 16 + zancadaDerecha, 17, 7, 4, 4);
+            double piernaIzquierda = -13 - paso * 1.5;
+            double piernaDerecha = 2 + paso * 1.5;
+            bloque(gc, contorno, piernaIzquierda - 2, -5, 15, 29 + zancadaIzquierda);
+            bloque(gc, traje, piernaIzquierda, -3, 11, 24 + zancadaIzquierda);
+            bloque(gc, contorno, piernaDerecha - 2, -5, 15, 29 + zancadaDerecha);
+            bloque(gc, traje, piernaDerecha, -3, 11, 24 + zancadaDerecha);
+            bloque(gc, contorno, piernaIzquierda - 5, 17 + zancadaIzquierda, 20, 10);
+            bloque(gc, bota, piernaIzquierda - 3, 19 + zancadaIzquierda, 16, 6);
+            bloque(gc, contorno, piernaDerecha - 2, 17 + zancadaDerecha, 20, 10);
+            bloque(gc, bota, piernaDerecha, 19 + zancadaDerecha, 16, 6);
         }
     }
 
-    private void dibujarBrazosJugador(GraphicsContext gc, double balanceo) {
-        gc.setStroke(Color.web("#eef5f0"));
-        gc.setLineWidth(9);
-        gc.setLineCap(javafx.scene.shape.StrokeLineCap.ROUND);
-        gc.strokeLine(-16, -29, -22 - balanceo, -8);
-        gc.strokeLine(16, -29, 22 + balanceo, -8);
-        gc.setFill(Color.web("#b9e4dc"));
-        gc.fillRoundRect(-27 - balanceo, -11, 10, 11, 5, 5);
-        gc.fillRoundRect(17 + balanceo, -11, 10, 11, 5, 5);
+    private void dibujarBrazoJugador(GraphicsContext gc, int lado, double balanceo) {
+        Color contorno = Color.web("#17120e");
+        Color traje = Color.web("#f5df08");
+        Color guante = Color.web("#1762a8");
+        double x = lado < 0 ? -12 : 5;
+        double desplazamiento = balanceo * 0.65;
+        bloque(gc, contorno, x + desplazamiento, -34, 10, 25);
+        bloque(gc, traje, x + 2 + desplazamiento, -32, 6, 20);
+        bloque(gc, contorno, x + desplazamiento, -13, 10, 15);
+        bloque(gc, guante, x + 2 + desplazamiento, -11, 6, 11);
+    }
+
+    private void dibujarBrazosDeFrenteYEspalda(GraphicsContext gc, double balanceo) {
+        Color contorno = Color.web("#17120e");
+        Color traje = Color.web("#f5df08");
+        Color guante = Color.web("#1762a8");
+        bloque(gc, contorno, -25, -35, 13, 34);
+        bloque(gc, traje, -23, -33, 9, 28);
+        bloque(gc, contorno, 12, -35, 13, 34);
+        bloque(gc, traje, 14, -33, 9, 28);
+        bloque(gc, contorno, -27 - balanceo, -7, 14, 14);
+        bloque(gc, guante, -25 - balanceo, -5, 10, 10);
+        bloque(gc, contorno, 13 + balanceo, -7, 14, 14);
+        bloque(gc, guante, 15 + balanceo, -5, 10, 10);
+    }
+
+    private void dibujarTrajeJugador(GraphicsContext gc, boolean perfil, boolean frente) {
+        Color contorno = Color.web("#17120e");
+        Color traje = Color.web("#f5df08");
+        bloque(gc, contorno, perfil ? -12 : -17, -37, perfil ? 29 : 34, 52);
+        bloque(gc, contorno, perfil ? -14 : -19, -33, perfil ? 32 : 38, 16);
+        bloque(gc, traje, perfil ? -10 : -15, -35, perfil ? 25 : 30, 46);
+        bloque(gc, traje, perfil ? -12 : -17, -31, perfil ? 28 : 34, 12);
+        if (frente && !perfil) {
+            gc.setFill(Color.web("#f2f2eb"));
+            gc.fillPolygon(new double[]{-10, 0, 10, 5, -5},
+                    new double[]{-35, -25, -35, -21, -21}, 5);
+            bloque(gc, Color.web("#fffdf2"), -2, -22, 4, 34);
+        } else if (!perfil) {
+            bloque(gc, Color.web("#d7c400"), -2, -31, 4, 39);
+        } else {
+            bloque(gc, Color.web("#fffdf2"), 5, -29, 3, 36);
+        }
     }
 
     private void dibujarFrenteJugador(GraphicsContext gc) {
-        dibujarCaraJugador(gc, true);
-        gc.setFill(Color.web("#f4f7f2"));
-        gc.fillPolygon(new double[]{-22, -15, -8, 0, 8, 15, 22, 18, 14, -14, -18},
-                new double[]{-32, -36, -31, -33, -31, -36, -32, 10, 13, 13, 10}, 11);
-        gc.setStroke(Color.web("#c2d6d1"));
-        gc.setLineWidth(1.2);
-        gc.strokeLine(-18, 9, 18, 9);
-        gc.setFill(Color.web("#53b9aa"));
-        gc.fillPolygon(new double[]{-7, 0, 7, 3, 0, -3},
-                new double[]{-30, -22, -30, -8, 7, -8}, 6);
-        gc.setStroke(Color.web("#c3d8d2"));
-        gc.setLineWidth(1);
-        gc.strokeLine(0, -8, 0, 7);
-        gc.setFill(Color.web("#ffffff"));
-        gc.fillRoundRect(-16, -1, 10, 7, 2, 2);
-        gc.fillRoundRect(6, -1, 10, 7, 2, 2);
-        gc.setFill(Color.web("#e5bf64"));
-        gc.fillRoundRect(-14, -46, 10, 7, 2, 2);
-        gc.setFill(Color.web("#56bbc1"));
-        gc.fillRoundRect(3, -46, 10, 7, 2, 2);
+        dibujarCabezaCalva(gc);
+        bloque(gc, Color.web("#1a2930"), -14, -53, 28, 8);
+        bloque(gc, Color.web("#78c9d0"), -11, -51, 9, 4);
+        bloque(gc, Color.web("#78c9d0"), 2, -51, 9, 4);
+        bloque(gc, Color.web("#1a2930"), -2, -51, 4, 4);
+        bloque(gc, Color.web("#d6aa82"), -2, -45, 4, 7);
+        bloque(gc, Color.web("#17120e"), -9, -42, 18, 7);
+        bloque(gc, Color.web("#513326"), -7, -41, 14, 6);
+        bloque(gc, Color.web("#17120e"), -5, -36, 10, 3);
+        bloque(gc, Color.web("#d6aa82"), -3, -37, 6, 2);
     }
 
     private void dibujarEspaldaJugador(GraphicsContext gc) {
-        gc.setFill(Color.web("#f1f5ef"));
-        gc.fillPolygon(new double[]{-22, -15, -8, 0, 8, 15, 22, 18, 14, -14, -18},
-                new double[]{-32, -36, -31, -33, -31, -36, -32, 10, 13, 13, 10}, 11);
-        gc.setStroke(Color.web("#b4c9c5"));
-        gc.setLineWidth(1.4);
-        gc.strokeLine(0, -31, 0, 12);
-        gc.strokeLine(-16, 2, 16, 2);
-        gc.setFill(Color.web("#d8e8e3"));
-        gc.fillPolygon(new double[]{-8, 0, 8, 4, -4},
-                new double[]{-33, -25, -33, -18, -18}, 5);
-        gc.setFill(Color.web("#50b7a9"));
-        gc.fillRoundRect(-7, -4, 14, 9, 3, 3);
-        gc.setFill(Color.web("#dcebed"));
-        gc.setFont(Font.font("Consolas", FontWeight.BOLD, 6));
-        gc.fillText("CL", -4.5, 2.5);
-        dibujarCaraJugador(gc, false);
+        dibujarCabezaCalva(gc);
+        bloque(gc, Color.web("#cfaa83"), -4, -39, 8, 5);
     }
 
     private void dibujarPerfilJugador(GraphicsContext gc) {
-        gc.setFill(Color.web("#f2f6f1"));
-        gc.fillRoundRect(-13, -34, 27, 47, 8, 8);
-        gc.setFill(Color.web("#d9e8e3"));
-        gc.fillPolygon(new double[]{-5, 0, 7, 2}, new double[]{-32, -24, -32, -14}, 4);
-        gc.setStroke(Color.web("#c0d3ce"));
-        gc.setLineWidth(1.2);
-        gc.strokeLine(1, -13, 1, 11);
-        gc.setFill(Color.web("#ffffff"));
-        gc.fillRoundRect(-6, -1, 11, 8, 2, 2);
-        gc.setFill(Color.web("#52b8a7"));
-        gc.fillRoundRect(2, -5, 4, 12, 2, 2);
-
-        gc.setFill(Color.web("#d7ad86"));
-        gc.fillOval(-8, -58, 23, 28);
-        gc.setFill(Color.web("#40322c"));
-        gc.fillOval(-9, -62, 24, 13);
-        gc.fillRoundRect(8, -56, 7, 12, 3, 3);
-        gc.setStroke(Color.web("#306c7a"));
-        gc.setLineWidth(2.5);
-        gc.strokeRoundRect(6, -50, 10, 8, 3, 3);
-        gc.setFill(Color.web("#80d7df", 0.6));
-        gc.fillRoundRect(7, -49, 8, 6, 2, 2);
-        gc.setFill(Color.web("#d7f0f1"));
-        gc.fillPolygon(new double[]{8, 17, 8}, new double[]{-39, -36, -32}, 3);
-        gc.setFill(Color.web("#b9e4dc"));
-        gc.fillRoundRect(5, -12, 10, 10, 5, 5);
+        Color contorno = Color.web("#17120e");
+        Color piel = Color.web("#efc29a");
+        bloque(gc, contorno, -4, -68, 13, 4);
+        bloque(gc, contorno, -10, -64, 24, 5);
+        bloque(gc, contorno, -14, -59, 30, 9);
+        bloque(gc, contorno, -16, -50, 32, 10);
+        bloque(gc, contorno, -14, -40, 28, 5);
+        bloque(gc, contorno, -9, -35, 18, 3);
+        bloque(gc, piel, -3, -64, 13, 4);
+        bloque(gc, piel, -8, -59, 22, 7);
+        bloque(gc, piel, -12, -52, 23, 10);
+        bloque(gc, piel, -10, -42, 19, 6);
+        bloque(gc, piel, -7, -36, 13, 2);
+        bloque(gc, contorno, 7, -53, 8, 7);
+        bloque(gc, piel, 9, -51, 5, 4);
+        bloque(gc, Color.web("#1a2930"), 6, -52, 8, 5);
+        bloque(gc, Color.web("#78c9d0"), 8, -51, 4, 3);
+        bloque(gc, Color.web("#d6aa82"), 13, -47, 5, 4);
+        bloque(gc, contorno, 4, -44, 7, 8);
+        bloque(gc, Color.web("#513326"), 5, -42, 6, 6);
+        bloque(gc, contorno, 4, -37, 4, 3);
+        bloque(gc, Color.web("#d6aa82"), 5, -37, 2, 2);
     }
 
-    private void dibujarCaraJugador(GraphicsContext gc, boolean mostrarRostro) {
-        gc.setFill(Color.web("#d8ad86"));
-        gc.fillOval(-14, -59, 28, 30);
-        gc.setFill(Color.web("#43352e"));
-        gc.fillOval(-15, -63, 30, 17);
-        gc.fillRoundRect(-14, -57, 6, 10, 3, 3);
-        gc.fillRoundRect(8, -57, 6, 10, 3, 3);
-        if (mostrarRostro) {
-            gc.setFill(Color.web("#edf9f7", 0.76));
-            gc.fillRoundRect(-13, -50, 26, 10, 4, 4);
-            gc.setStroke(Color.web("#246879"));
-            gc.setLineWidth(2.2);
-            gc.strokeRoundRect(-12, -51, 11, 8, 3, 3);
-            gc.strokeRoundRect(1, -51, 11, 8, 3, 3);
-            gc.strokeLine(-1, -47, 1, -47);
-            gc.setFill(Color.web("#d5f0ee"));
-            gc.fillRoundRect(-10, -39, 20, 8, 4, 4);
-            gc.setStroke(Color.web("#47919a"));
-            gc.setLineWidth(1);
-            gc.strokeRoundRect(-10, -39, 20, 8, 4, 4);
-        } else {
-            gc.setStroke(Color.web("#2e6671"));
-            gc.setLineWidth(2.5);
-            gc.strokeLine(-14, -47, 14, -47);
-            gc.setFill(Color.web("#d5f0ee"));
-            gc.fillRoundRect(-9, -38, 18, 6, 3, 3);
-        }
+    private void dibujarCabezaCalva(GraphicsContext gc) {
+        bloque(gc, Color.web("#17120e"), -12, -68, 24, 4);
+        bloque(gc, Color.web("#17120e"), -16, -64, 32, 8);
+        bloque(gc, Color.web("#17120e"), -18, -56, 36, 16);
+        bloque(gc, Color.web("#17120e"), -14, -40, 28, 8);
+        bloque(gc, Color.web("#efc29a"), -12, -64, 24, 4);
+        bloque(gc, Color.web("#efc29a"), -14, -60, 28, 19);
+        bloque(gc, Color.web("#efc29a"), -10, -41, 20, 6);
+        bloque(gc, Color.web("#d8ad86"), -14, -59, 3, 14);
+        bloque(gc, Color.web("#f5d2ac"), -8, -63, 14, 3);
+    }
+
+    private void bloque(GraphicsContext gc, Color color, double x, double y, double ancho, double alto) {
+        gc.setFill(color);
+        gc.fillRect(x, y, ancho, alto);
     }
 
 }

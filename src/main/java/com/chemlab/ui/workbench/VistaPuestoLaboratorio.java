@@ -3,6 +3,7 @@ package com.chemlab.ui.workbench;
 import com.chemlab.game.procedure.ProtocoloProcedimiento;
 import com.chemlab.game.world.EstacionLaboratorio;
 import com.chemlab.model.entity.Reaccion;
+import com.chemlab.model.entity.CondicionesExperimentales;
 import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.EstadoMateria;
 import com.chemlab.model.enums.TipoEquipo;
@@ -49,6 +50,8 @@ public final class VistaPuestoLaboratorio extends BorderPane {
     private final Reaccion reaccion;
     private final ProtocoloProcedimiento.InfoPasoProcedimiento protocolo;
     private final VisualizadorReaccion.Perfil perfilVisual;
+    private final boolean modoDificil;
+    private final CondicionesExperimentales condicionesActuales;
     private final LienzoPuesto lienzo = new LienzoPuesto();
     private final VBox panelLateral = new VBox(12);
     private final VBox contenidoInteraccion = new VBox(10);
@@ -64,6 +67,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
     private boolean transferenciaRequerida;
     private boolean transferenciaCompletada = true;
     private boolean muestraEnPuesto;
+    private boolean sistemaEvaporacionMontado;
     private Runnable alCompletarTraslado = () -> {};
 
     public VistaPuestoLaboratorio(
@@ -75,22 +79,76 @@ public final class VistaPuestoLaboratorio extends BorderPane {
             Runnable alCerrar,
             Runnable alAbandonar
     ) {
+        this(estacion, reaccion, protocolo, transiciones, alSeleccionarTransicion,
+                alCerrar, alAbandonar, false, null);
+    }
+
+    public VistaPuestoLaboratorio(
+            EstacionLaboratorio estacion,
+            Reaccion reaccion,
+            ProtocoloProcedimiento.InfoPasoProcedimiento protocolo,
+            List<TransicionQuimica> transiciones,
+            Consumer<TransicionQuimica> alSeleccionarTransicion,
+            Runnable alCerrar,
+            Runnable alAbandonar,
+            boolean modoDificil,
+            CondicionesExperimentales condicionesActuales
+    ) {
+        this(estacion, reaccion, protocolo, transiciones, alSeleccionarTransicion,
+                alCerrar, alAbandonar, modoDificil, condicionesActuales, () -> {});
+    }
+
+    public VistaPuestoLaboratorio(
+            EstacionLaboratorio estacion,
+            Reaccion reaccion,
+            ProtocoloProcedimiento.InfoPasoProcedimiento protocolo,
+            List<TransicionQuimica> transiciones,
+            Consumer<TransicionQuimica> alSeleccionarTransicion,
+            Runnable alCerrar,
+            Runnable alAbandonar,
+            boolean modoDificil,
+            CondicionesExperimentales condicionesActuales,
+            Runnable alCambiarModo
+    ) {
+        this(estacion, reaccion, protocolo, transiciones, alSeleccionarTransicion, alCerrar,
+                alAbandonar, modoDificil, condicionesActuales, alCambiarModo,
+                protocolo == null ? "PREPARACION" : protocolo.estadoAutomataId());
+    }
+
+    public VistaPuestoLaboratorio(
+            EstacionLaboratorio estacion,
+            Reaccion reaccion,
+            ProtocoloProcedimiento.InfoPasoProcedimiento protocolo,
+            List<TransicionQuimica> transiciones,
+            Consumer<TransicionQuimica> alSeleccionarTransicion,
+            Runnable alCerrar,
+            Runnable alAbandonar,
+            boolean modoDificil,
+            CondicionesExperimentales condicionesActuales,
+            Runnable alCambiarModo,
+            String estadoAutomataId
+    ) {
         this.estacion = estacion;
         this.reaccion = reaccion;
         this.protocolo = protocolo;
         this.perfilVisual = VisualizadorReaccion.crear(reaccion);
+        this.modoDificil = modoDificil;
+        this.condicionesActuales = condicionesActuales;
+        String estadoActual = estadoAutomataId == null ? "PREPARACION" : estadoAutomataId;
+        this.sistemaEvaporacionMontado = reaccion.getId().equals("R_SEPARACION_NACL")
+                && !"PREPARACION".equals(estadoActual);
 
         getStyleClass().add("workbench-overlay");
         setCursor(Cursor.DEFAULT);
         setPadding(new Insets(15, 18, 15, 18));
-        setTop(construirCabecera(alCerrar, alAbandonar));
+        setTop(construirCabecera(alCerrar, alAbandonar, alCambiarModo));
         setCenter(construirAreaTrabajo(transiciones, alSeleccionarTransicion));
         setBottom(construirPie());
         setMinSize(0, 0);
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
     }
 
-    private HBox construirCabecera(Runnable alCerrar, Runnable alAbandonar) {
+    private HBox construirCabecera(Runnable alCerrar, Runnable alAbandonar, Runnable alCambiarModo) {
         Label indicador = new Label("ESTACIÓN ACTIVA");
         indicador.getStyleClass().add("workbench-eyebrow");
         Label titulo = new Label(estacion.nombre());
@@ -107,11 +165,16 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         abandonar.getStyleClass().add("workbench-quiet-button");
         abandonar.setCursor(Cursor.DEFAULT);
         abandonar.setOnAction(evento -> alAbandonar.run());
+        Button cambiarModo = new Button("Modo · V");
+        cambiarModo.getStyleClass().add("workbench-quiet-button");
+        cambiarModo.setCursor(Cursor.DEFAULT);
+        cambiarModo.setAccessibleText("Cambiar modo de juego");
+        cambiarModo.setOnAction(evento -> alCambiarModo.run());
         Button cerrar = new Button("Volver al laboratorio  ·  Esc");
         cerrar.getStyleClass().add("workbench-close-button");
         cerrar.setCursor(Cursor.DEFAULT);
         cerrar.setOnAction(evento -> alCerrar.run());
-        HBox cabecera = new HBox(12, identidad, espacio, telemetria, abandonar, cerrar);
+        HBox cabecera = new HBox(12, identidad, espacio, telemetria, cambiarModo, abandonar, cerrar);
         cabecera.setAlignment(Pos.CENTER_LEFT);
         cabecera.getStyleClass().add("workbench-header");
         return cabecera;
@@ -135,22 +198,40 @@ public final class VistaPuestoLaboratorio extends BorderPane {
 
         Label cabeceraRack = new Label("CONSOLA DEL EQUIPO");
         cabeceraRack.getStyleClass().add("workbench-rack-title");
-        labelPaso.setText(protocolo.nombreEstado().toUpperCase(Locale.ROOT));
+        labelPaso.setText(modoDificil
+                ? "EXPERIMENTACIÓN LIBRE"
+                : protocolo.nombreEstado().toUpperCase(Locale.ROOT));
         labelPaso.getStyleClass().add("workbench-step");
         labelPaso.setWrapText(true);
-        labelCondiciones.setText(String.format(Locale.ROOT,
-                "OBJETIVO  %.0f °C     ·     %.3f atm\nATMÓSFERA  %s",
-                protocolo.temperaturaObjetivo(), protocolo.presionObjetivo(), protocolo.atmosferaRequerida()));
+        labelCondiciones.setText(modoDificil
+                ? condicionesActuales == null ? "Condiciones actuales no disponibles."
+                : String.format(Locale.ROOT, "ACTUALES  %.0f °C     ·     %.3f atm\nATMÓSFERA  %s",
+                        condicionesActuales.getTemperatura(), condicionesActuales.getPresion(),
+                        condicionesActuales.getAtmosfera())
+                : String.format(Locale.ROOT,
+                        "OBJETIVO  %.0f °C     ·     %.3f atm\nATMÓSFERA  %s",
+                        protocolo.temperaturaObjetivo(), protocolo.presionObjetivo(),
+                        protocolo.atmosferaRequerida()));
         labelCondiciones.getStyleClass().add("workbench-telemetry");
         labelCondiciones.setWrapText(true);
-        Label explicacion = new Label(protocolo.explicacionManejo());
+        Label explicacion = new Label(modoDificil
+                ? "Elige libremente una operación y evalúa sus efectos sobre la muestra."
+                : protocolo.explicacionManejo());
         explicacion.getStyleClass().add("workbench-instruction");
         explicacion.setWrapText(true);
-        Label fenomeno = new Label("CAMBIO OBSERVABLE  ·  " + perfilVisual.fenomeno().etiqueta());
+        Label fenomeno = new Label(modoDificil
+                ? "El resultado depende de las sustancias, el equipo y las condiciones alcanzadas."
+                : "CAMBIO OBSERVABLE  ·  " + perfilVisual.fenomeno().etiqueta());
         fenomeno.getStyleClass().add("workbench-phenomenon");
         fenomeno.setWrapText(true);
 
-        panelLateral.getChildren().addAll(cabeceraRack, labelPaso, labelCondiciones, fenomeno, explicacion);
+        panelLateral.getChildren().addAll(cabeceraRack, labelPaso, labelCondiciones);
+        if (modoDificil) {
+            explicacion.getStyleClass().add("workbench-instruction");
+            panelLateral.getChildren().add(explicacion);
+        } else {
+            panelLateral.getChildren().addAll(fenomeno, explicacion);
+        }
         if (transiciones.size() > 1) {
             Label elegir = new Label("OPERACIONES DISPONIBLES");
             elegir.getStyleClass().add("workbench-rack-title");
@@ -205,10 +286,14 @@ public final class VistaPuestoLaboratorio extends BorderPane {
     }
 
     private HBox construirPie() {
-        Label objetivo = new Label("SIGUIENTE  " + protocolo.accionSiguienteSugerida());
+        Label objetivo = new Label(modoDificil
+                ? "MODO DIFÍCIL · experimenta sin secuencia obligatoria"
+                : "SIGUIENTE  " + protocolo.accionSiguienteSugerida());
         objetivo.getStyleClass().add("workbench-next");
         objetivo.setWrapText(true);
-        Label interaccion = new Label("Arrastra los materiales al recipiente resaltado o haz clic en el mando del aparato.");
+        Label interaccion = new Label(modoDificil
+                ? "La interacción realizada se registra y se evalúa con el autómata químico."
+                : "Arrastra los materiales al recipiente resaltado o haz clic en el mando del aparato.");
         interaccion.getStyleClass().add("workbench-hint");
         interaccion.setWrapText(true);
         HBox pie = new HBox(18, objetivo, interaccion);
@@ -232,6 +317,10 @@ public final class VistaPuestoLaboratorio extends BorderPane {
 
     public void actualizarProceso(AccionLaboratorio accion, double progreso, String descripcion) {
         lienzo.setProceso(accion, progreso);
+        if (accion == AccionLaboratorio.MONTAR_EQUIPO && progreso >= 1) {
+            sistemaEvaporacionMontado = true;
+            lienzo.renderizar();
+        }
         labelEstado.setText(descripcion.toUpperCase(Locale.ROOT));
     }
 
@@ -318,6 +407,9 @@ public final class VistaPuestoLaboratorio extends BorderPane {
 
     private String nombreAccion(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "Montar sistema de evaporación"
+                    : "Montar equipo";
             case CARGAR_REACTIVO -> "Cargar materiales";
             case AGREGAR_CATALIZADOR -> "Montar catalizador";
             case AGREGAR_AGUA -> "Añadir agua";
@@ -330,7 +422,9 @@ public final class VistaPuestoLaboratorio extends BorderPane {
             case ACTIVAR_IGNICION -> "Encender";
             case ESPERAR -> "Mantener";
             case FINALIZAR -> "Finalizar";
-            case SELECCIONAR_METODO -> "Preparar método";
+            case SELECCIONAR_METODO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "Seleccionar evaporación"
+                    : "Preparar método";
         };
     }
 
@@ -506,6 +600,8 @@ public final class VistaPuestoLaboratorio extends BorderPane {
             double ly = punto[1];
             return switch (estacion.tipoEquipo()) {
                 case MATRAZ -> switch (accionSeleccionada) {
+                    case MONTAR_EQUIPO -> dentro(lx, ly, 430, 190, 553, 290);
+                    case SELECCIONAR_METODO -> dentro(lx, ly, 454, 274, 536, 350);
                     case CALENTAR -> dentro(lx, ly, 382, 302, 425, 360); // válvula y tubo del mechero
                     case MEZCLAR -> dentro(lx, ly, 307, 291, 520, 348); // placa agitadora
                     case ACTIVAR_IGNICION -> dentro(lx, ly, 365, 224, 448, 296); // chispero junto al matraz
@@ -626,7 +722,8 @@ public final class VistaPuestoLaboratorio extends BorderPane {
             gc.fillText("MESA DE OPERACIONES  /  " + estacion.nombre().toUpperCase(Locale.ROOT), 30, 160);
             gc.setFill(Color.web("#7f9ba2"));
             gc.setFont(Font.font("Consolas", 10));
-            gc.fillText("PROTOCOLO  " + protocolo.nombreEstado().toUpperCase(Locale.ROOT), 30, 178);
+            gc.fillText(modoDificil ? "EXPERIMENTACIÓN LIBRE"
+                    : "PROTOCOLO  " + protocolo.nombreEstado().toUpperCase(Locale.ROOT), 30, 178);
         }
 
         private void dibujarMesa(GraphicsContext gc) {
@@ -798,6 +895,33 @@ public final class VistaPuestoLaboratorio extends BorderPane {
             dibujarBotellaReactivo(gc, 206, 326, "REACTIVO");
             dibujarVidrio(gc, 550, 326);
             dibujarEtiquetaInstrumento(gc, "MATRAZ / AGITADOR", 310, 365);
+            if (reaccion.getId().equals("R_SEPARACION_NACL")
+                    && (sistemaEvaporacionMontado
+                    || accionSeleccionada == AccionLaboratorio.MONTAR_EQUIPO)) {
+                dibujarSistemaEvaporacion(gc);
+            }
+        }
+
+        private void dibujarSistemaEvaporacion(GraphicsContext gc) {
+            Color colorMontaje = sistemaEvaporacionMontado
+                    ? Color.web("#9cebd4", 0.94) : Color.web("#8eaaa8", 0.82);
+            gc.setStroke(colorMontaje);
+            gc.setLineWidth(4);
+            gc.strokeLine(430, 236, 482, 236);
+            gc.strokeLine(482, 236, 482, 261);
+            gc.strokeLine(482, 261, 518, 261);
+            gc.setFill(Color.web("#172a30"));
+            gc.fillRoundRect(468, 226, 28, 8, 4, 4);
+            gc.setLineWidth(2);
+            gc.strokeRoundRect(474, 220, 37, 19, 5, 5);
+            gc.strokeLine(490, 239, 490, 254);
+            gc.strokeOval(502, 253, 34, 32);
+            gc.strokeLine(519, 285, 519, 305);
+            gc.setFill(Color.web("#438ba0", 0.55));
+            gc.fillOval(508, 276, 22, 7);
+            gc.setFill(colorMontaje);
+            gc.setFont(Font.font("Consolas", FontWeight.BOLD, 8));
+            gc.fillText(sistemaEvaporacionMontado ? "EVAPORADOR MONTADO" : "MONTAJE REQUERIDO", 452, 212);
         }
 
         private void dibujarHorno(GraphicsContext gc) {
@@ -1009,6 +1133,16 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         }
 
         private double progresoQuimico() {
+            if (modoDificil) {
+                if (accionEnCurso == AccionLaboratorio.FINALIZAR) {
+                    return Math.min(1, 0.84 + progreso * 0.16);
+                }
+                if (accionEnCurso != null) return Math.min(0.72, progreso * 0.29);
+                if (interaccion != null && interaccion.esCargaDeMateriales()) {
+                    return Math.min(0.14, interaccion.getFraccionCarga() * 0.06);
+                }
+                return 0;
+            }
             String estado = protocolo.estadoAutomataId().toUpperCase(Locale.ROOT);
             double base = switch (estado) {
                 case "QF", "COMPLETADO" -> 0.98;
@@ -1523,6 +1657,8 @@ public final class VistaPuestoLaboratorio extends BorderPane {
                     || !interaccion.permiteAccionarHerramienta() || accionEnCurso != null) return;
             double[] zona = switch (estacion.tipoEquipo()) {
                 case MATRAZ -> switch (accionSeleccionada) {
+                    case MONTAR_EQUIPO -> new double[]{427, 188, 130, 105};
+                    case SELECCIONAR_METODO -> new double[]{450, 268, 91, 87};
                     case CALENTAR -> new double[]{380, 300, 49, 61};
                     case MEZCLAR -> new double[]{304, 289, 217, 61};
                     case ACTIVAR_IGNICION -> new double[]{362, 222, 90, 77};
@@ -1565,12 +1701,18 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         }
 
         private double temperaturaVisual() {
+            if (modoDificil) {
+                return condicionesActuales == null ? 25 : condicionesActuales.getTemperatura();
+            }
             return protocolo.temperaturaActual()
                     + (protocolo.temperaturaObjetivo() - protocolo.temperaturaActual())
                     * (accionEnCurso == AccionLaboratorio.CALENTAR ? progreso : 0);
         }
 
         private double presionVisual() {
+            if (modoDificil) {
+                return condicionesActuales == null ? 1 : condicionesActuales.getPresion();
+            }
             return protocolo.presionActual()
                     + (protocolo.presionObjetivo() - protocolo.presionActual())
                     * (accionEnCurso == AccionLaboratorio.COMPRIMIR || accionEnCurso == AccionLaboratorio.DESCOMPRIMIR
@@ -1579,6 +1721,8 @@ public final class VistaPuestoLaboratorio extends BorderPane {
 
         private String etiquetaMando(AccionLaboratorio accion) {
             return switch (accion) {
+                case MONTAR_EQUIPO -> "MONTAJE DE EQUIPO";
+                case SELECCIONAR_METODO -> "SELECTOR DE MÉTODO";
                 case CALENTAR -> estacion.tipoEquipo() == TipoEquipo.MATRAZ ? "VÁLVULA DE GAS" : "REGULADOR TÉRMICO";
                 case ENFRIAR, FINALIZAR -> "CIRCUITO DE ENFRIAMIENTO";
                 case MEZCLAR -> "AGITADOR MAGNÉTICO";

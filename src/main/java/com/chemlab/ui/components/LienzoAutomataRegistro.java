@@ -1,17 +1,5 @@
 package com.chemlab.ui.components;
 
-import com.chemlab.automata.AutomataQuimico;
-import com.chemlab.automata.EstadoQuimico;
-import com.chemlab.automata.TransicionQuimica;
-import com.chemlab.factory.FabricaAutomata;
-import com.chemlab.model.entity.RegistroExperimento;
-import com.chemlab.model.enums.AccionLaboratorio;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -20,6 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.chemlab.automata.AutomataQuimico;
+import com.chemlab.automata.EstadoQuimico;
+import com.chemlab.automata.TransicionQuimica;
+import com.chemlab.factory.FabricaAutomata;
+import com.chemlab.game.ProgresoAutomata;
+import com.chemlab.model.entity.RegistroExperimento;
+import com.chemlab.model.enums.AccionLaboratorio;
+
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 /** Representación gráfica del autómata vinculado a un experimento guardado. */
 public final class LienzoAutomataRegistro extends Canvas {
@@ -81,10 +83,18 @@ public final class LienzoAutomataRegistro extends Canvas {
                     .map(EstadoQuimico::getId).forEach(finales::add);
         }
         String inicial = automata.getEstadoInicial().getId();
+        Set<String> estadosRevelados = ProgresoAutomata.estadosAlcanzadosCorrectamente(
+                registro.getEstadoInicial(), registro.getPasosTransicion());
+        String estadoActual = registro.getPasosTransicion().isEmpty()
+                ? registro.getEstadoInicial()
+                : registro.getPasosTransicion().getLast().estadoDestino();
         return ordenados.values().stream()
                 .map(estado -> new Nodo(estado.getId(), estado.getNombre(),
                         estado.getId().equals(inicial) || estado.getNombre().equals(registro.getEstadoInicial()),
-                        finales.contains(estado.getId()) || registro.getEstadosFinales().contains(estado.getNombre())))
+                        finales.contains(estado.getId()) || registro.getEstadosFinales().contains(estado.getNombre()),
+                        estado.getId().equals(estadoActual) || estado.getNombre().equals(estadoActual),
+                        estadosRevelados.contains(estado.getId())
+                                || estadosRevelados.contains(estado.getNombre())))
                 .toList();
     }
 
@@ -123,6 +133,7 @@ public final class LienzoAutomataRegistro extends Canvas {
 
     private String etiquetaAccion(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO -> "Montar equipo";
             case CARGAR_REACTIVO -> "Cargar";
             case AGREGAR_CATALIZADOR -> "Catalizador";
             case AGREGAR_AGUA -> "Añadir agua";
@@ -218,12 +229,14 @@ public final class LienzoAutomataRegistro extends Canvas {
             Nodo nodo = nodos.get(i);
             Punto punto = puntos.get(nodo.id());
             if (punto == null) continue;
-            Color borde = nodo.inicial() ? Color.web("#5ae2c1")
+            Color borde = nodo.actual() ? Color.web("#64f0cd")
+                    : nodo.inicial() ? Color.web("#5ae2c1")
                     : nodo.finalEstado() ? Color.web("#ffd277") : Color.web("#78a8b1");
-            gc.setFill(Color.web(nodo.inicial() ? "#103d3d" : nodo.finalEstado() ? "#3c3420" : "#102a35"));
+            gc.setFill(Color.web(nodo.actual() ? "#145344"
+                    : nodo.inicial() ? "#103d3d" : nodo.finalEstado() ? "#3c3420" : "#102a35"));
             gc.fillOval(punto.x() - RADIO, punto.y() - RADIO, RADIO * 2, RADIO * 2);
             gc.setStroke(borde);
-            gc.setLineWidth(nodo.inicial() || nodo.finalEstado() ? 2.8 : 1.8);
+            gc.setLineWidth(nodo.actual() || nodo.inicial() || nodo.finalEstado() ? 2.8 : 1.8);
             gc.strokeOval(punto.x() - RADIO, punto.y() - RADIO, RADIO * 2, RADIO * 2);
             if (nodo.finalEstado()) {
                 gc.setLineWidth(1.5);
@@ -239,7 +252,7 @@ public final class LienzoAutomataRegistro extends Canvas {
                 gc.setFont(Font.font("Consolas", FontWeight.BOLD, 21));
                 gc.fillText(">", punto.x() - RADIO - 19, punto.y() + 7);
             }
-            dibujarNombreEstado(gc, nodo.nombre(), punto.x(), punto.y() + RADIO + 16);
+            dibujarNombreEstado(gc, nodo.revelado() ? nodo.nombre() : "?", punto.x(), punto.y() + RADIO + 16);
         }
     }
 
@@ -283,7 +296,7 @@ public final class LienzoAutomataRegistro extends Canvas {
                 new double[]{y, y - longitud * Math.sin(angulo - apertura), y - longitud * Math.sin(angulo + apertura)}, 3);
     }
 
-    private record Nodo(String id, String nombre, boolean inicial, boolean finalEstado) {}
+    private record Nodo(String id, String nombre, boolean inicial, boolean finalEstado, boolean actual, boolean revelado) {}
     private record ParEstados(String origen, String destino) {}
     private record Arista(String origen, String destino, String etiqueta, boolean ejecutada) {}
     private record Punto(double x, double y) {}

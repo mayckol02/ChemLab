@@ -502,6 +502,73 @@ public final class ProtocoloProcedimiento {
             };
         }
 
+        if (idReaccion.equals("R_SEPARACION_NACL")) {
+            return switch (estadoAutomataId) {
+                case "PREPARACION" -> new InfoPasoProcedimiento(
+                        idReaccion, estadoAutomataId, "Preparación del sistema de evaporación",
+                        "Matraz de evaporación con condensador y recipiente colector",
+                        25.0, 25.0, 1.0, 1.0, "Aire ambiente", "Sin catalizador",
+                        List.of(new InfoReactivoFase("NaCl(ac)", "Solución salina", "Muestra a separar",
+                                EstadoManejo.EN_ALMACEN, "Disolución acuosa", "En recipiente de transferencia")),
+                        "Antes de introducir la muestra, monta el matraz de evaporación, el condensador y el recipiente colector.",
+                        "Ejecuta 'MONTAR_EQUIPO' para instalar el sistema de evaporación."
+                );
+                case "SISTEMA_MONTADO" -> new InfoPasoProcedimiento(
+                        idReaccion, estadoAutomataId, "Sistema de evaporación instalado",
+                        "Matraz de evaporación con condensador y recipiente colector",
+                        25.0, 25.0, 1.0, 1.0, "Aire ambiente", "Sin catalizador",
+                        List.of(new InfoReactivoFase("NaCl(ac)", "Solución salina", "Muestra a separar",
+                                EstadoManejo.EN_ALMACEN, "Disolución acuosa", "Lista para cargar en el matraz")),
+                        "El matraz está conectado al condensador y al recipiente colector; aún no se ha transferido la muestra.",
+                        "Ejecuta 'CARGAR_REACTIVO' para cargar la solución salina."
+                );
+                case "CARGADO" -> new InfoPasoProcedimiento(
+                        idReaccion, estadoAutomataId, "Solución salina cargada",
+                        "Matraz de evaporación con condensador",
+                        25.0, 25.0, 1.0, 1.0, "Aire ambiente", "Sin catalizador",
+                        List.of(new InfoReactivoFase("NaCl(ac)", "Solución salina", "Muestra a separar",
+                                EstadoManejo.DISUELTO_EN_SOLVENTE, "Disolución acuosa", "Dentro del matraz")),
+                        "La muestra está en el matraz conectado al condensador. Selecciona evaporación para retirar el agua como vapor y recuperarla por condensación.",
+                        "Ejecuta 'SELECCIONAR_METODO' y elige evaporación."
+                );
+                case "METODO_ELEGIDO" -> new InfoPasoProcedimiento(
+                        idReaccion, estadoAutomataId, "Método de evaporación seleccionado",
+                        "Matraz de evaporación con condensador",
+                        25.0, 100.0, 1.0, 1.0, "Aire ambiente", "Sin catalizador",
+                        List.of(new InfoReactivoFase("NaCl(ac)", "Solución salina", "Muestra a separar",
+                                EstadoManejo.DISUELTO_EN_SOLVENTE, "Disolución acuosa", "En calentamiento controlado")),
+                        "El montaje permite calentar la solución y conducir el vapor de agua al condensador, mientras la sal queda en el matraz.",
+                        "Ejecuta 'CALENTAR' para evaporar el agua."
+                );
+                case "EVAPORANDO" -> new InfoPasoProcedimiento(
+                        idReaccion, estadoAutomataId, "Evaporación y condensación",
+                        "Matraz de evaporación con condensador y colector",
+                        100.0, 100.0, 1.0, 1.0, "Aire ambiente", "Sin catalizador",
+                        List.of(
+                                new InfoReactivoFase("NaCl", "Cristales de cloruro de sodio", "Residuo recuperable",
+                                        EstadoManejo.PRODUCTO_FORMADO, "Sólido cristalino", "En el matraz"),
+                                new InfoReactivoFase("H2O", "Agua condensada", "Destilado",
+                                        EstadoManejo.PRODUCTO_FORMADO, "Líquido", "En el recipiente colector")
+                        ),
+                        "El agua se evapora de la solución y condensa en el recipiente colector; los cristales de NaCl permanecen en el matraz.",
+                        "Ejecuta 'FINALIZAR' para detener el calentamiento y recuperar ambas fracciones."
+                );
+                default -> new InfoPasoProcedimiento(
+                        idReaccion, estadoAutomataId, "Separación completada",
+                        "Sistema de evaporación y condensación",
+                        25.0, 25.0, 1.0, 1.0, "Ambiente", "Sin catalizador",
+                        List.of(
+                                new InfoReactivoFase("NaCl", "Cloruro de sodio", "Sólido recuperado",
+                                        EstadoManejo.PRODUCTO_FORMADO, "Cristales", "En el matraz"),
+                                new InfoReactivoFase("H2O", "Agua", "Destilado recuperado",
+                                        EstadoManejo.PRODUCTO_FORMADO, "Líquido", "En el colector")
+                        ),
+                        "La solución salina se separó en cristales de NaCl y agua condensada.",
+                        "Separación completada."
+                );
+            };
+        }
+
         // PROTOCOLO GENÉRICO REALISTA PARA LAS DEMÁS REACCIONES
         return new InfoPasoProcedimiento(
                 idReaccion, estadoAutomataId, estadoAutomataId,

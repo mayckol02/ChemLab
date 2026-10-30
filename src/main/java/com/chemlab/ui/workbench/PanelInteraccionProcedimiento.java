@@ -6,6 +6,7 @@ import com.chemlab.model.entity.Reaccion;
 import com.chemlab.model.entity.Sustancia;
 import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.TipoEquipo;
+import com.chemlab.model.value.Cantidad;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -20,6 +21,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -33,7 +35,12 @@ public final class PanelInteraccionProcedimiento extends VBox {
     private final Consumer<AccionLaboratorio> alIniciarOperacion;
     private final Consumer<AccionLaboratorio> alConfirmarCarga;
     private final boolean interaccionSobreMesa;
+    private final Set<String> sustanciasDisponibles;
+    private final Consumer<String> alCargarSustancia;
+    private final Map<String, Sustancia> catalogoSustancias;
+    private final Map<Sustancia, Cantidad> materialesEnProceso;
     private final Set<String> elementosRequeridos;
+    private final boolean cargaParcialPermitida;
     private final Set<String> elementosColocados = new LinkedHashSet<>();
     private final Label estadoCarga = new Label();
     private final Label etiquetaProgreso = new Label();
@@ -62,6 +69,74 @@ public final class PanelInteraccionProcedimiento extends VBox {
             Consumer<AccionLaboratorio> alConfirmarCarga,
             boolean interaccionSobreMesa
     ) {
+        this(reaccion, experimento, tipoEquipo, accion, alIniciarOperacion, alConfirmarCarga,
+                interaccionSobreMesa, null, id -> {}, Map.of());
+    }
+
+    public PanelInteraccionProcedimiento(
+            Reaccion reaccion,
+            Experimento experimento,
+            TipoEquipo tipoEquipo,
+            AccionLaboratorio accion,
+            Consumer<AccionLaboratorio> alIniciarOperacion,
+            Consumer<AccionLaboratorio> alConfirmarCarga,
+            boolean interaccionSobreMesa,
+            Set<String> sustanciasDisponibles,
+            Consumer<String> alCargarSustancia
+    ) {
+        this(reaccion, experimento, tipoEquipo, accion, alIniciarOperacion, alConfirmarCarga,
+                interaccionSobreMesa, sustanciasDisponibles, alCargarSustancia, Map.of());
+    }
+
+    public PanelInteraccionProcedimiento(
+            Reaccion reaccion,
+            Experimento experimento,
+            TipoEquipo tipoEquipo,
+            AccionLaboratorio accion,
+            Consumer<AccionLaboratorio> alIniciarOperacion,
+            Consumer<AccionLaboratorio> alConfirmarCarga,
+            boolean interaccionSobreMesa,
+            Set<String> sustanciasDisponibles,
+            Consumer<String> alCargarSustancia,
+            Map<String, Sustancia> catalogoSustancias
+    ) {
+        this(reaccion, experimento, tipoEquipo, accion, alIniciarOperacion, alConfirmarCarga,
+                interaccionSobreMesa, sustanciasDisponibles, alCargarSustancia, catalogoSustancias, false);
+    }
+
+    public PanelInteraccionProcedimiento(
+            Reaccion reaccion,
+            Experimento experimento,
+            TipoEquipo tipoEquipo,
+            AccionLaboratorio accion,
+            Consumer<AccionLaboratorio> alIniciarOperacion,
+            Consumer<AccionLaboratorio> alConfirmarCarga,
+            boolean interaccionSobreMesa,
+            Set<String> sustanciasDisponibles,
+            Consumer<String> alCargarSustancia,
+            Map<String, Sustancia> catalogoSustancias,
+            boolean cargaParcialPermitida
+    ) {
+        this(reaccion, experimento, tipoEquipo, accion, alIniciarOperacion, alConfirmarCarga,
+                interaccionSobreMesa, sustanciasDisponibles, alCargarSustancia,
+                catalogoSustancias, cargaParcialPermitida,
+                experimento.getInventario().obtenerCantidades());
+    }
+
+    public PanelInteraccionProcedimiento(
+            Reaccion reaccion,
+            Experimento experimento,
+            TipoEquipo tipoEquipo,
+            AccionLaboratorio accion,
+            Consumer<AccionLaboratorio> alIniciarOperacion,
+            Consumer<AccionLaboratorio> alConfirmarCarga,
+            boolean interaccionSobreMesa,
+            Set<String> sustanciasDisponibles,
+            Consumer<String> alCargarSustancia,
+            Map<String, Sustancia> catalogoSustancias,
+            boolean cargaParcialPermitida,
+            Map<Sustancia, Cantidad> materialesEnProceso
+    ) {
         this.reaccion = reaccion;
         this.experimento = experimento;
         this.tipoEquipo = tipoEquipo;
@@ -69,7 +144,13 @@ public final class PanelInteraccionProcedimiento extends VBox {
         this.alIniciarOperacion = alIniciarOperacion;
         this.alConfirmarCarga = alConfirmarCarga;
         this.interaccionSobreMesa = interaccionSobreMesa;
+        this.sustanciasDisponibles = sustanciasDisponibles == null
+                ? null : Set.copyOf(sustanciasDisponibles);
+        this.alCargarSustancia = alCargarSustancia == null ? id -> {} : alCargarSustancia;
+        this.catalogoSustancias = Map.copyOf(catalogoSustancias);
+        this.materialesEnProceso = Map.copyOf(materialesEnProceso);
         this.elementosRequeridos = calcularElementosRequeridos();
+        this.cargaParcialPermitida = cargaParcialPermitida;
 
         setSpacing(8);
         setPadding(new Insets(10, 12, 10, 12));
@@ -77,7 +158,7 @@ public final class PanelInteraccionProcedimiento extends VBox {
 
         Label destino = new Label(textoDestino(accion));
         destino.getStyleClass().add("game-section-title");
-        getChildren().add(destino);
+        getChildren().addAll(destino, construirInventarioCompartido());
 
         if (requiereColocarElementos()) {
             construirInteraccionDeCarga();
@@ -86,8 +167,70 @@ public final class PanelInteraccionProcedimiento extends VBox {
         }
     }
 
+    private VBox construirInventarioCompartido() {
+        VBox inventario = new VBox(5);
+        inventario.getStyleClass().add("game-shared-inventory");
+        Label titulo = new Label("MATERIALES DISPONIBLES EN EL EXPERIMENTO");
+        titulo.getStyleClass().add("game-section-title");
+        inventario.getChildren().add(titulo);
+        if (materialesEnProceso.isEmpty()) {
+            Label vacio = new Label("No hay materiales cargados en el inventario compartido.");
+            vacio.getStyleClass().add("game-menu-subtitle");
+            inventario.getChildren().add(vacio);
+            return inventario;
+        }
+
+        FlowPane materiales = new FlowPane(8, 6);
+        materiales.setAlignment(Pos.CENTER_LEFT);
+        materiales.getStyleClass().add("game-shared-inventory-items");
+        materialesEnProceso.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(java.util.Comparator.comparing(Sustancia::getId)))
+                .forEach(entrada -> {
+                    Sustancia sustancia = entrada.getKey();
+                    Cantidad cantidad = entrada.getValue();
+                    HBox ficha = new HBox(5,
+                            new IconoSustancia(sustancia, 22),
+                            new Label(sustancia.getFormula() + " · "
+                                    + String.format(java.util.Locale.ROOT, "%.3f %s",
+                                    cantidad.getValor(), cantidad.getUnidad())));
+                    ficha.setAlignment(Pos.CENTER_LEFT);
+                    ficha.getStyleClass().add("game-item-placed");
+                    materiales.getChildren().add(ficha);
+                });
+        inventario.getChildren().add(materiales);
+        return inventario;
+    }
+
     private Set<String> calcularElementosRequeridos() {
         Set<String> ids = new LinkedHashSet<>();
+        if (accion == AccionLaboratorio.AGREGAR_CATALIZADOR) {
+            if (!reaccion.getCondicionesRequeridas().getCatalizadoresRequeridos().isEmpty()) {
+                ids.addAll(reaccion.getCondicionesRequeridas().getCatalizadoresRequeridos());
+            } else if ("R_DIAMANTE_HPHT".equals(reaccion.getId())) {
+                ids.add("Fe");
+                ids.add("Ni");
+            } else {
+                Set<Sustancia> reactivos = reaccion.getReactivos().keySet();
+                Set<Sustancia> productos = reaccion.getProductos().keySet();
+                experimento.getInventario().obtenerCantidades().keySet().stream()
+                        .filter(sustancia -> !reactivos.contains(sustancia) && !productos.contains(sustancia))
+                        .forEach(sustancia -> ids.add(sustancia.getId()));
+            }
+            if (sustanciasDisponibles != null) {
+                ids.retainAll(sustanciasDisponibles);
+            }
+            return ids;
+        }
+        if (sustanciasDisponibles != null
+                && (accion == AccionLaboratorio.CARGAR_REACTIVO
+                || accion == AccionLaboratorio.AGREGAR_AGUA)) {
+            if (accion == AccionLaboratorio.AGREGAR_AGUA) {
+                if (sustanciasDisponibles.contains("H2O")) ids.add("H2O");
+                return ids;
+            }
+            ids.addAll(sustanciasDisponibles);
+            return ids;
+        }
         if (accion == AccionLaboratorio.CARGAR_REACTIVO) {
             reaccion.getReactivos().keySet().forEach(sustancia -> ids.add(sustancia.getId()));
             if ("R_DIAMANTE_CVD".equals(reaccion.getId())
@@ -97,14 +240,6 @@ public final class PanelInteraccionProcedimiento extends VBox {
             }
             if ("R_DIAMANTE_CVD".equals(reaccion.getId())) ids.add("SUSTRATO_CVD");
             if ("R_DIAMANTE_HPHT".equals(reaccion.getId())) ids.add("SEMILLA_DIAMANTE");
-        } else if (accion == AccionLaboratorio.AGREGAR_CATALIZADOR) {
-            Set<Sustancia> reactivos = reaccion.getReactivos().keySet();
-            Set<Sustancia> productos = reaccion.getProductos().keySet();
-            for (Sustancia sustancia : experimento.getInventario().obtenerCantidades().keySet()) {
-                if (!reactivos.contains(sustancia) && !productos.contains(sustancia)) {
-                    ids.add(sustancia.getId());
-                }
-            }
         } else if (accion == AccionLaboratorio.AGREGAR_AGUA) {
             experimento.getInventario().obtenerCantidades().keySet().stream()
                     .filter(sustancia -> "H2O".equals(sustancia.getId()))
@@ -209,17 +344,12 @@ public final class PanelInteraccionProcedimiento extends VBox {
         botonConfirmar = new Button(textoConfirmacion(accion));
         botonConfirmar.getStyleClass().add("game-start-button");
         botonConfirmar.setCursor(Cursor.DEFAULT);
-        botonConfirmar.setDisable(!elementosRequeridos.isEmpty() || accion == AccionLaboratorio.CARGAR_REACTIVO);
+        botonConfirmar.setDisable(!puedeConfirmarCarga());
         botonConfirmar.setOnAction(evento -> confirmarCarga());
 
         if (elementosRequeridos.isEmpty()) {
-            if (accion == AccionLaboratorio.CARGAR_REACTIVO) {
-                estadoCarga.setText("No se definieron reactivos para esta carga; no se puede continuar.");
-                botonConfirmar.setDisable(true);
-            } else {
-                estadoCarga.setText("No hay elementos auxiliares que colocar; puedes confirmar el paso.");
-                botonConfirmar.setDisable(false);
-            }
+            estadoCarga.setText("No hay materiales disponibles para este paso; no se puede continuar.");
+            botonConfirmar.setDisable(true);
         } else {
             estadoCarga.setText("Colocados: 0 de " + elementosRequeridos.size());
         }
@@ -246,9 +376,15 @@ public final class PanelInteraccionProcedimiento extends VBox {
             ficha.getStyleClass().add("game-item-placed");
             fichasColocadas.getChildren().add(ficha);
         }
+        if (sustanciasDisponibles != null
+                && (accion == AccionLaboratorio.CARGAR_REACTIVO
+                || accion == AccionLaboratorio.AGREGAR_CATALIZADOR
+                || accion == AccionLaboratorio.AGREGAR_AGUA)) {
+            alCargarSustancia.accept(id);
+        }
         estadoCarga.setText("Colocados: " + elementosColocados.size()
                 + " de " + elementosRequeridos.size());
-        botonConfirmar.setDisable(!elementosColocados.containsAll(elementosRequeridos));
+        botonConfirmar.setDisable(!puedeConfirmarCarga());
     }
 
     public boolean aceptaCargaDesdeMesa(String id) {
@@ -267,15 +403,29 @@ public final class PanelInteraccionProcedimiento extends VBox {
 
     public boolean puedeConfirmarCarga() {
         if (!requiereColocarElementos()) return false;
-        if (accion == AccionLaboratorio.CARGAR_REACTIVO && elementosRequeridos.isEmpty()) return false;
-        return elementosColocados.containsAll(elementosRequeridos);
+        return cargaCompleta(cargaParcialPermitida, accion, elementosColocados, elementosRequeridos);
+    }
+
+    static boolean cargaCompleta(
+            boolean permitirParcial,
+            AccionLaboratorio accion,
+            Set<String> colocados,
+            Set<String> requeridos
+    ) {
+        if (requeridos.isEmpty()) return false;
+        if (permitirParcial && accion == AccionLaboratorio.CARGAR_REACTIVO) {
+            return !colocados.isEmpty();
+        }
+        return !colocados.isEmpty() && colocados.containsAll(requeridos);
     }
 
     private void confirmarCarga() {
         if (puedeConfirmarCarga()) {
             alConfirmarCarga.accept(accion);
         } else {
-            estadoCarga.setText("Carga incompleta: coloca todos los materiales antes de continuar.");
+            estadoCarga.setText(cargaParcialPermitida && accion == AccionLaboratorio.CARGAR_REACTIVO
+                    ? "Coloca al menos un reactivo para confirmar la carga."
+                    : "Carga incompleta: coloca todos los materiales antes de continuar.");
         }
     }
 
@@ -361,10 +511,11 @@ public final class PanelInteraccionProcedimiento extends VBox {
     }
 
     private Sustancia buscarSustancia(String id) {
-        return experimento.getInventario().obtenerCantidades().keySet().stream()
+        Sustancia delInventario = experimento.getInventario().obtenerCantidades().keySet().stream()
                 .filter(sustancia -> sustancia.getId().equals(id))
                 .findFirst()
                 .orElse(null);
+        return delInventario != null ? delInventario : catalogoSustancias.get(id);
     }
 
     private String textoElemento(String id, Sustancia sustancia) {
@@ -379,6 +530,12 @@ public final class PanelInteraccionProcedimiento extends VBox {
     private String textoDestino(AccionLaboratorio accion) {
         String destino = nombreHerramienta();
         return switch (accion) {
+            case MONTAR_EQUIPO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "MONTAJE · " + destino + " · instala el sistema de evaporación"
+                    : "MONTAJE · " + destino + " · configura el equipo";
+            case SELECCIONAR_METODO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "MÉTODO · " + destino + " · selecciona evaporación"
+                    : "MÉTODO · " + destino;
             case CARGAR_REACTIVO -> "PREPARACIÓN · " + destino + " · carga los reactivos";
             case AGREGAR_CATALIZADOR -> "CATALIZADOR · " + destino;
             case AGREGAR_AGUA -> "DISOLUCIÓN · " + destino;
@@ -407,6 +564,9 @@ public final class PanelInteraccionProcedimiento extends VBox {
 
     private String textoOperacion(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "Instala el matraz de evaporación, conecta el condensador y coloca el recipiente colector."
+                    : "Monta y configura el equipo antes de iniciar el proceso.";
             case CALENTAR -> "La fuente térmica del " + nombreHerramienta()
                     + " elevará la temperatura hasta el valor del protocolo.";
             case ENFRIAR -> "El circuito de enfriamiento del " + nombreHerramienta()
@@ -425,13 +585,18 @@ public final class PanelInteraccionProcedimiento extends VBox {
                     + " en operación durante el tiempo de residencia.";
             case FINALIZAR -> "Detén el " + nombreHerramienta()
                     + ", estabiliza el producto y retira la muestra.";
-            case SELECCIONAR_METODO -> "Selecciona y prepara la ruta experimental.";
+            case SELECCIONAR_METODO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "Selecciona evaporación para retirar el agua de la solución y recuperarla en el condensador."
+                    : "Selecciona y prepara la ruta experimental.";
             default -> "Prepara el equipo según la guía y realiza la operación.";
         };
     }
 
     private String textoBoton(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "Montar sistema de evaporación"
+                    : "Montar equipo";
             case CALENTAR -> switch (tipoEquipo) {
                 case MATRAZ -> "Encender mechero Bunsen";
                 case HORNO -> "Encender horno mufla";
@@ -447,14 +612,18 @@ public final class PanelInteraccionProcedimiento extends VBox {
             case ACTIVAR_IGNICION -> "Pulsar chispero";
             case ESPERAR -> "Iniciar temporizador";
             case FINALIZAR -> "Detener equipo y extraer muestra";
-            case SELECCIONAR_METODO -> "Confirmar método";
+            case SELECCIONAR_METODO -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "Seleccionar evaporación"
+                    : "Confirmar método";
             default -> "Iniciar operación";
         };
     }
 
     private String nombreHerramienta() {
         return switch (tipoEquipo) {
-            case MATRAZ -> "matraz con mechero Bunsen";
+            case MATRAZ -> reaccion.getId().equals("R_SEPARACION_NACL")
+                    ? "sistema de evaporación"
+                    : "matraz con mechero Bunsen";
             case HORNO -> "horno mufla";
             case REACTOR -> "reactor de alta presión";
             case CAMARA_SELLADA -> "cámara de vacío CVD";

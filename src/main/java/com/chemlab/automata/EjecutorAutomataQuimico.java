@@ -78,6 +78,13 @@ public final class EjecutorAutomataQuimico {
                     reaccionObjetivo,
                     experimento
             );
+            if (!resultado.isExitoso()) {
+                return ResultadoAccion.fallo(
+                        automataQuimico.getEstadoActual(),
+                        "El procedimiento alcanzó su estado final, pero la reacción no pudo completarse "
+                                + "con los reactivos y condiciones actuales."
+                );
+            }
             return ResultadoAccion.completado(
                     automataQuimico.getEstadoActual(),
                     resultado,

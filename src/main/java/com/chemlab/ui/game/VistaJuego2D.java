@@ -15,11 +15,13 @@ import com.chemlab.game.ProductoAlmacenado;
 import com.chemlab.game.procedure.PlanificadorEstacionesProcedimiento;
 import com.chemlab.game.procedure.ProtocoloProcedimiento;
 import com.chemlab.game.SesionJuego;
+import com.chemlab.game.ModoJuego;
 import com.chemlab.model.entity.CuadernoLaboratorio;
 import com.chemlab.model.entity.Experimento;
 import com.chemlab.model.entity.Reaccion;
 import com.chemlab.model.entity.RegistroExperimento;
 import com.chemlab.model.entity.Sustancia;
+import com.chemlab.model.enums.EstadoRegistroExperimento;
 import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.TipoEquipo;
 import com.chemlab.model.enums.UnidadCantidad;
@@ -58,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -70,7 +73,7 @@ import java.util.Set;
  */
 public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
-    private enum Menu { ALMACEN, CUADERNO }
+    private enum Menu { MODO, ALMACEN, CUADERNO }
     private enum SeccionCuaderno { INVENTARIO, HISTORIAL, QUIMICA }
 
     private static final DateTimeFormatter FECHA_REGISTRO =
@@ -91,6 +94,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private final Set<KeyCode> teclasPresionadas = EnumSet.noneOf(KeyCode.class);
     private final Set<String> reactivosDisponibles = new HashSet<>();
     private final AnimationTimer reloj;
+    private PresentadorModoJuego presentadorModo = new PresentadorModoTutorial();
 
     private final Label labelEstado = new Label("Explora el laboratorio");
     private final Label labelObjetivo = new Label("Selecciona una práctica con M");
@@ -129,6 +133,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private FlowPane galeriaResultados;
     private Button botonTabExperimentos;
     private Button botonTabResultados;
+    private Button botonCambiarModo;
     private TextField busquedaExperimentos;
     private String filtroExperimentos = "";
     private VBox contenidoCuaderno;
@@ -137,11 +142,13 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private Button botonQuimicaCuaderno;
     private Label detalleExperimento;
     private Button botonIniciarExperimento;
+    private Button botonSolicitarPista;
     private StackPane cabecera;
     private HBox barraControles;
     private long ultimoPulso;
     private long avisoHasta;
     private String avisoActual = "";
+    private boolean modoSeleccionInicial = true;
 
     public VistaJuego2D() {
         catalogo = CatalogoQuimico.predeterminado();
@@ -173,7 +180,8 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         VBox pieHud = new VBox(8, cabecera, barraControles);
         pieHud.setAlignment(Pos.CENTER);
         capaHud.setBottom(pieHud);
-        capaHud.setMouseTransparent(true);
+        capaHud.setMouseTransparent(false);
+        capaHud.setPickOnBounds(false);
         labelAviso.getStyleClass().add("game-toast");
         labelAviso.setVisible(false);
         labelAviso.setManaged(false);
@@ -187,6 +195,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
         addEventFilter(KeyEvent.KEY_PRESSED, this::alPresionarTecla);
         addEventFilter(KeyEvent.KEY_RELEASED, this::alSoltarTecla);
+        abrirSelectorModo();
 
         reloj = new AnimationTimer() {
             @Override
@@ -194,7 +203,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                 double delta = ultimoPulso == 0 ? 0 : Math.min((ahora - ultimoPulso) / 1_000_000_000.0, 0.05);
                 ultimoPulso = ahora;
                 actualizarMovimiento(delta);
-                actualizarOperacion(delta);
+                if (menuAbierto != Menu.MODO) actualizarOperacion(delta);
                 actualizarPuestoCercano();
                 actualizarAviso(ahora);
                 dibujarMundo();
@@ -235,19 +244,42 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         barra.setAlignment(Pos.CENTER);
         barra.getStyleClass().add("game-controls");
         labelPuestoCercano.getStyleClass().add("game-station-hint");
+        botonSolicitarPista = new Button("Solicitar pista · 0/2");
+        botonSolicitarPista.getStyleClass().add("game-secondary-button");
+        botonSolicitarPista.setVisible(false);
+        botonSolicitarPista.setManaged(false);
+        botonSolicitarPista.setOnAction(evento -> solicitarPista());
         barra.getChildren().addAll(
                 new Label("WASD / flechas · mover"),
                 new Label("F · usar puesto"),
                 new Label("E · inventario y cuaderno"),
-                new Label("M · almacén y experimentos"),
+                new Label("M · almacén · V · cambiar modo"),
+                botonCambiarModo = crearBotonCambiarModo(),
+                botonSolicitarPista,
                 labelPuestoCercano
         );
         return barra;
     }
 
+    private Button crearBotonCambiarModo() {
+        Button boton = new Button();
+        boton.getStyleClass().add("game-secondary-button");
+        boton.setOnAction(evento -> abrirSelectorModo());
+        actualizarTextoBotonModo();
+        return boton;
+    }
+
+    private void actualizarTextoBotonModo() {
+        if (botonCambiarModo == null) return;
+        botonCambiarModo.setText(sesion.getModoJuego() == ModoJuego.TUTORIAL
+                ? "Modo: Tutorial · V"
+                : "Modo: Difícil · V");
+        botonCambiarModo.setAccessibleText("Cambiar modo de juego");
+    }
+
     private void alPresionarTecla(KeyEvent evento) {
         KeyCode tecla = evento.getCode();
-        if ((tecla == KeyCode.E || tecla == KeyCode.M)
+        if ((tecla == KeyCode.E || tecla == KeyCode.M || tecla == KeyCode.V)
                 && (evento.getTarget() instanceof TextInputControl
                 || getScene() != null && getScene().getFocusOwner() instanceof TextInputControl)) {
             teclasPresionadas.remove(tecla);
@@ -262,13 +294,15 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         switch (tecla) {
             case E -> alternarMenu(Menu.CUADERNO);
             case M -> alternarMenu(Menu.ALMACEN);
+            case V -> abrirSelectorModo();
             case F -> {
                 if (menuAbierto == null) interactuarConPuesto();
             }
             case ESCAPE -> cerrarMenuOAcciones();
             default -> { }
         }
-        if (tecla == KeyCode.E || tecla == KeyCode.M || tecla == KeyCode.F || tecla == KeyCode.ESCAPE) {
+        if (tecla == KeyCode.E || tecla == KeyCode.M || tecla == KeyCode.V
+                || tecla == KeyCode.F || tecla == KeyCode.ESCAPE) {
             evento.consume();
         }
     }
@@ -292,6 +326,11 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         if (dx != 0 || dy != 0) {
             cerrarVistaPuesto(true);
             estacionActiva = null;
+            if (sesion.getModoJuego() == ModoJuego.DIFICIL && sesion.isActiva()) {
+                sesion.salirPuesto();
+                botonSolicitarPista.setVisible(true);
+                botonSolicitarPista.setManaged(true);
+            }
         }
     }
 
@@ -337,7 +376,8 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             return;
         }
         EstacionLaboratorio requerida = obtenerEstacionRequerida();
-        if (requerida == null || estacionCercana != requerida) {
+        if (!presentadorModo.permiteAccesoLibre()
+                && (requerida == null || estacionCercana != requerida)) {
             mostrarAviso("El paso actual debe realizarse en: "
                     + (requerida == null ? "otro puesto" : requerida.nombre()));
             return;
@@ -346,6 +386,15 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         teclasPresionadas.removeAll(TECLAS_MOVIMIENTO);
         estacionActiva = estacionCercana;
         ultimaEstacionDeTrabajo = estacionActiva;
+        if (presentadorModo.permiteAccesoLibre()) {
+            sesion.registrarEntradaPuesto(estacionActiva.nombre(), estacionActiva.tipoEquipo());
+            botonSolicitarPista.setVisible(false);
+            botonSolicitarPista.setManaged(false);
+            avisoActual = "";
+            labelAviso.setText("");
+            labelAviso.setVisible(false);
+            labelAviso.setManaged(false);
+        }
         labelEstado.setText("PUESTO ACTIVO · " + estacionActiva.nombre());
         mostrarAccionesDisponibles();
     }
@@ -354,6 +403,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         if (!sesion.isActiva() || reaccionSeleccionada == null || experimentoSeleccionado == null) {
             return null;
         }
+        if (presentadorModo.permiteAccesoLibre()) return null;
         return primeraEstacionDe(reaccionSeleccionada, experimentoSeleccionado, sesion.getAutomataActual());
     }
 
@@ -374,9 +424,10 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             vistaPuesto = null;
         }
         String estadoId = sesion.getAutomataActual().getEstadoActual().getId();
-        protocoloActivo =
-                ProtocoloProcedimiento.obtenerProtocoloPaso(reaccionSeleccionada.getId(), estadoId);
-        List<TransicionQuimica> transiciones = sesion.getAutomataActual().getTransicionesDisponibles();
+        boolean modoDificil = presentadorModo.permiteAccesoLibre();
+        protocoloActivo = presentadorModo.obtenerProtocolo(reaccionSeleccionada.getId(), estadoId);
+        List<TransicionQuimica> transiciones = presentadorModo.obtenerTransiciones(
+                sesion.getAutomataActual(), estacionActiva.tipoEquipo());
         vistaPuesto = new VistaPuestoLaboratorio(
                 estacionActiva,
                 reaccionSeleccionada,
@@ -388,9 +439,14 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                     operacionEnMarcha = false;
                     accionEnCurso = null;
                     sesion.abandonar();
-                }
+                },
+                modoDificil,
+                experimentoSeleccionado.getCondiciones(),
+                this::abrirSelectorModo,
+                estadoId
         );
         getChildren().add(2, vistaPuesto);
+        vistaPuesto.toFront();
         if (!muestraEnProceso.isBlank()) {
             if (trasladoPendiente) {
                 vistaPuesto.exigirTrasladoDeMuestra(muestraEnProceso, () -> {
@@ -406,6 +462,13 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     }
 
     private void construirControlInteraccion(TransicionQuimica transicion) {
+        boolean modoDificil = sesion.getModoJuego() == ModoJuego.DIFICIL;
+        Map<String, Sustancia> sustancias = catalogo.obtenerSustancias().stream()
+                .collect(java.util.stream.Collectors.toMap(Sustancia::getId, sustancia -> sustancia));
+        Set<String> materialesDisponibles = new LinkedHashSet<>(reactivosDisponibles);
+        sesion.obtenerMaterialesDisponibles().keySet().stream()
+                .map(Sustancia::getId)
+                .forEach(materialesDisponibles::add);
         panelInteraccion = new PanelInteraccionProcedimiento(
                 reaccionSeleccionada,
                 experimentoSeleccionado,
@@ -413,9 +476,48 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                 transicion.getAccion(),
                 this::iniciarOperacion,
                 this::confirmarColocacion,
-                true
+                true,
+                modoDificil ? materialesDisponibles : null,
+                id -> {
+                    if (modoDificil) {
+                        boolean yaDisponible = sesion.obtenerMaterialesDisponibles().keySet().stream()
+                                .anyMatch(sustancia -> sustancia.getId().equals(id));
+                        if (!yaDisponible) {
+                            catalogo.buscarSustancia(id).ifPresent(sustancia ->
+                                    sesion.agregarSustancia(
+                                            sustancia,
+                                            new Cantidad(1, UnidadCantidad.GRAMOS)
+                                    ));
+                        }
+                    }
+                },
+                sustancias,
+                modoDificil,
+                sesion.obtenerMaterialesDisponibles()
         );
         vistaPuesto.mostrarInteraccion(panelInteraccion, transicion.getAccion());
+    }
+
+    private void solicitarPista() {
+        String puestoSiguiente = null;
+        if (sesion.isActiva() && sesion.getModoJuego() == ModoJuego.DIFICIL
+                && reaccionSeleccionada != null && experimentoSeleccionado != null) {
+            EstacionLaboratorio estacion = primeraEstacionDe(
+                    reaccionSeleccionada,
+                    experimentoSeleccionado,
+                    sesion.getAutomataActual()
+            );
+            if (estacion != null) puestoSiguiente = estacion.nombre();
+        }
+        sesion.solicitarPista(puestoSiguiente).ifPresentOrElse(
+                this::mostrarAviso,
+                () -> {
+                    botonSolicitarPista.setDisable(true);
+                    mostrarAviso("No quedan pistas disponibles o debes salir del puesto para solicitarlas.");
+                }
+        );
+        botonSolicitarPista.setText("Solicitar pista · " + sesion.getCantidadPistasSolicitadas() + "/2");
+        if (sesion.getCantidadPistasSolicitadas() >= 2) botonSolicitarPista.setDisable(true);
     }
 
     private void confirmarColocacion(AccionLaboratorio accion) {
@@ -443,6 +545,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             case CALENTAR, ENFRIAR, ESPERAR -> 4.0;
             case MEZCLAR, COMPRIMIR, DESCOMPRIMIR, INICIAR_PLASMA -> 3.0;
             case ACTIVAR_IGNICION, FINALIZAR -> 1.8;
+            case MONTAR_EQUIPO -> 3.0;
             default -> 2.2;
         };
     }
@@ -478,6 +581,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             return String.format(Locale.ROOT, "Presión · %.3f / %.3f atm", actual, protocoloActivo.presionObjetivo());
         }
         String verbo = switch (accion) {
+            case MONTAR_EQUIPO -> "Montando equipo";
             case MEZCLAR -> "Mezclando";
             case INICIAR_PLASMA -> "Estabilizando plasma";
             case ACTIVAR_IGNICION -> "Encendiendo";
@@ -507,6 +611,11 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         if (operacionEnMarcha) return;
         cerrarVistaPuesto(true);
         estacionActiva = null;
+        sesion.salirPuesto();
+        if (sesion.getModoJuego() == ModoJuego.DIFICIL && sesion.isActiva()) {
+            botonSolicitarPista.setVisible(true);
+            botonSolicitarPista.setManaged(true);
+        }
         requestFocus();
     }
 
@@ -519,6 +628,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     }
 
     private void cerrarMenuOAcciones() {
+        if (menuAbierto == Menu.MODO && modoSeleccionInicial) return;
         if (menuAbierto != null) {
             cerrarMenu();
         } else {
@@ -527,6 +637,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     }
 
     private void alternarMenu(Menu menu) {
+        if (menuAbierto == Menu.MODO && modoSeleccionInicial) return;
         if (operacionEnMarcha) {
             mostrarAviso("El equipo está en operación; espera a que termine antes de abrir otro menú.");
             return;
@@ -537,7 +648,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         cerrarPanelAcciones();
         if (menu == Menu.ALMACEN) {
             abrirMenuAlmacen();
-        } else {
+        } else if (menu == Menu.CUADERNO) {
             abrirMenuCuaderno();
         }
     }
@@ -558,6 +669,9 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     private StackPane crearOverlay(String tituloTexto, String subtituloTexto) {
         StackPane overlay = new StackPane();
         overlay.getStyleClass().add("game-menu-overlay");
+        overlay.setPickOnBounds(true);
+        overlay.setMinSize(0, 0);
+        overlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         VBox tarjeta = new VBox(14);
         tarjeta.getStyleClass().add("game-menu-card");
         tarjeta.setPrefSize(1040, 590);
@@ -590,9 +704,92 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         return overlay;
     }
 
+    private void abrirSelectorModo() {
+        if (menuAbierto == Menu.MODO) return;
+        if (menuAbierto != null) cerrarMenu();
+        menuAbierto = Menu.MODO;
+        StackPane overlay = crearOverlay(
+                "Cambiar modo de juego",
+                "El cambio aplica de inmediato. Si hay un experimento activo, se registrará como abandonado."
+        );
+        VBox tarjeta = (VBox) overlay.getUserData();
+        if (modoSeleccionInicial) {
+            HBox encabezado = (HBox) tarjeta.getChildren().getFirst();
+            Button cerrar = (Button) encabezado.getChildren().getLast();
+            cerrar.setVisible(false);
+            cerrar.setManaged(false);
+        }
+        Button tutorial = new Button(mensajeOpcionModo(
+                ModoJuego.TUTORIAL,
+                "Guía paso a paso, procedimientos y pistas del laboratorio."
+        ));
+        tutorial.getStyleClass().add("game-start-button");
+        tutorial.setWrapText(true);
+        tutorial.setMaxWidth(Double.MAX_VALUE);
+        tutorial.setMinHeight(96);
+        tutorial.setOnAction(evento -> seleccionarModo(ModoJuego.TUTORIAL));
+
+        Button dificil = new Button(mensajeOpcionModo(
+                ModoJuego.DIFICIL,
+                "Experimentación libre, sin pistas iniciales y con resultados según tus decisiones."
+        ));
+        dificil.getStyleClass().add("game-secondary-button");
+        dificil.setWrapText(true);
+        dificil.setMaxWidth(Double.MAX_VALUE);
+        dificil.setMinHeight(96);
+        dificil.setOnAction(evento -> seleccionarModo(ModoJuego.DIFICIL));
+        tarjeta.getChildren().addAll(tutorial, dificil);
+        getChildren().add(overlay);
+        overlayMenu = overlay;
+        overlay.toFront();
+    }
+
+    private String mensajeOpcionModo(ModoJuego modo, String descripcion) {
+        String estado = modo == sesion.getModoJuego() ? " · ACTUAL" : "";
+        String nombre = modo == ModoJuego.TUTORIAL ? "MODO TUTORIAL" : "MODO DIFÍCIL";
+        return nombre + estado + "\n" + descripcion;
+    }
+
+    private void seleccionarModo(ModoJuego modo) {
+        ModoJuego modoAnterior = sesion.getModoJuego();
+        if (modo == modoAnterior) {
+            modoSeleccionInicial = false;
+            cerrarMenu();
+            mostrarAviso(modo == ModoJuego.TUTORIAL
+                    ? "Continúas en Modo Tutorial."
+                    : "Continúas en Modo Difícil.");
+            return;
+        }
+        operacionEnMarcha = false;
+        accionEnCurso = null;
+        progresoInteraccion = 0;
+        sesion.salirPuesto();
+        sesion.seleccionarModo(modo);
+        presentadorModo = PresentadorModoJuego.para(modo);
+        modoSeleccionInicial = false;
+        cerrarVistaPuesto(true);
+        estacionActiva = null;
+        experimentoSeleccionado = null;
+        reaccionSeleccionada = null;
+        automataSeleccionado = null;
+        reaccionVisualId = null;
+        botonSolicitarPista.setVisible(false);
+        botonSolicitarPista.setManaged(false);
+        actualizarTextoBotonModo();
+        labelObjetivo.setText(modo == ModoJuego.TUTORIAL
+                ? "MODO TUTORIAL · Selecciona una práctica con M"
+                : "MODO DIFÍCIL · Selecciona una práctica con M");
+        cerrarMenu();
+        mostrarAviso(modoAnterior == ModoJuego.TUTORIAL
+                ? "Experimento interrumpido y registrado. Modo Difícil seleccionado."
+                : "Experimento interrumpido y registrado. Modo Tutorial seleccionado.");
+        requestFocus();
+    }
+
     private void abrirMenuAlmacen() {
         menuAbierto = Menu.ALMACEN;
-        StackPane overlay = crearOverlay("Almacén y experimentos", "Elige los reactivos disponibles y la práctica que quieres realizar.");
+        String descripcion = presentadorModo.descripcionAlmacen();
+        StackPane overlay = crearOverlay("Almacén y experimentos", descripcion);
         VBox tarjeta = (VBox) overlay.getUserData();
 
         HBox contenido = new HBox(16);
@@ -812,11 +1009,17 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         VBox detalle = new VBox(3);
         Label nombre = new Label(reaccion.getNombre());
         nombre.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
-        Label ecuacion = new Label(formatearEcuacion(reaccion));
-        ecuacion.getStyleClass().add("game-menu-subtitle");
-        detalle.getChildren().addAll(nombre, ecuacion);
+        if (!presentadorModo.mostrarEcuacionReaccion()) {
+            detalle.getChildren().add(nombre);
+        } else {
+            Label ecuacion = new Label(formatearEcuacion(reaccion));
+            ecuacion.getStyleClass().add("game-menu-subtitle");
+            detalle.getChildren().addAll(nombre, ecuacion);
+        }
         boton.setGraphic(detalle);
-        boton.setAccessibleText(reaccion.getNombre() + ": " + formatearEcuacion(reaccion));
+        boton.setAccessibleText(presentadorModo.mostrarEcuacionReaccion()
+                ? reaccion.getNombre() + ": " + formatearEcuacion(reaccion)
+                : reaccion.getNombre());
         boton.setOnAction(evento -> seleccionarExperimento(reaccion));
         return boton;
     }
@@ -833,7 +1036,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         ultimaEstacionDeTrabajo = null;
         operacionEnMarcha = false;
         accionEnCurso = null;
-        experimentoSeleccionado = fabricaExperimento.crearExperimentoParaReaccion(reaccion);
+        experimentoSeleccionado = presentadorModo.crearExperimento(fabricaExperimento, reaccion);
         automataSeleccionado = FabricaAutomata.crearAutomataParaReaccion(reaccion.getId());
         actualizarDetalleExperimento();
     }
@@ -845,14 +1048,11 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             botonIniciarExperimento.setDisable(true);
             return;
         }
-        EstacionLaboratorio estacion = primeraEstacionDe(
-                reaccionSeleccionada, experimentoSeleccionado, automataSeleccionado);
-        String nombreEstacion = estacion == null ? "sin puesto asignado" : estacion.nombre();
         boolean disponible = reaccionDisponible(reaccionSeleccionada);
-        detalleExperimento.setText("Seleccionado: " + reaccionSeleccionada.getNombre()
-                + "\nPrimera estación: " + nombreEstacion
-                + "\nObjetivo: " + experimentoSeleccionado.getObjetivo().getDescripcion()
-                + (disponible ? "" : "\nFaltan reactivos marcados en el almacén."));
+        EstacionLaboratorio estacion = presentadorModo.permiteAccesoLibre() ? null
+                : primeraEstacionDe(reaccionSeleccionada, experimentoSeleccionado, automataSeleccionado);
+        detalleExperimento.setText(presentadorModo.textoExperimento(
+                reaccionSeleccionada, experimentoSeleccionado, estacion, disponible));
         botonIniciarExperimento.setDisable(sesion.isActiva() || !disponible);
     }
 
@@ -866,8 +1066,14 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         trasladoPendiente = false;
         sesion.iniciar(experimentoSeleccionado, reaccionSeleccionada, automataSeleccionado);
         cerrarMenu();
+        if (sesion.getModoJuego() == ModoJuego.DIFICIL) {
+            botonSolicitarPista.setText("Solicitar pista · 0/2");
+            botonSolicitarPista.setDisable(false);
+            botonSolicitarPista.setVisible(true);
+            botonSolicitarPista.setManaged(true);
+        }
         EstacionLaboratorio destino = obtenerEstacionRequerida();
-        mostrarAviso("Experimento iniciado. Ve a " + (destino == null ? "la estación indicada" : destino.nombre()) + " y pulsa F.");
+        mostrarAviso(presentadorModo.textoInicio(destino));
     }
 
     private void abrirMenuCuaderno() {
@@ -894,6 +1100,12 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         Button botonInventario = new Button("▤  MATERIALES");
         Button botonHistorial = new Button("⌁  EXPERIMENTOS");
         Button botonQuimica = new Button("⚗  CUADERNO QUÍMICO");
+        for (Button boton : List.of(botonInventario, botonHistorial, botonQuimica)) {
+            boton.setMinHeight(42);
+            boton.setFocusTraversable(true);
+            HBox.setHgrow(boton, Priority.ALWAYS);
+            boton.setMaxWidth(Double.MAX_VALUE);
+        }
         botonInventario.getStyleClass().add("game-notebook-tab");
         botonHistorial.getStyleClass().add("game-notebook-tab");
         botonQuimica.getStyleClass().add("game-notebook-tab");
@@ -925,6 +1137,8 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
         mostrarSeccionCuaderno(contenido, botonInventario, botonHistorial, botonQuimica);
         getChildren().add(overlay);
         overlayMenu = overlay;
+        StackPane.setAlignment(overlay, Pos.CENTER);
+        overlay.toFront();
     }
 
     private void mostrarSeccionCuaderno(
@@ -1037,10 +1251,11 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                 tarjeta.setMinHeight(88);
                 tarjeta.setPrefHeight(88);
                 tarjeta.setMaxHeight(88);
-                String estado = registro.isExitoso() ? "COMPLETADO" : "ABANDONADO";
+                String estado = registro.getEstadoFinal().name();
                 Label titulo = new Label((registro.isExitoso() ? "✓ " : "○ ") + registro.getNombreExperimento());
                 titulo.setStyle("-fx-font-weight: bold;");
-                Label fecha = new Label(registro.getFecha().format(FECHA_REGISTRO) + " · " + estado);
+                Label fecha = new Label(registro.getFecha().format(FECHA_REGISTRO)
+                        + " · " + estado + " · " + registro.getModoJuego());
                 fecha.setText(fecha.getText() + " / " + registro.getPasosTransicion().size() + " pasos");
                 fecha.getStyleClass().add("game-menu-subtitle");
                 Label pasos = new Label(registro.getPasosTransicion().size() + " pasos registrados");
@@ -1098,9 +1313,9 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
         Label titulo = new Label(registro.getNombreExperimento());
         titulo.getStyleClass().add("game-notebook-summary");
-        Label descripcion = new Label((registro.isExitoso()
-                ? "PROCESO COMPLETADO" : "INTENTO INTERRUMPIDO")
-                + "  ·  " + registro.getPasosTransicion().size() + " etapas registradas");
+        Label descripcion = new Label(registro.getEstadoFinal().name()
+                + "  ·  " + registro.getModoJuego()
+                + "  ·  " + registro.getPasosTransicion().size() + " acciones evaluadas");
         descripcion.getStyleClass().add("game-notebook-micro");
 
         AutomataQuimico automata = registro.getIdProceso() == null
@@ -1135,6 +1350,37 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
                     + registro.getResultado().getProductos().keySet().stream()
                     .map(producto -> producto.getFormula() + " · " + producto.getNombre())
                     .reduce((a, b) -> a + "  |  " + b).orElse("")));
+        }
+        if (!registro.getMotivoFinalizacion().isBlank()) {
+            Label motivo = new Label("Causa de finalización: " + registro.getMotivoFinalizacion());
+            motivo.setWrapText(true);
+            detalleEtapas.getChildren().add(motivo);
+        }
+        if (!registro.getEventos().isEmpty()) {
+            detalleEtapas.getChildren().add(new Label("BITÁCORA DE LA SESIÓN"));
+            registro.getEventos().forEach(evento -> {
+                Label linea = new Label("• " + evento);
+                linea.setWrapText(true);
+                detalleEtapas.getChildren().add(linea);
+            });
+        }
+        if (!registro.getPistasSolicitadas().isEmpty()) {
+            detalleEtapas.getChildren().add(new Label("PISTAS SOLICITADAS"));
+            registro.getPistasSolicitadas().forEach(pista -> {
+                Label linea = new Label("• " + pista);
+                linea.setWrapText(true);
+                detalleEtapas.getChildren().add(linea);
+            });
+        }
+        if (!registro.getInventarioFinal().isEmpty()) {
+            detalleEtapas.getChildren().add(new Label("INVENTARIO AL CIERRE"));
+            registro.getInventarioFinal().forEach((sustancia, cantidad) -> {
+                Label linea = new Label(sustancia.getFormula() + " · " + sustancia.getNombre()
+                        + " · " + String.format(Locale.ROOT, "%.3f %s",
+                        cantidad.getValor(), cantidad.getUnidad()));
+                linea.setWrapText(true);
+                detalleEtapas.getChildren().add(linea);
+            });
         }
 
         Button botonRuta = new Button("RUTA");
@@ -1308,6 +1554,7 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
 
     private String formatearAccion(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO -> "Montar equipo";
             case CARGAR_REACTIVO -> "Cargar reactivos";
             case AGREGAR_CATALIZADOR -> "Añadir catalizador";
             case CALENTAR -> "Calentar";
@@ -1330,7 +1577,9 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             experimentoVisible = experimento;
             labelEstado.setText("EN PROGRESO");
             labelObjetivo.setText(experimento.getObjetivo().getDescripcion());
-            mostrarAviso("Experimento iniciado. Interactúa con el puesto asignado.");
+            mostrarAviso(sesion.getModoJuego() == ModoJuego.DIFICIL
+                    ? "Experimento iniciado. Elige un puesto para explorar."
+                    : "Experimento iniciado. Interactúa con el puesto asignado.");
         });
     }
 
@@ -1340,6 +1589,10 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             labelEstado.setText("Estado: " + resultado.getEstadoActual().getNombre());
             mostrarAviso((resultado.isExitoso() ? "✓ " : "× ") + resultado.getMensaje());
             if (sesion.isActiva() && estacionActiva != null) {
+                if (sesion.getModoJuego() == ModoJuego.DIFICIL) {
+                    mostrarAccionesDisponibles();
+                    return;
+                }
                 EstacionLaboratorio siguiente = obtenerEstacionRequerida();
                 if (siguiente != estacionActiva) {
                     String nombreSiguiente = siguiente == null ? "el puesto indicado" : siguiente.nombre();
@@ -1421,8 +1674,12 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
     public void onExperimentoAbandonado(Experimento experimento) {
         Platform.runLater(() -> {
             experimentoVisible = experimento;
-            labelEstado.setText("EXPERIMENTO ABANDONADO");
-            labelObjetivo.setText("El intento quedó registrado en el cuaderno");
+            if (sesion.getModoJuego() == ModoJuego.DIFICIL) {
+                mostrarResumenFinalDificil(experimento);
+            } else {
+                labelEstado.setText("EXPERIMENTO ABANDONADO");
+                labelObjetivo.setText("El intento quedó registrado en el cuaderno");
+            }
             cerrarVistaPuesto(true);
             estacionActiva = null;
             teclasPresionadas.clear();
@@ -1437,5 +1694,60 @@ public final class VistaJuego2D extends StackPane implements ObservadorSesion {
             automataSeleccionado = null;
             requestFocus();
         });
+    }
+
+    @Override
+    public void onExperimentoFallido(Experimento experimento, String motivo) {
+        Platform.runLater(() -> {
+            experimentoVisible = experimento;
+            if (sesion.getModoJuego() == ModoJuego.DIFICIL) {
+                mostrarResumenFinalDificil(experimento);
+            } else {
+                labelEstado.setText("EXPERIMENTO FALLIDO");
+                labelObjetivo.setText("El procedimiento llegó al final, pero la reacción no se produjo.");
+            }
+            cerrarVistaPuesto(true);
+            estacionActiva = null;
+            teclasPresionadas.clear();
+            operacionEnMarcha = false;
+            accionEnCurso = null;
+            muestraEnProceso = "";
+            trasladoPendiente = false;
+            reaccionVisualId = null;
+            botonSolicitarPista.setVisible(false);
+            botonSolicitarPista.setManaged(false);
+            mostrarAviso(motivo);
+            experimentoSeleccionado = null;
+            reaccionSeleccionada = null;
+            automataSeleccionado = null;
+            requestFocus();
+        });
+    }
+
+    private void mostrarResumenFinalDificil(Experimento experimento) {
+        RegistroExperimento registro = sesion.getCuaderno().getHistorial().stream()
+                .filter(item -> item.getNombreExperimento().equals(experimento.getNombre()))
+                .max(Comparator.comparing(RegistroExperimento::getFecha))
+                .orElse(null);
+        if (registro == null) {
+            labelEstado.setText("EXPERIMENTO INTERRUMPIDO");
+            labelObjetivo.setText("El intento quedó registrado en el cuaderno");
+            return;
+        }
+
+        labelEstado.setText("EXPERIMENTO " + registro.getEstadoFinal().name());
+        Map<Sustancia, Cantidad> productos = registro.getResultado() == null
+                ? Map.of() : registro.getResultado().getProductos();
+        if (productos.isEmpty()) {
+            labelObjetivo.setText("No se formaron productos. El inventario final está en el cuaderno.");
+            return;
+        }
+        String resumenProductos = productos.entrySet().stream()
+                .map(entrada -> entrada.getKey().getFormula() + " · "
+                        + String.format(Locale.ROOT, "%.3f %s",
+                        entrada.getValue().getValor(), entrada.getValue().getUnidad()))
+                .reduce((anterior, actual) -> anterior + "  |  " + actual)
+                .orElse("");
+        labelObjetivo.setText("Productos obtenidos: " + resumenProductos);
     }
 }

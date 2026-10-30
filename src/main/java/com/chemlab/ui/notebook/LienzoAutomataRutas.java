@@ -4,7 +4,10 @@ import com.chemlab.automata.AutomataQuimico;
 import com.chemlab.automata.EstadoQuimico;
 import com.chemlab.automata.TransicionQuimica;
 import com.chemlab.factory.FabricaAutomata;
+import com.chemlab.game.ProgresoAutomata;
+import com.chemlab.game.SesionJuego;
 import com.chemlab.game.procedure.ProtocoloProcedimiento;
+import com.chemlab.model.entity.RegistroExperimento;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -35,18 +38,21 @@ final class LienzoAutomataRutas extends Canvas {
             EstadoQuimico inicial,
             List<EstadoQuimico> estados,
             List<TransicionQuimica> transiciones,
-            Set<String> finales
+            Set<String> finales,
+            Set<String> estadosRevelados
     ) {}
 
-    LienzoAutomataRutas(List<ProtocoloProcedimiento.InfoRutaSintesis> rutas) {
-        List<RutaVisual> visuales = rutas.stream().map(this::construirRuta).toList();
+    LienzoAutomataRutas(List<ProtocoloProcedimiento.InfoRutaSintesis> rutas, SesionJuego sesion) {
+        List<RutaVisual> visuales = rutas.stream()
+                .map(ruta -> construirRuta(ruta, sesion))
+                .toList();
         double alto = Math.max(180, 112 + visuales.size() * ESPACIO_FILA);
         setWidth(ANCHO);
         setHeight(alto);
         dibujar(visuales, alto);
     }
 
-    private RutaVisual construirRuta(ProtocoloProcedimiento.InfoRutaSintesis ruta) {
+    private RutaVisual construirRuta(ProtocoloProcedimiento.InfoRutaSintesis ruta, SesionJuego sesion) {
         AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(ruta.idReaccion());
         Map<String, EstadoQuimico> porId = new LinkedHashMap<>();
         ArrayDeque<EstadoQuimico> pendientes = new ArrayDeque<>();
@@ -65,9 +71,38 @@ final class LienzoAutomataRutas extends Canvas {
                     .filter(destino -> !visitados.contains(destino.getId()))
                     .forEach(pendientes::addLast);
         }
+        Set<String> alcanzados = obtenerEstadosAlcanzados(ruta.idReaccion(), sesion);
+        Set<String> revelados = porId.values().stream()
+                .filter(estado -> alcanzados.contains(estado.getId())
+                        || alcanzados.contains(estado.getNombre()))
+                .map(EstadoQuimico::getId)
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
         return new RutaVisual(ruta, automata.getEstadoInicial(), List.copyOf(porId.values()),
                 List.copyOf(transiciones), automata.getEstadosFinales().stream()
-                .map(EstadoQuimico::getId).collect(java.util.stream.Collectors.toUnmodifiableSet()));
+                .map(EstadoQuimico::getId).collect(java.util.stream.Collectors.toUnmodifiableSet()),
+                revelados);
+    }
+
+    private Set<String> obtenerEstadosAlcanzados(String idReaccion, SesionJuego sesion) {
+        List<RegistroExperimento.PasoTransicion> pasos = new ArrayList<>();
+        String estadoInicial = null;
+        boolean hayProgreso = false;
+        for (RegistroExperimento registro : sesion.getCuaderno().getHistorial()) {
+            if (idReaccion.equals(registro.getIdProceso())) {
+                if (estadoInicial == null) estadoInicial = registro.getEstadoInicial();
+                pasos.addAll(registro.getPasosTransicion());
+                hayProgreso = true;
+            }
+        }
+        if (sesion.isActiva()
+                && sesion.getReaccion().map(reaccion -> idReaccion.equals(reaccion.getId())).orElse(false)) {
+            estadoInicial = sesion.getAutomataActual().getEstadoInicial().getNombre();
+            pasos.addAll(sesion.getPasosTransicionActual());
+            hayProgreso = true;
+        }
+        return hayProgreso
+                ? ProgresoAutomata.estadosAlcanzadosCorrectamente(estadoInicial, pasos)
+                : Set.of();
     }
 
     private void dibujar(List<RutaVisual> rutas, double alto) {
@@ -110,7 +145,8 @@ final class LienzoAutomataRutas extends Canvas {
             for (int posicion = 0; posicion < ruta.estados().size(); posicion++) {
                 EstadoQuimico estado = ruta.estados().get(posicion);
                 double x = X_ESTADOS + posicion * espacioX;
-                dibujarNodo(grafico, x, y, estado.getNombre(),
+                dibujarNodo(grafico, x, y,
+                        ruta.estadosRevelados().contains(estado.getId()) ? estado.getNombre() : "?",
                         ruta.finales().contains(estado.getId()),
                         ruta.inicial().getId().equals(estado.getId()));
             }
@@ -185,6 +221,7 @@ final class LienzoAutomataRutas extends Canvas {
 
     private String nombreAccion(TransicionQuimica transicion) {
         return switch (transicion.getAccion()) {
+            case MONTAR_EQUIPO -> "montar equipo";
             case CARGAR_REACTIVO -> "cargar reactivos";
             case MEZCLAR -> "mezclar";
             case INICIAR_PLASMA -> "activar plasma";

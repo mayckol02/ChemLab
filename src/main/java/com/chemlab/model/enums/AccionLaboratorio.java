@@ -43,5 +43,8 @@ public enum AccionLaboratorio {
     INICIAR_PLASMA,
 
     /** Selección del método a utilizar para un proceso. */
-    SELECCIONAR_METODO
+    SELECCIONAR_METODO,
+
+    /** Montaje o configuración física del equipo experimental. */
+    MONTAR_EQUIPO
 }

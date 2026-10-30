@@ -36,6 +36,10 @@ public final class PlanificadorEstacionesProcedimiento {
             };
         }
 
+        if ("R_CO2".equals(idReaccion) && accion == AccionLaboratorio.MEZCLAR) {
+            return TipoEquipo.MATRAZ;
+        }
+
         if (accion == AccionLaboratorio.CARGAR_REACTIVO
                 && equipoPrincipal != TipoEquipo.MATRAZ
                 && equipoPrincipal != TipoEquipo.BANDEJA) {

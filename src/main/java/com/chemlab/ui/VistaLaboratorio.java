@@ -1467,6 +1467,7 @@ public final class VistaLaboratorio extends BorderPane
 
     private static String formatearAccion(AccionLaboratorio accion) {
         return switch (accion) {
+            case MONTAR_EQUIPO       -> "🧰 Montar Equipo";
             case CARGAR_REACTIVO    -> "📦 Cargar Reactivo";
             case AGREGAR_CATALIZADOR -> "⚗ Catalizador";
             case CALENTAR           -> "🔥 Calentar";

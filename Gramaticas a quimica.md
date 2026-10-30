@@ -96,9 +96,11 @@ Sus límites actuales son 128 caracteres, 16 niveles de anidamiento y un millón
 La integración se verifica compilando el proyecto y ejecutando todas las pruebas con JDK 25:
 
 ```powershell
-$env:JAVA_HOME = 'C:\Users\klmxl\.jdk\jdk-25.0.4.1+1'
+# Ajuste la ruta a la ubicación local del JDK 25 instalado.
+$env:JAVA_HOME = 'C:\ruta\a\jdk-25'
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+java -version
 mvn clean test
 ```
 
-La validación ejecutada terminó correctamente: 218 pruebas, sin fallos, errores ni omisiones.
+La validación ejecutada terminó correctamente: 222 pruebas, sin fallos, errores ni omisiones.

@@ -1,5 +1,9 @@
 package com.chemlab.model.entity;
 
+import com.chemlab.game.ModoJuego;
+import com.chemlab.model.enums.EstadoRegistroExperimento;
+import com.chemlab.model.value.Cantidad;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +36,12 @@ public class RegistroExperimento {
     private final List<String> estadosFinales;
     private final List<String> todosLosEstados;
     private final List<PasoTransicion> pasosTransicion;
+    private final ModoJuego modoJuego;
+    private final EstadoRegistroExperimento estadoFinal;
+    private final String motivoFinalizacion;
+    private final List<String> eventos;
+    private final List<String> pistasSolicitadas;
+    private final Map<Sustancia, Cantidad> inventarioFinal;
 
     public RegistroExperimento(
             String nombreExperimento,
@@ -64,6 +74,32 @@ public class RegistroExperimento {
             List<String> todosLosEstados,
             List<PasoTransicion> pasosTransicion
     ) {
+        this(
+                nombreExperimento, idProceso, accionesEjecutadas, resultado, exitoso,
+                estadoInicial, estadosFinales, todosLosEstados, pasosTransicion,
+                ModoJuego.TUTORIAL,
+                exitoso ? EstadoRegistroExperimento.COMPLETADO : EstadoRegistroExperimento.FALLIDO,
+                "", List.of(), List.of(), Map.of()
+        );
+    }
+
+    public RegistroExperimento(
+            String nombreExperimento,
+            String idProceso,
+            Map<String, String> accionesEjecutadas,
+            ResultadoQuimico resultado,
+            boolean exitoso,
+            String estadoInicial,
+            List<String> estadosFinales,
+            List<String> todosLosEstados,
+            List<PasoTransicion> pasosTransicion,
+            ModoJuego modoJuego,
+            EstadoRegistroExperimento estadoFinal,
+            String motivoFinalizacion,
+            List<String> eventos,
+            List<String> pistasSolicitadas,
+            Map<Sustancia, Cantidad> inventarioFinal
+    ) {
         this.fecha = LocalDateTime.now();
         this.nombreExperimento = Objects.requireNonNull(nombreExperimento, "El nombre no puede ser null");
         this.idProceso = idProceso;
@@ -76,6 +112,14 @@ public class RegistroExperimento {
         this.estadosFinales = estadosFinales != null ? List.copyOf(estadosFinales) : List.of();
         this.todosLosEstados = todosLosEstados != null ? List.copyOf(todosLosEstados) : List.of();
         this.pasosTransicion = pasosTransicion != null ? List.copyOf(pasosTransicion) : List.of();
+        this.modoJuego = Objects.requireNonNull(modoJuego, "El modo no puede ser null");
+        this.estadoFinal = Objects.requireNonNull(estadoFinal, "El estado final no puede ser null");
+        this.motivoFinalizacion = motivoFinalizacion == null ? "" : motivoFinalizacion;
+        this.eventos = eventos == null ? List.of() : List.copyOf(eventos);
+        this.pistasSolicitadas = pistasSolicitadas == null ? List.of() : List.copyOf(pistasSolicitadas);
+        this.inventarioFinal = Collections.unmodifiableMap(new LinkedHashMap<>(
+                inventarioFinal == null ? Map.of() : inventarioFinal
+        ));
     }
 
     public LocalDateTime getFecha() {
@@ -117,5 +161,28 @@ public class RegistroExperimento {
     public List<PasoTransicion> getPasosTransicion() {
         return pasosTransicion;
     }
-}
 
+    public ModoJuego getModoJuego() {
+        return modoJuego;
+    }
+
+    public EstadoRegistroExperimento getEstadoFinal() {
+        return estadoFinal;
+    }
+
+    public String getMotivoFinalizacion() {
+        return motivoFinalizacion;
+    }
+
+    public List<String> getEventos() {
+        return eventos;
+    }
+
+    public List<String> getPistasSolicitadas() {
+        return pistasSolicitadas;
+    }
+
+    public Map<Sustancia, Cantidad> getInventarioFinal() {
+        return inventarioFinal;
+    }
+}

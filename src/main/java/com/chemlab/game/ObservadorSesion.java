@@ -38,4 +38,8 @@ public interface ObservadorSesion {
      * @param experimento experimento marcado como fallido.
      */
     void onExperimentoAbandonado(Experimento experimento);
+
+    default void onExperimentoFallido(Experimento experimento, String motivo) {
+        onExperimentoAbandonado(experimento);
+    }
 }
