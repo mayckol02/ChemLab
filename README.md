@@ -4,6 +4,8 @@ Juego/laboratorio químico educativo desarrollado con **Java 25 + JavaFX + Maven
 
 La aplicación inicia ahora en un prototipo 2D jugable: puedes recorrer el laboratorio, acercarte a los puestos y ejecutar desde ellos los procesos del dominio químico.
 
+Al abrirse, el juego muestra una intro original con el logo de ChemLab; puedes omitirla con cualquier tecla o con un clic. La pista de audio es opcional: para usar una propia con licencia, consulta `src/main/resources/audio/README.md`.
+
 ## Arquitectura inicial
 
 El proyecto se organizará por responsabilidades, evitando que la interfaz gráfica contenga reglas químicas o lógica de negocio.

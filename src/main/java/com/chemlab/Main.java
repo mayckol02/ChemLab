@@ -1,10 +1,14 @@
 package com.chemlab;
 
 import com.chemlab.ui.game.VistaJuego2D;
+import com.chemlab.ui.IntroChemLab;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
+import java.net.URL;
 
 /**
  * Punto de entrada de ChemLab.
@@ -20,16 +24,24 @@ public final class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        VistaJuego2D vista = new VistaJuego2D();
-
-        Scene scene = new Scene(vista, ANCHO, ALTO);
+        URL logoResource = Main.class.getResource("/images/chemlab-logo.png");
+        if (logoResource == null) {
+            throw new IllegalStateException("No se encontró el icono de ChemLab");
+        }
+        stage.getIcons().add(new Image(logoResource.toExternalForm()));
 
         stage.setTitle("ChemLab - Laboratorio 2D");
         stage.setMinWidth(800);
         stage.setMinHeight(550);
+        IntroChemLab intro = new IntroChemLab(() -> {
+            VistaJuego2D vista = new VistaJuego2D();
+            stage.getScene().setRoot(vista);
+            vista.requestFocus();
+        });
+        Scene scene = new Scene(intro, ANCHO, ALTO);
         stage.setScene(scene);
         stage.show();
-        vista.requestFocus();
+        intro.iniciar();
     }
 
     public static void main(String[] args) {
