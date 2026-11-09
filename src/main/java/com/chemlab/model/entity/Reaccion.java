@@ -16,6 +16,7 @@ public class Reaccion {
     private final Map<Sustancia, Integer> reactivos;
     private final Map<Sustancia, Integer> productos;
     private final CondicionesRequeridas condicionesRequeridas;
+    private final DefinicionPractica definicionPractica;
 
     public Reaccion(
             String id,
@@ -40,6 +41,18 @@ public class Reaccion {
             Map<Sustancia, Integer> reactivos,
             Map<Sustancia, Integer> productos,
             CondicionesRequeridas condicionesRequeridas
+    ) {
+        this(id, nombre, tipo, reactivos, productos, condicionesRequeridas, null);
+    }
+
+    public Reaccion(
+            String id,
+            String nombre,
+            TipoReaccion tipo,
+            Map<Sustancia, Integer> reactivos,
+            Map<Sustancia, Integer> productos,
+            CondicionesRequeridas condicionesRequeridas,
+            DefinicionPractica definicionPractica
     ) {
         this.id = Objects.requireNonNull(
                 id,
@@ -69,6 +82,7 @@ public class Reaccion {
         this.condicionesRequeridas = condicionesRequeridas != null 
                 ? condicionesRequeridas 
                 : CondicionesRequeridas.sinCondicionesEspeciales();
+        this.definicionPractica = definicionPractica;
 
         if (this.reactivos.isEmpty()) {
             throw new ReaccionInvalidaException(
@@ -144,5 +158,9 @@ public class Reaccion {
 
     public CondicionesRequeridas getCondicionesRequeridas() {
         return condicionesRequeridas;
+    }
+
+    public java.util.Optional<DefinicionPractica> getDefinicionPractica() {
+        return java.util.Optional.ofNullable(definicionPractica);
     }
 }

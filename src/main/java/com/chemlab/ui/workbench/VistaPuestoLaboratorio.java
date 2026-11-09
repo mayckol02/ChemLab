@@ -2,6 +2,7 @@ package com.chemlab.ui.workbench;
 
 import com.chemlab.game.procedure.ProtocoloProcedimiento;
 import com.chemlab.game.world.EstacionLaboratorio;
+import com.chemlab.game.MonitorSeguridadLaboratorio;
 import com.chemlab.model.entity.Reaccion;
 import com.chemlab.model.entity.CondicionesExperimentales;
 import com.chemlab.model.enums.AccionLaboratorio;
@@ -60,6 +61,9 @@ public final class VistaPuestoLaboratorio extends BorderPane {
     private final Label labelEstado = new Label("EQUIPO EN ESPERA");
     private final Label labelPaso = new Label();
     private final Label labelCondiciones = new Label();
+    private final Label labelObservacion = new Label();
+    private final Label labelSeguridad = new Label();
+    private final Label labelRetroalimentacion = new Label();
     private final Label estadoTraslado = new Label();
     private final Button fichaMuestra = new Button();
     private PanelInteraccionProcedimiento interaccion;
@@ -203,15 +207,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
                 : protocolo.nombreEstado().toUpperCase(Locale.ROOT));
         labelPaso.getStyleClass().add("workbench-step");
         labelPaso.setWrapText(true);
-        labelCondiciones.setText(modoDificil
-                ? condicionesActuales == null ? "Condiciones actuales no disponibles."
-                : String.format(Locale.ROOT, "ACTUALES  %.0f °C     ·     %.3f atm\nATMÓSFERA  %s",
-                        condicionesActuales.getTemperatura(), condicionesActuales.getPresion(),
-                        condicionesActuales.getAtmosfera())
-                : String.format(Locale.ROOT,
-                        "OBJETIVO  %.0f °C     ·     %.3f atm\nATMÓSFERA  %s",
-                        protocolo.temperaturaObjetivo(), protocolo.presionObjetivo(),
-                        protocolo.atmosferaRequerida()));
+        labelCondiciones.setText("Lecturas actuales no disponibles.");
         labelCondiciones.getStyleClass().add("workbench-telemetry");
         labelCondiciones.setWrapText(true);
         Label explicacion = new Label(modoDificil
@@ -219,19 +215,26 @@ public final class VistaPuestoLaboratorio extends BorderPane {
                 : protocolo.explicacionManejo());
         explicacion.getStyleClass().add("workbench-instruction");
         explicacion.setWrapText(true);
-        Label fenomeno = new Label(modoDificil
-                ? "El resultado depende de las sustancias, el equipo y las condiciones alcanzadas."
-                : "CAMBIO OBSERVABLE  ·  " + perfilVisual.fenomeno().etiqueta());
-        fenomeno.getStyleClass().add("workbench-phenomenon");
-        fenomeno.setWrapText(true);
+        labelObservacion.setText("FENÓMENO MODELADO  ·  " + perfilVisual.fenomeno().etiqueta()
+                + "\nPRODUCTOS PREVISTOS  ·  " + perfilVisual.resumenProductos()
+                + "\nFASES  ·  " + perfilVisual.resumenFasesProducto());
+        labelObservacion.getStyleClass().add("workbench-phenomenon");
+        labelObservacion.setWrapText(true);
+        labelSeguridad.setWrapText(true);
+        labelSeguridad.setMaxWidth(Double.MAX_VALUE);
 
-        panelLateral.getChildren().addAll(cabeceraRack, labelPaso, labelCondiciones);
+        panelLateral.getChildren().addAll(
+                cabeceraRack, labelPaso, labelCondiciones, labelObservacion, labelSeguridad);
         if (modoDificil) {
             explicacion.getStyleClass().add("workbench-instruction");
             panelLateral.getChildren().add(explicacion);
         } else {
-            panelLateral.getChildren().addAll(fenomeno, explicacion);
+            panelLateral.getChildren().add(explicacion);
         }
+        actualizarTelemetria(
+                condicionesActuales == null ? Double.NaN : condicionesActuales.getTemperatura(),
+                condicionesActuales == null ? Double.NaN : condicionesActuales.getPresion(),
+                null);
         if (transiciones.size() > 1) {
             Label elegir = new Label("OPERACIONES DISPONIBLES");
             elegir.getStyleClass().add("workbench-rack-title");
@@ -251,6 +254,11 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         labelEstado.setPrefHeight(38);
         labelEstado.setMaxHeight(38);
         panelLateral.getChildren().add(labelEstado);
+        labelRetroalimentacion.getStyleClass().add("workbench-feedback");
+        labelRetroalimentacion.setWrapText(true);
+        labelRetroalimentacion.setMaxWidth(Double.MAX_VALUE);
+        labelRetroalimentacion.setVisible(false);
+        labelRetroalimentacion.setManaged(false);
         panelTraslado.getStyleClass().add("workbench-transfer-panel");
         Label tituloTraslado = new Label("MUESTRA DEL PROCESO");
         tituloTraslado.getStyleClass().add("workbench-rack-title");
@@ -285,6 +293,17 @@ public final class VistaPuestoLaboratorio extends BorderPane {
         return area;
     }
 
+    public void mostrarRetroalimentacion(String titulo, String detalle, boolean positiva) {
+        labelRetroalimentacion.setText(titulo + "\n" + detalle);
+        labelRetroalimentacion.getStyleClass().setAll(
+                "workbench-feedback",
+                positiva ? "workbench-feedback-positive" : "workbench-feedback-review"
+        );
+        labelRetroalimentacion.setManaged(true);
+        labelRetroalimentacion.setVisible(true);
+        reconstruirContenidoInteraccion();
+    }
+
     private HBox construirPie() {
         Label objetivo = new Label(modoDificil
                 ? "MODO DIFÍCIL · experimenta sin secuencia obligatoria"
@@ -317,11 +336,77 @@ public final class VistaPuestoLaboratorio extends BorderPane {
 
     public void actualizarProceso(AccionLaboratorio accion, double progreso, String descripcion) {
         lienzo.setProceso(accion, progreso);
+        if (condicionesActuales != null) {
+            double temperatura = condicionesActuales.getTemperatura();
+            double presion = condicionesActuales.getPresion();
+            if (!modoDificil && protocolo != null) {
+                if (accion == AccionLaboratorio.CALENTAR || accion == AccionLaboratorio.ENFRIAR) {
+                    temperatura = interpolar(protocolo.temperaturaActual(),
+                            protocolo.temperaturaObjetivo(), progreso);
+                } else if (accion == AccionLaboratorio.COMPRIMIR
+                        || accion == AccionLaboratorio.DESCOMPRIMIR) {
+                    presion = interpolar(protocolo.presionActual(),
+                            protocolo.presionObjetivo(), progreso);
+                }
+            }
+            actualizarTelemetria(temperatura, presion, accion);
+        }
         if (accion == AccionLaboratorio.MONTAR_EQUIPO && progreso >= 1) {
             sistemaEvaporacionMontado = true;
             lienzo.renderizar();
         }
         labelEstado.setText(descripcion.toUpperCase(Locale.ROOT));
+    }
+
+    public void anticiparOperacion(AccionLaboratorio accion) {
+        if (condicionesActuales != null) {
+            actualizarTelemetria(
+                    condicionesActuales.getTemperatura(),
+                    condicionesActuales.getPresion(),
+                    accion);
+        }
+    }
+
+    private void actualizarTelemetria(double temperatura, double presion, AccionLaboratorio accion) {
+        if (condicionesActuales == null || !Double.isFinite(temperatura) || !Double.isFinite(presion)) {
+            labelCondiciones.setText("Lecturas actuales no disponibles.");
+            labelObservacion.setText("El estado de la muestra no se puede evaluar sin lecturas.");
+            labelSeguridad.setText("AVISOS EDUCATIVOS NO DISPONIBLES");
+            labelSeguridad.getStyleClass().setAll("workbench-safety", "workbench-safety-alert");
+            return;
+        }
+
+        StringBuilder telemetria = new StringBuilder(String.format(Locale.ROOT,
+                "ACTUALES  %.0f °C  ·  %.3f atm  ·  pH %.1f\nATMÓSFERA  %s",
+                temperatura, presion, condicionesActuales.getPh(), condicionesActuales.getAtmosfera()));
+        if (!modoDificil && protocolo != null) {
+            telemetria.append(String.format(Locale.ROOT,
+                    "\nOBJETIVO  %.0f °C  ·  %.3f atm",
+                    protocolo.temperaturaObjetivo(), protocolo.presionObjetivo()));
+        }
+        labelCondiciones.setText(telemetria.toString());
+
+        CondicionesExperimentales lectura = new CondicionesExperimentales(
+                temperatura, presion, condicionesActuales.getPh(), condicionesActuales.getAtmosfera());
+        MonitorSeguridadLaboratorio.Informe informe = MonitorSeguridadLaboratorio.analizar(
+                lectura, reaccion.getCondicionesRequeridas(), accion);
+        labelObservacion.setText("FENÓMENO MODELADO  ·  " + perfilVisual.fenomeno().etiqueta()
+                + "\nREACTIVOS  ·  " + perfilVisual.resumenReactivos()
+                + "\nPRODUCTOS PREVISTOS  ·  " + perfilVisual.resumenProductos()
+                + "\nFASES DE PRODUCTO  ·  " + perfilVisual.resumenFasesProducto()
+                + "\n" + informe.estadoParametros());
+
+        boolean hayAdvertencias = !informe.advertencias().isEmpty();
+        labelSeguridad.setText(hayAdvertencias
+                ? "ALERTA EDUCATIVA · SIMULACIÓN\n" + String.join("\n", informe.advertencias())
+                : "SIN ALERTAS SIMULADAS ACTIVAS\nEsta lectura no certifica condiciones de seguridad reales.");
+        labelSeguridad.getStyleClass().setAll(
+                "workbench-safety",
+                hayAdvertencias ? "workbench-safety-alert" : "workbench-safety-clear");
+    }
+
+    private double interpolar(double inicio, double fin, double progreso) {
+        return inicio + (fin - inicio) * progreso;
     }
 
     public void redibujar() {
@@ -380,6 +465,7 @@ public final class VistaPuestoLaboratorio extends BorderPane {
     private void reconstruirContenidoInteraccion() {
         contenidoInteraccion.getChildren().clear();
         if (transferenciaRequerida || muestraEnPuesto) contenidoInteraccion.getChildren().add(panelTraslado);
+        if (labelRetroalimentacion.isVisible()) contenidoInteraccion.getChildren().add(labelRetroalimentacion);
         if (interaccion != null) contenidoInteraccion.getChildren().add(interaccion);
     }
 

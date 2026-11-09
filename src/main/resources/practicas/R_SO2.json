@@ -1,0 +1,130 @@
+{
+  "idReaccion" : "R_SO2",
+  "practica" : {
+    "dificultad" : "INTERMEDIO",
+    "aprendizaje" : "Analiza Oxidación del azufre y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar SO₂ (Dióxido de azufre)",
+      "producto" : "SO2",
+      "gramos" : 51.25280000000001
+    },
+    "equipo" : {
+      "nombre" : "Cámara de Combustión Sellada",
+      "tipo" : "HORNO",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 400.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "OXIGENO"
+    },
+    "materiales" : [ {
+      "sustancia" : "S",
+      "gramos" : 32.065
+    }, {
+      "sustancia" : "O2",
+      "gramos" : 32.0
+    } ],
+    "etapas" : [ {
+      "id" : "IGNICION",
+      "nombre" : "IGNICION",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [IGNICION], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_REACCION_TERMICA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "COMPLETADO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [COMPLETADO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "CARGADO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [CARGADO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "PREPARACION",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [PREPARACION], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "IGNICION",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "ACTIVAR_IGNICION",
+        "siguiente" : "IGNICION"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      } ]
+    }
+  }
+}

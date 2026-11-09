@@ -44,7 +44,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void debeGuardarYCargarUnExperimento() {
-        Experimento original = fabrica.crearExperimentoSintesisAgua();
+        Experimento original = crearExperimento("R_H2O");
 
         repositorio.guardar(original);
         Optional<Experimento> cargado = repositorio.cargar(original.getId());
@@ -62,7 +62,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void debePreservarNombreDelObjetivo() {
-        Experimento exp = fabrica.crearExperimentoSintesisAmoniaco();
+        Experimento exp = crearExperimento("R_NH3");
         repositorio.guardar(exp);
 
         Experimento cargado = repositorio.cargar(exp.getId()).orElseThrow();
@@ -74,7 +74,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void debePreservarSustanciaObjetivo() {
-        Experimento exp = fabrica.crearExperimentoSintesisNaCl();
+        Experimento exp = crearExperimento("R_NaCl");
         repositorio.guardar(exp);
 
         Experimento cargado = repositorio.cargar(exp.getId()).orElseThrow();
@@ -86,7 +86,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void debePreservarCondicionesTemperatura() {
-        Experimento exp = fabrica.crearExperimentoSintesisAmoniaco();
+        Experimento exp = crearExperimento("R_NH3");
         repositorio.guardar(exp);
 
         Experimento cargado = repositorio.cargar(exp.getId()).orElseThrow();
@@ -99,7 +99,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void debePreservarEquipo() {
-        Experimento exp = fabrica.crearExperimentoCombustionCarbono();
+        Experimento exp = crearExperimento("R_CO2");
         repositorio.guardar(exp);
 
         Experimento cargado = repositorio.cargar(exp.getId()).orElseThrow();
@@ -109,7 +109,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void debePreservarInventario() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
+        Experimento exp = crearExperimento("R_H2O");
         repositorio.guardar(exp);
 
         Experimento cargado = repositorio.cargar(exp.getId()).orElseThrow();
@@ -126,7 +126,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void experimentoGuardadoNoIniciadoDebeCargarseSinIniciar() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
+        Experimento exp = crearExperimento("R_H2O");
         assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
 
         repositorio.guardar(exp);
@@ -137,7 +137,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void experimentoEnProgresoDebeCargarseCorrecto() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
+        Experimento exp = crearExperimento("R_H2O");
         exp.iniciar();
         assertEquals(EstadoExperimento.EN_PROGRESO, exp.getEstado());
 
@@ -149,7 +149,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void experimentoFallidoDebeCargarseCorrecto() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
+        Experimento exp = crearExperimento("R_H2O");
         exp.iniciar();
         exp.fallar();
         assertEquals(EstadoExperimento.FALLIDO, exp.getEstado());
@@ -172,9 +172,9 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void listarTodosDebeRetornarTodosLosGuardados() {
-        repositorio.guardar(fabrica.crearExperimentoSintesisAgua());
-        repositorio.guardar(fabrica.crearExperimentoCombustionCarbono());
-        repositorio.guardar(fabrica.crearExperimentoSintesisAmoniaco());
+        repositorio.guardar(crearExperimento("R_H2O"));
+        repositorio.guardar(crearExperimento("R_CO2"));
+        repositorio.guardar(crearExperimento("R_NH3"));
 
         List<Experimento> lista = repositorio.listarTodos();
         assertEquals(3, lista.size(), "Debe haber exactamente 3 experimentos guardados");
@@ -182,7 +182,7 @@ class RepositorioExperimentoJsonTest {
 
     @Test
     void sobreescribirUnExperimentoDebeActualizarloAlCargar() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
+        Experimento exp = crearExperimento("R_H2O");
         repositorio.guardar(exp);   // estado NO_INICIADO
         exp.iniciar();               // cambiamos estado
         repositorio.guardar(exp);   // guardamos de nuevo (misma ID)
@@ -205,5 +205,10 @@ class RepositorioExperimentoJsonTest {
                 NullPointerException.class,
                 () -> new RepositorioExperimentoJson(directorioTemporal.toString(), null)
         );
+    }
+
+    private Experimento crearExperimento(String idReaccion) {
+        return fabrica.crearExperimentoParaReaccion(
+                catalogo.buscarReaccion(idReaccion).orElseThrow());
     }
 }

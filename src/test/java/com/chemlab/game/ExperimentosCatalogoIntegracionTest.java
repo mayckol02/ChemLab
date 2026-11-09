@@ -36,7 +36,7 @@ class ExperimentosCatalogoIntegracionTest {
     }
 
     private void verificarRecorridoCompleto(ModoJuego modo, Reaccion reaccion) {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion.getId());
+        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
         Experimento experimento = fabrica.crearExperimentoParaReaccion(reaccion);
         SesionJuego sesion = FabricaSesion.crearSesion(catalogo, automata, modo);
         sesion.iniciar(experimento, reaccion, automata);

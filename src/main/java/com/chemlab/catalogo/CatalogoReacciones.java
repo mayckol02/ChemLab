@@ -167,8 +167,11 @@ public final class CatalogoReacciones {
         return new Reaccion(
                 reaccion.getId(),
                 reaccion.getNombre(),
+                reaccion.getTipo(),
                 copiarSustancias(reaccion.getReactivos()),
-                copiarSustancias(reaccion.getProductos())
+                copiarSustancias(reaccion.getProductos()),
+                reaccion.getCondicionesRequeridas(),
+                reaccion.getDefinicionPractica().orElse(null)
         );
     }
 

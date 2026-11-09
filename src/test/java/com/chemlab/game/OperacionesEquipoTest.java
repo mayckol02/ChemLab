@@ -28,7 +28,7 @@ class OperacionesEquipoTest {
         PlanificadorEstacionesProcedimiento planificador = new PlanificadorEstacionesProcedimiento();
 
         for (Reaccion reaccion : catalogo.obtenerReacciones()) {
-            AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion.getId());
+            AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
             TipoEquipo equipoPrincipal = fabrica.crearExperimentoParaReaccion(reaccion).getEquipo().getTipo();
             for (EstadoQuimico estado : automata.getEstados()) {
                 for (var transicion : automata.getTransicionesDesdeEstado(estado)) {
@@ -58,7 +58,9 @@ class OperacionesEquipoTest {
 
     @Test
     void separacionDeSolucionSalinaSigueLaSecuenciaDeMontajeCargaYEvaporacion() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion("R_SEPARACION_NACL");
+        var reaccion = CatalogoQuimico.predeterminado()
+                .buscarReaccion("R_SEPARACION_NACL").orElseThrow();
+        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
         CondicionesExperimentales condiciones =
                 new CondicionesExperimentales(25, 1, 7, Atmosfera.AIRE);
         Inventario inventario = new Inventario();

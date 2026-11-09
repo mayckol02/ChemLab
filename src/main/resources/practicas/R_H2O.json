@@ -1,0 +1,168 @@
+{
+  "idReaccion" : "R_H2O",
+  "practica" : {
+    "dificultad" : "INTERMEDIO",
+    "aprendizaje" : "Analiza Formación de agua y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar al menos 18 g de agua",
+      "producto" : "H2O",
+      "gramos" : 18.0
+    },
+    "equipo" : {
+      "nombre" : "Matraz Erlenmeyer 500 mL",
+      "tipo" : "MATRAZ",
+      "capacidad" : 500.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 25.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "AIRE"
+    },
+    "materiales" : [ {
+      "sustancia" : "O2",
+      "gramos" : 32.0
+    }, {
+      "sustancia" : "H2",
+      "gramos" : 4.032
+    } ],
+    "etapas" : [ {
+      "id" : "PREPARADO",
+      "nombre" : "Gases Introducidos en el Matraz",
+      "equipoTecnico" : "Matraz de Síntesis Sellado",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Cámara sellada",
+      "catalizadorEstado" : "Chispero montado",
+      "explicacion" : "Los gases están dentro del matraz pero se encuentran ESTRATIFICADOS POR DENSIDAD (el H₂ es 16 veces más liviano que el O₂). Aún no forman una mezcla homogénea reactiva.",
+      "siguienteAccion" : "Ejecuta 'MEZCLAR' para agitar los gases y formar una mezcla estequiométrica uniforme 2:1.",
+      "reactivosFases" : [ {
+        "formula" : "H2",
+        "nombre" : "Hidrógeno",
+        "rol" : "Capa superior",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Gas ligero",
+        "descripcionUbicacion" : "Estratificado en parte alta"
+      }, {
+        "formula" : "O2",
+        "nombre" : "Oxígeno",
+        "rol" : "Capa inferior",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Gas denso",
+        "descripcionUbicacion" : "Estratificado en parte baja"
+      } ]
+    }, {
+      "id" : "MEZCLADO",
+      "nombre" : "Mezcla Estequiométrica Homogénea (Gas detonante)",
+      "equipoTecnico" : "Matraz de Síntesis Sellado",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Mezcla uniforme H₂/O₂",
+      "catalizadorEstado" : "Chispero listo",
+      "explicacion" : "Los gases están MEZCLADOS HOMOGÉNEAMENTE a nivel molecular. La mezcla es termodinámicamente reactiva pero cinéticamente estable a 25 °C por la barrera de activación.",
+      "siguienteAccion" : "Ejecuta 'CALENTAR' o 'ACTIVAR_IGNICION' para proporcionar la chispa de energía de activación.",
+      "reactivosFases" : [ {
+        "formula" : "2H2 + O2",
+        "nombre" : "Mezcla de gas detonante",
+        "rol" : "Reactivos homogéneos",
+        "estadoManejo" : "MEZCLADO_HOMOGENEO",
+        "faseFisica" : "Gas homogéneo a 25°C",
+        "descripcionUbicacion" : "Distribuido uniformemente"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "Agua H₂O Líquida Obtenida",
+      "equipoTecnico" : "Matraz Erlenmeyer con agua pura condensada",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Condensación a temperatura ambiente",
+      "catalizadorEstado" : "Finalizado",
+      "explicacion" : "El vapor se ha condensado en agua líquida pura en el fondo del matraz.",
+      "siguienteAccion" : "Síntesis completada con éxito.",
+      "reactivosFases" : [ {
+        "formula" : "H2O",
+        "nombre" : "Agua pura",
+        "rol" : "Producto condensado",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Líquido transparente (1.00 g/mL)",
+        "descripcionUbicacion" : "Fondo del matraz"
+      } ]
+    }, {
+      "id" : "REACCIONANDO",
+      "nombre" : "Combustión Rápida Exotérmica",
+      "equipoTecnico" : "Matraz de Síntesis (Llama invisible de hidrógeno)",
+      "temperaturaActual" : 600.0,
+      "temperaturaObjetivo" : 600.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Vapor de agua generado",
+      "catalizadorEstado" : "Reacción en cadena",
+      "explicacion" : "La ignición desencadenó la reacción en cadena: 2H₂ + O₂ → 2H₂O + 572 kJ. La temperatura se eleva momentáneamente y se forma vapor de agua que empieza a empañar el cristal.",
+      "siguienteAccion" : "Ejecuta 'FINALIZAR' para enfriar y condensar el agua líquida pura.",
+      "reactivosFases" : [ {
+        "formula" : "H2O (vapor)",
+        "nombre" : "Vapor de agua sobrecalentado",
+        "rol" : "Producto gaseoso",
+        "estadoManejo" : "EN_REACCION_TERMICA",
+        "faseFisica" : "Gas caliente",
+        "descripcionUbicacion" : "Llenando el volumen del matraz"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación de Reactivos Gaseosos",
+      "equipoTecnico" : "Matraz Erlenmeyer con tapón sellado y chispero",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "Los gases H₂ y O₂ se encuentran en contenedores SEPARADOS. El hidrógeno es altamente inflamable y debe manejarse con cuidado antes de conectarlo a la cámara de mezcla.",
+      "siguienteAccion" : "Ejecuta 'CARGAR_REACTIVO' para introducir ambos gases en el matraz de síntesis sellado.",
+      "reactivosFases" : [ {
+        "formula" : "H2",
+        "nombre" : "Gas Hidrógeno",
+        "rol" : "Combustible (2 mol)",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Gas diatómico",
+        "descripcionUbicacion" : "Cilindro de H₂"
+      }, {
+        "formula" : "O2",
+        "nombre" : "Gas Oxígeno",
+        "rol" : "Comburente (1 mol)",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Gas diatómico",
+        "descripcionUbicacion" : "Cilindro de O₂"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "PREPARADO",
+        "terminal" : "MEZCLAR",
+        "siguiente" : "MEZCLADO"
+      }, {
+        "origen" : "MEZCLADO",
+        "terminal" : "CALENTAR",
+        "siguiente" : "REACCIONANDO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "REACCIONANDO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "PREPARADO"
+      } ]
+    }
+  }
+}

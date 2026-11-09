@@ -3,6 +3,7 @@ package com.chemlab.ui.notebook;
 import com.chemlab.automata.AutomataQuimico;
 import com.chemlab.automata.EstadoQuimico;
 import com.chemlab.automata.TransicionQuimica;
+import com.chemlab.catalogo.CatalogoQuimico;
 import com.chemlab.factory.FabricaAutomata;
 import com.chemlab.game.ProgresoAutomata;
 import com.chemlab.game.SesionJuego;
@@ -42,9 +43,13 @@ final class LienzoAutomataRutas extends Canvas {
             Set<String> estadosRevelados
     ) {}
 
-    LienzoAutomataRutas(List<ProtocoloProcedimiento.InfoRutaSintesis> rutas, SesionJuego sesion) {
+    LienzoAutomataRutas(
+            List<ProtocoloProcedimiento.InfoRutaSintesis> rutas,
+            SesionJuego sesion,
+            CatalogoQuimico catalogo
+    ) {
         List<RutaVisual> visuales = rutas.stream()
-                .map(ruta -> construirRuta(ruta, sesion))
+                .map(ruta -> construirRuta(ruta, sesion, catalogo))
                 .toList();
         double alto = Math.max(180, 112 + visuales.size() * ESPACIO_FILA);
         setWidth(ANCHO);
@@ -52,8 +57,15 @@ final class LienzoAutomataRutas extends Canvas {
         dibujar(visuales, alto);
     }
 
-    private RutaVisual construirRuta(ProtocoloProcedimiento.InfoRutaSintesis ruta, SesionJuego sesion) {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(ruta.idReaccion());
+    private RutaVisual construirRuta(
+            ProtocoloProcedimiento.InfoRutaSintesis ruta,
+            SesionJuego sesion,
+            CatalogoQuimico catalogo
+    ) {
+        AutomataQuimico automata = catalogo.buscarReaccion(ruta.idReaccion())
+                .map(FabricaAutomata::crearAutomataParaReaccion)
+                .orElseThrow(() -> new IllegalStateException(
+                        "La ruta referencia una reacción inexistente: " + ruta.idReaccion()));
         Map<String, EstadoQuimico> porId = new LinkedHashMap<>();
         ArrayDeque<EstadoQuimico> pendientes = new ArrayDeque<>();
         Set<String> visitados = new LinkedHashSet<>();

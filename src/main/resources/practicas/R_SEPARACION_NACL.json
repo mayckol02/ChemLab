@@ -1,0 +1,189 @@
+{
+  "idReaccion" : "R_SEPARACION_NACL",
+  "practica" : {
+    "dificultad" : "INTERMEDIO",
+    "aprendizaje" : "Analiza Separación de solución salina por evaporación y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar H₂O (Agua)",
+      "producto" : "H2O",
+      "gramos" : 14.412
+    },
+    "equipo" : {
+      "nombre" : "Aparato de Evaporación y Cristalización",
+      "tipo" : "MATRAZ",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 100.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "AIRE"
+    },
+    "materiales" : [ {
+      "sustancia" : "NaCl_AC",
+      "gramos" : 58.44
+    } ],
+    "etapas" : [ {
+      "id" : "EVAPORANDO",
+      "nombre" : "Evaporación y condensación",
+      "equipoTecnico" : "Matraz de evaporación con condensador y colector",
+      "temperaturaActual" : 100.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "El agua se evapora de la solución y condensa en el recipiente colector; los cristales de NaCl permanecen en el matraz.",
+      "siguienteAccion" : "Ejecuta 'FINALIZAR' para detener el calentamiento y recuperar ambas fracciones.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl",
+        "nombre" : "Cristales de cloruro de sodio",
+        "rol" : "Residuo recuperable",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Sólido cristalino",
+        "descripcionUbicacion" : "En el matraz"
+      }, {
+        "formula" : "H2O",
+        "nombre" : "Agua condensada",
+        "rol" : "Destilado",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Líquido",
+        "descripcionUbicacion" : "En el recipiente colector"
+      } ]
+    }, {
+      "id" : "SISTEMA_MONTADO",
+      "nombre" : "Sistema de evaporación instalado",
+      "equipoTecnico" : "Matraz de evaporación con condensador y recipiente colector",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "El matraz está conectado al condensador y al recipiente colector; aún no se ha transferido la muestra.",
+      "siguienteAccion" : "Ejecuta 'CARGAR_REACTIVO' para cargar la solución salina.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl(ac)",
+        "nombre" : "Solución salina",
+        "rol" : "Muestra a separar",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Disolución acuosa",
+        "descripcionUbicacion" : "Lista para cargar en el matraz"
+      } ]
+    }, {
+      "id" : "METODO_ELEGIDO",
+      "nombre" : "Método de evaporación seleccionado",
+      "equipoTecnico" : "Matraz de evaporación con condensador",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "El montaje permite calentar la solución y conducir el vapor de agua al condensador, mientras la sal queda en el matraz.",
+      "siguienteAccion" : "Ejecuta 'CALENTAR' para evaporar el agua.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl(ac)",
+        "nombre" : "Solución salina",
+        "rol" : "Muestra a separar",
+        "estadoManejo" : "DISUELTO_EN_SOLVENTE",
+        "faseFisica" : "Disolución acuosa",
+        "descripcionUbicacion" : "En calentamiento controlado"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "Separación completada",
+      "equipoTecnico" : "Sistema de evaporación y condensación",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "La solución salina se separó en cristales de NaCl y agua condensada.",
+      "siguienteAccion" : "Separación completada.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl",
+        "nombre" : "Cloruro de sodio",
+        "rol" : "Sólido recuperado",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Cristales",
+        "descripcionUbicacion" : "En el matraz"
+      }, {
+        "formula" : "H2O",
+        "nombre" : "Agua",
+        "rol" : "Destilado recuperado",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Líquido",
+        "descripcionUbicacion" : "En el colector"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "Solución salina cargada",
+      "equipoTecnico" : "Matraz de evaporación con condensador",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "La muestra está en el matraz conectado al condensador. Selecciona evaporación para retirar el agua como vapor y recuperarla por condensación.",
+      "siguienteAccion" : "Ejecuta 'SELECCIONAR_METODO' y elige evaporación.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl(ac)",
+        "nombre" : "Solución salina",
+        "rol" : "Muestra a separar",
+        "estadoManejo" : "DISUELTO_EN_SOLVENTE",
+        "faseFisica" : "Disolución acuosa",
+        "descripcionUbicacion" : "Dentro del matraz"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación del sistema de evaporación",
+      "equipoTecnico" : "Matraz de evaporación con condensador y recipiente colector",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "Antes de introducir la muestra, monta el matraz de evaporación, el condensador y el recipiente colector.",
+      "siguienteAccion" : "Ejecuta 'MONTAR_EQUIPO' para instalar el sistema de evaporación.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl(ac)",
+        "nombre" : "Solución salina",
+        "rol" : "Muestra a separar",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Disolución acuosa",
+        "descripcionUbicacion" : "En recipiente de transferencia"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "EVAPORANDO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      }, {
+        "origen" : "SISTEMA_MONTADO",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      }, {
+        "origen" : "METODO_ELEGIDO",
+        "terminal" : "CALENTAR",
+        "siguiente" : "EVAPORANDO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "SELECCIONAR_METODO",
+        "siguiente" : "METODO_ELEGIDO"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "MONTAR_EQUIPO",
+        "siguiente" : "SISTEMA_MONTADO"
+      } ]
+    }
+  }
+}

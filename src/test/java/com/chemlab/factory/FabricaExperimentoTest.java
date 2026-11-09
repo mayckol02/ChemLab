@@ -2,6 +2,7 @@ package com.chemlab.factory;
 
 import com.chemlab.catalogo.CatalogoQuimico;
 import com.chemlab.model.entity.Experimento;
+import com.chemlab.model.enums.Atmosfera;
 import com.chemlab.model.enums.EstadoExperimento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,148 +11,78 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FabricaExperimentoTest {
 
+    private CatalogoQuimico catalogo;
     private FabricaExperimento fabrica;
 
     @BeforeEach
     void setUp() {
-        fabrica = new FabricaExperimento(CatalogoQuimico.predeterminado());
+        catalogo = CatalogoQuimico.predeterminado();
+        fabrica = new FabricaExperimento(catalogo);
     }
 
     @Test
-    void debeCrearExperimentoSintesisAguaConInventarioPrecargado() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
+    void cadaReaccionDelCatalogoCreaExperimentoDesdeSuDefinicionJson() {
+        for (var reaccion : catalogo.obtenerReacciones()) {
+            Experimento experimento = fabrica.crearExperimentoParaReaccion(reaccion);
 
-        assertNotNull(exp);
-        assertEquals("Síntesis de Agua", exp.getNombre());
-        assertFalse(exp.getInventario().estaVacio(),
-                "El inventario debe tener reactivos precargados");
-        assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
+            assertNotNull(experimento);
+            assertEquals(reaccion.getNombre(), experimento.getNombre());
+            assertFalse(experimento.getInventario().estaVacio(), reaccion.getId());
+            assertNotNull(experimento.getEquipo(), reaccion.getId());
+            assertNotNull(experimento.getCondiciones(), reaccion.getId());
+            assertTrue(reaccion.getProductos().containsKey(experimento.getObjetivo().getSustanciaEsperada()),
+                    reaccion.getId());
+            assertEquals(EstadoExperimento.NO_INICIADO, experimento.getEstado());
+        }
     }
 
     @Test
-    void debeCrearExperimentoCombustionCarbonoConInventarioPrecargado() {
-        Experimento exp = fabrica.crearExperimentoCombustionCarbono();
-
-        assertNotNull(exp);
-        assertEquals("Combustión de Carbono", exp.getNombre());
-        assertFalse(exp.getInventario().estaVacio(),
-                "El inventario debe tener reactivos precargados");
-        assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
+    void objetivosDePracticasRepresentativasSalenDeJson() {
+        assertEquals("H2O", crear("R_H2O").getObjetivo().getSustanciaEsperada().getId());
+        assertEquals("CO2", crear("R_CO2").getObjetivo().getSustanciaEsperada().getId());
+        assertEquals("NH3", crear("R_NH3").getObjetivo().getSustanciaEsperada().getId());
+        assertEquals("NaCl", crear("R_NaCl").getObjetivo().getSustanciaEsperada().getId());
+        assertEquals("Fe2O3", crear("R_Fe2O3").getObjetivo().getSustanciaEsperada().getId());
+        assertEquals("HCl", crear("R_HCl").getObjetivo().getSustanciaEsperada().getId());
     }
 
     @Test
-    void debeCrearExperimentoSintesisAmoniacoConInventarioPrecargado() {
-        Experimento exp = fabrica.crearExperimentoSintesisAmoniaco();
-
-        assertNotNull(exp);
-        assertEquals("Síntesis de Amoníaco (Haber-Bosch)", exp.getNombre());
-        assertFalse(exp.getInventario().estaVacio(),
-                "El inventario debe tener N2 y H2 precargados");
-        assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
+    void idsDeExperimentosSonUnicos() {
+        assertNotEquals(crear("R_H2O").getId(), crear("R_H2O").getId());
     }
 
     @Test
-    void experimentoAmoniacoDebeApuntarAlNH3ComoObjetivo() {
-        Experimento exp = fabrica.crearExperimentoSintesisAmoniaco();
-        assertEquals(
-                "NH3",
-                exp.getObjetivo().getSustanciaEsperada().getId()
-        );
+    void practicaMgOConfiguraObjetivoEquipoCondicionesYMaterialesDesdeJson() {
+        Experimento experimento = crear("R_MgO");
+        var magnesio = catalogo.buscarSustancia("Mg").orElseThrow();
+
+        assertEquals("MgO", experimento.getObjetivo().getSustanciaEsperada().getId());
+        assertEquals(64.4864, experimento.getObjetivo().getCantidadMinima(), 0.0001);
+        assertEquals("Cámara de Combustión Sellada", experimento.getEquipo().getNombre());
+        assertEquals(400, experimento.getCondiciones().getTemperatura());
+        assertEquals(Atmosfera.OXIGENO, experimento.getCondiciones().getAtmosfera());
+        assertEquals(48.61, experimento.getInventario().obtenerCantidad(magnesio), 0.0001);
     }
 
     @Test
-    void debeCrearExperimentoSintesisNaClConInventarioPrecargado() {
-        Experimento exp = fabrica.crearExperimentoSintesisNaCl();
+    void modoDificilConservaEquipoObjetivoYCondicionesPeroIniciaSinInventario() {
+        var reaccion = catalogo.buscarReaccion("R_NH3").orElseThrow();
+        Experimento experimento = fabrica.crearExperimentoVacioParaReaccion(reaccion);
 
-        assertNotNull(exp);
-        assertEquals("Síntesis de Cloruro de Sodio", exp.getNombre());
-        assertFalse(exp.getInventario().estaVacio(),
-                "El inventario debe tener Na y Cl2 precargados");
-        assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
-    }
-
-    @Test
-    void experimentoNaClDebeApuntarAlNaClComoObjetivo() {
-        Experimento exp = fabrica.crearExperimentoSintesisNaCl();
-        assertEquals(
-                "NaCl",
-                exp.getObjetivo().getSustanciaEsperada().getId()
-        );
-    }
-
-    @Test
-    void debeCrearExperimentoOxidacionHierroConInventarioPrecargado() {
-        Experimento exp = fabrica.crearExperimentoOxidacionHierro();
-
-        assertNotNull(exp);
-        assertEquals("Oxidación del Hierro", exp.getNombre());
-        assertFalse(exp.getInventario().estaVacio(),
-                "El inventario debe tener Fe y O2 precargados");
-        assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
-    }
-
-    @Test
-    void experimentoHierroDebeApuntarAlFe2O3ComoObjetivo() {
-        Experimento exp = fabrica.crearExperimentoOxidacionHierro();
-        assertEquals(
-                "Fe2O3",
-                exp.getObjetivo().getSustanciaEsperada().getId()
-        );
-    }
-
-    @Test
-    void cadaExperimentoDebeGenerarIdUnico() {
-        Experimento exp1 = fabrica.crearExperimentoSintesisAgua();
-        Experimento exp2 = fabrica.crearExperimentoSintesisAgua();
-
-        assertNotEquals(
-                exp1.getId(),
-                exp2.getId(),
-                "Cada llamada debe generar un id único"
-        );
-    }
-
-    @Test
-    void experimentoSintesisDebeApuntarAlH2OComoObjetivo() {
-        Experimento exp = fabrica.crearExperimentoSintesisAgua();
-        assertEquals(
-                "H2O",
-                exp.getObjetivo().getSustanciaEsperada().getId()
-        );
+        assertTrue(experimento.getInventario().estaVacio());
+        assertEquals("NH3", experimento.getObjetivo().getSustanciaEsperada().getId());
+        assertEquals("Reactor de alta presión", experimento.getEquipo().getNombre());
+        assertEquals(25, experimento.getCondiciones().getTemperatura());
+        assertEquals(Atmosfera.AIRE, experimento.getCondiciones().getAtmosfera());
     }
 
     @Test
     void debeFallarSiElCatalogoEsNull() {
-        assertThrows(
-                NullPointerException.class,
-                () -> new FabricaExperimento(null)
-        );
+        assertThrows(NullPointerException.class, () -> new FabricaExperimento(null));
     }
 
-    @Test
-    void debeCrearExperimentoSintesisHClConInventarioPrecargado() {
-        Experimento exp = fabrica.crearExperimentoSintesisHCl();
-
-        assertNotNull(exp);
-        assertEquals("Síntesis de Ácido Clorhídrico", exp.getNombre());
-        assertFalse(exp.getInventario().estaVacio(),
-                "El inventario debe tener H2 y Cl2 precargados");
-        assertEquals(EstadoExperimento.NO_INICIADO, exp.getEstado());
-    }
-
-    @Test
-    void experimentoHClDebeApuntarAlHClComoObjetivo() {
-        Experimento exp = fabrica.crearExperimentoSintesisHCl();
-        assertEquals(
-                "HCl",
-                exp.getObjetivo().getSustanciaEsperada().getId()
-        );
-    }
-
-    @Test
-    void experimentoHClDebeTenerCantidadMinimaDeHClDefinida() {
-        Experimento exp = fabrica.crearExperimentoSintesisHCl();
-        assertTrue(exp.getObjetivo().getCantidadMinima() > 0,
-                "La cantidad mínima de HCl debe ser positiva");
+    private Experimento crear(String idReaccion) {
+        return fabrica.crearExperimentoParaReaccion(
+                catalogo.buscarReaccion(idReaccion).orElseThrow());
     }
 }

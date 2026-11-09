@@ -31,10 +31,10 @@ public final class PresentadorModoTutorial implements PresentadorModoJuego {
 
     @Override
     public ProtocoloProcedimiento.InfoPasoProcedimiento obtenerProtocolo(
-            String reaccionId,
+            Reaccion reaccion,
             String estadoId
     ) {
-        return ProtocoloProcedimiento.obtenerProtocoloPaso(reaccionId, estadoId);
+        return ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion, estadoId);
     }
 
     @Override
@@ -51,10 +51,15 @@ public final class PresentadorModoTutorial implements PresentadorModoJuego {
     public String textoExperimento(Reaccion reaccion, Experimento experimento,
                                    EstacionLaboratorio estacion, boolean disponibles) {
         String nombreEstacion = estacion == null ? "sin puesto asignado" : estacion.nombre();
+        String detalleEducativo = reaccion.getDefinicionPractica()
+                .map(definicion -> "\nDificultad: " + definicion.dificultad()
+                        + "\nAprendizaje: " + definicion.aprendizaje())
+                .orElse("");
         return "Seleccionado: " + reaccion.getNombre()
                 + "\nPrimera estación: " + nombreEstacion
                 + "\nObjetivo: " + experimento.getObjetivo().getDescripcion()
-                + (disponibles ? "" : "\nFaltan reactivos marcados en el almacén.");
+                + (disponibles ? "" : "\nFaltan reactivos marcados en el almacén.")
+                + detalleEducativo;
     }
 
     @Override

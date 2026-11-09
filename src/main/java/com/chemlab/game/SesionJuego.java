@@ -75,6 +75,14 @@ public final class SesionJuego {
             CatalogoQuimico catalogo,
             EjecutorAutomataQuimico ejecutorAutomata
     ) {
+        this(catalogo, ejecutorAutomata, new CuadernoLaboratorio());
+    }
+
+    public SesionJuego(
+            CatalogoQuimico catalogo,
+            EjecutorAutomataQuimico ejecutorAutomata,
+            CuadernoLaboratorio cuaderno
+    ) {
         this.catalogo = Objects.requireNonNull(
                 catalogo,
                 "El catálogo no puede ser null"
@@ -85,7 +93,7 @@ public final class SesionJuego {
                 "El ejecutor de autómata no puede ser null"
         );
 
-        this.cuaderno = new CuadernoLaboratorio();
+        this.cuaderno = Objects.requireNonNull(cuaderno, "El cuaderno no puede ser null");
         this.motorLibre = new MotorExperimentacionLibre(catalogo);
         this.activa = false;
     }

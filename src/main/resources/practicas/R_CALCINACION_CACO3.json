@@ -1,0 +1,127 @@
+{
+  "idReaccion" : "R_CALCINACION_CACO3",
+  "practica" : {
+    "dificultad" : "AVANZADO",
+    "aprendizaje" : "Analiza Calcinación de carbonato de calcio (Ruta 2 CaO y CO₂) y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar CaO (Óxido de calcio)",
+      "producto" : "CaO",
+      "gramos" : 44.8616
+    },
+    "equipo" : {
+      "nombre" : "Horno Mufla de Calcinación (900°C)",
+      "tipo" : "HORNO",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 900.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "AIRE"
+    },
+    "materiales" : [ {
+      "sustancia" : "CaCO3",
+      "gramos" : 100.086
+    } ],
+    "etapas" : [ {
+      "id" : "COMPLETADO",
+      "nombre" : "COMPLETADO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [COMPLETADO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "CARGADO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [CARGADO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "PREPARACION",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [PREPARACION], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "CALCINANDO",
+      "nombre" : "CALCINANDO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [CALCINANDO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_REACCION_TERMICA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "CALENTAR",
+        "siguiente" : "CALCINANDO"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      }, {
+        "origen" : "CALCINANDO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      } ]
+    }
+  }
+}

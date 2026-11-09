@@ -1,0 +1,251 @@
+{
+  "idReaccion" : "R_DIAMANTE_HPHT",
+  "practica" : {
+    "dificultad" : "AVANZADO",
+    "aprendizaje" : "Analiza Producción de diamante HPHT y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar C (Diamante) (Diamante)",
+      "producto" : "DIAMANTE",
+      "gramos" : 9.6088
+    },
+    "equipo" : {
+      "nombre" : "Prensa Cúbica HPHT (5.5 GPa / 1500°C)",
+      "tipo" : "REACTOR",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 1500.0,
+      "presion" : 55000.0,
+      "ph" : 7.0,
+      "atmosfera" : "VACIO"
+    },
+    "materiales" : [ {
+      "sustancia" : "C",
+      "gramos" : 12.011
+    }, {
+      "sustancia" : "Ni",
+      "gramos" : 20.0
+    }, {
+      "sustancia" : "Fe",
+      "gramos" : 20.0
+    } ],
+    "etapas" : [ {
+      "id" : "PRESURIZADO",
+      "nombre" : "Presurización Extrema a 5.5 GPa",
+      "equipoTecnico" : "Prensa Cúbica HPHT (Presión hiperbárica activa)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1500.0,
+      "presionActual" : 55000.0,
+      "presionObjetivo" : 55000.0,
+      "atmosferaRequerida" : "Cámara a 5.5 GPa",
+      "catalizadorEstado" : "Fe-Ni bajo 55,000 atm",
+      "explicacion" : "El sistema completo ha alcanzado 5.5 GPa (55,000 atmósferas). A esta presión colosal, el diamante es la fase termodinámicamente más estable del carbono (curva Berman-Simon), pero los átomos aún no tienen energía cinética para reorganizarse.",
+      "siguienteAccion" : "Ejecuta 'CALENTAR' para encender el calefactor resistivo de grafito y alcanzar 1500 °C.",
+      "reactivosFases" : [ {
+        "formula" : "C",
+        "nombre" : "Grafito",
+        "rol" : "Fuente de Carbono",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido bajo 5.5 GPa",
+        "descripcionUbicacion" : "Comprimido en zona caliente"
+      }, {
+        "formula" : "Fe/Ni",
+        "nombre" : "Aleación Fe-Ni",
+        "rol" : "Flujo Metálico Solvente",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido bajo 5.5 GPa",
+        "descripcionUbicacion" : "Soporte hiperbárico"
+      }, {
+        "formula" : "C (semilla)",
+        "nombre" : "Semilla de Diamante",
+        "rol" : "Núcleo de Cristalización",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido bajo 5.5 GPa",
+        "descripcionUbicacion" : "Zona termodinámica estable"
+      } ]
+    }, {
+      "id" : "CATALIZADOR",
+      "nombre" : "Flujo Metálico en Contacto Sólido",
+      "equipoTecnico" : "Prensa Cúbica HPHT (Ensamble completo)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1500.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 55000.0,
+      "atmosferaRequerida" : "Atmósfera protegida",
+      "catalizadorEstado" : "Fe-Ni intercalado en contacto",
+      "explicacion" : "Los reactivos se encuentran ahora EN CONTACTO FÍSICO DIRECTO en fase sólida (Grafito ↔ Flujo Fe/Ni ↔ Semilla). El metal aún no está fundido, por lo que no hay difusión de carbono todavía.",
+      "siguienteAccion" : "Ejecuta 'COMPRIMIR' para accionar los 6 pistones hidráulicos y alcanzar 5.5 GPa (55,000 atm).",
+      "reactivosFases" : [ {
+        "formula" : "C",
+        "nombre" : "Grafito",
+        "rol" : "Fuente de Carbono",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido",
+        "descripcionUbicacion" : "En contacto con cara superior del flujo"
+      }, {
+        "formula" : "Fe/Ni",
+        "nombre" : "Aleación Fe-Ni",
+        "rol" : "Flujo Metálico Solvente",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido (intercalado)",
+        "descripcionUbicacion" : "En contacto directo con grafito y semilla"
+      }, {
+        "formula" : "C (semilla)",
+        "nombre" : "Semilla de Diamante",
+        "rol" : "Núcleo de Cristalización",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido",
+        "descripcionUbicacion" : "En contacto con cara inferior del flujo"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "Diamante HPHT Sintetizado",
+      "equipoTecnico" : "Prensa Cúbica HPHT (Despresurizada y fría)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Ambiente",
+      "catalizadorEstado" : "Recuperado y reciclable",
+      "explicacion" : "El proceso HPHT ha concluido exitosamente. Tras disolver la envoltura metálica residual en baño ácido, se recupera el diamante monocristalino sintético de máxima dureza.",
+      "siguienteAccion" : "Experimento completado. Registrado en el cuaderno de laboratorio.",
+      "reactivosFases" : [ {
+        "formula" : "DIAMANTE",
+        "nombre" : "Diamante Sintético HPHT",
+        "rol" : "Producto Monocristalino",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Sólido cristalino (dureza 10 Mohs)",
+        "descripcionUbicacion" : "Monocristal octaédrico recuperado"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "Carga en Compartimentos Aislados",
+      "equipoTecnico" : "Prensa Cúbica HPHT (Cámara cargada)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1500.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 55000.0,
+      "atmosferaRequerida" : "Cámara sellada",
+      "catalizadorEstado" : "Pendiente de inserción",
+      "explicacion" : "El grafito y la semilla de diamante están CARGADOS EN COMPARTIMENTOS SEPARADOS en los extremos de la celda de alta presión. Permanecen aislados para que no exista grafitización desordenada sin el solvente metálico regulador.",
+      "siguienteAccion" : "Ejecuta 'AGREGAR_CATALIZADOR' para intercalar la lámina de flujo solvente Fe-Ni entre el grafito y la semilla.",
+      "reactivosFases" : [ {
+        "formula" : "C",
+        "nombre" : "Grafito",
+        "rol" : "Fuente de Carbono",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Sólido (cilindro de alta pureza)",
+        "descripcionUbicacion" : "Zona superior de la cápsula térmica"
+      }, {
+        "formula" : "C (semilla)",
+        "nombre" : "Semilla de Diamante",
+        "rol" : "Núcleo de Cristalización",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Sólido (orientación [100])",
+        "descripcionUbicacion" : "Base inferior más fría de la celda"
+      }, {
+        "formula" : "Fe/Ni",
+        "nombre" : "Aleación Fe-Ni",
+        "rol" : "Flujo Metálico Solvente",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Sólido",
+        "descripcionUbicacion" : "Listo para inserción intermedia"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación de la Celda HPHT",
+      "equipoTecnico" : "Prensa Cúbica HPHT de Carburo de Tungsteno (5.5 GPa)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1500.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 55000.0,
+      "atmosferaRequerida" : "Vacío / Gas Inerte",
+      "catalizadorEstado" : "Flujo Fe-Ni en lámina",
+      "explicacion" : "Los reactivos se encuentran TOTALMENTE SEPARADOS en la mesa de preparación. El grafito purificado se troquela en cilindros densos, mientras la semilla de diamante monocristalino se inspecciona para orientar su cara cristalina [100]. Aún no se introducen a la celda.",
+      "siguienteAccion" : "Ejecuta 'CARGAR_REACTIVO' para introducir el grafito y la semilla en la celda cúbica.",
+      "reactivosFases" : [ {
+        "formula" : "C",
+        "nombre" : "Grafito",
+        "rol" : "Fuente de Carbono",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Sólido (pastilla prensada)",
+        "descripcionUbicacion" : "En mesa de preparación"
+      }, {
+        "formula" : "Fe/Ni",
+        "nombre" : "Aleación Fe-Ni",
+        "rol" : "Flujo Metálico Solvente",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Sólido (lámina metálica)",
+        "descripcionUbicacion" : "En contenedor sellado"
+      }, {
+        "formula" : "C (semilla)",
+        "nombre" : "Semilla de Diamante",
+        "rol" : "Núcleo de Cristalización",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Sólido (microcristal natural)",
+        "descripcionUbicacion" : "En cápsula de molibdeno"
+      } ]
+    }, {
+      "id" : "CRECIMIENTO",
+      "nombre" : "Disolución en Flujo Líquido y Crecimiento Epitaxial",
+      "equipoTecnico" : "Prensa Cúbica HPHT (1500°C / 5.5 GPa)",
+      "temperaturaActual" : 1500.0,
+      "temperaturaObjetivo" : 1500.0,
+      "presionActual" : 55000.0,
+      "presionObjetivo" : 55000.0,
+      "atmosferaRequerida" : "Condiciones de síntesis sostenidas",
+      "catalizadorEstado" : "Fe-Ni fundido disolviendo carbono",
+      "explicacion" : "A 1500 °C el flujo Fe-Ni se FUNDE POR COMPLETO. El grafito metaestable se disuelve continuamente en el metal fundido. Por gradiente térmico (~30°C/mm), el carbono disuelto migra hacia la semilla más fría donde precipita en red tetraédrica pura sp³ como DIAMANTE.",
+      "siguienteAccion" : "Ejecuta 'FINALIZAR' para enfriar la celda, liberar la presión hidráulica y extraer el diamante.",
+      "reactivosFases" : [ {
+        "formula" : "C (disuelto)",
+        "nombre" : "Carbono atómico",
+        "rol" : "En transporte",
+        "estadoManejo" : "DISUELTO_EN_SOLVENTE",
+        "faseFisica" : "Disolución atómica en metal fundido",
+        "descripcionUbicacion" : "Difundiéndose por gradiente térmico"
+      }, {
+        "formula" : "Fe/Ni",
+        "nombre" : "Aleación Fe-Ni",
+        "rol" : "Solvente Metálico Líquido",
+        "estadoManejo" : "DISUELTO_EN_SOLVENTE",
+        "faseFisica" : "Líquido fundido a 1500°C",
+        "descripcionUbicacion" : "Medio de transporte activo"
+      }, {
+        "formula" : "C (diamante)",
+        "nombre" : "Diamante en crecimiento",
+        "rol" : "Cristalización activa",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Sólido cristalino sp³",
+        "descripcionUbicacion" : "Precipitándose sobre la semilla"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "PRESURIZADO",
+        "terminal" : "CALENTAR",
+        "siguiente" : "CRECIMIENTO"
+      }, {
+        "origen" : "CATALIZADOR",
+        "terminal" : "COMPRIMIR",
+        "siguiente" : "PRESURIZADO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "AGREGAR_CATALIZADOR",
+        "siguiente" : "CATALIZADOR"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      }, {
+        "origen" : "CRECIMIENTO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      } ]
+    }
+  }
+}

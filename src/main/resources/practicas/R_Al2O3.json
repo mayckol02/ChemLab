@@ -1,0 +1,130 @@
+{
+  "idReaccion" : "R_Al2O3",
+  "practica" : {
+    "dificultad" : "INTERMEDIO",
+    "aprendizaje" : "Analiza Formación de óxido de aluminio y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar Al₂O₃ (Óxido de aluminio)",
+      "producto" : "Al2O3",
+      "gramos" : 163.136
+    },
+    "equipo" : {
+      "nombre" : "Horno de Oxidación Térmica (800°C)",
+      "tipo" : "HORNO",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 800.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "OXIGENO"
+    },
+    "materiales" : [ {
+      "sustancia" : "O2",
+      "gramos" : 96.0
+    }, {
+      "sustancia" : "Al",
+      "gramos" : 107.928
+    } ],
+    "etapas" : [ {
+      "id" : "OXIDANDO",
+      "nombre" : "OXIDANDO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [OXIDANDO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_REACCION_TERMICA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "COMPLETADO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [COMPLETADO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "CARGADO",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [CARGADO], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "PREPARACION",
+      "equipoTecnico" : "Equipo experimental de laboratorio",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 100.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Controlada",
+      "catalizadorEstado" : "Estándar",
+      "explicacion" : "En esta etapa [PREPARACION], los componentes químicos se manipulan siguiendo el protocolo experimental estándar, asegurando que las condiciones de temperatura, presión y atmósfera permitan la transición adecuada de los reactivos.",
+      "siguienteAccion" : "Sigue la secuencia de acciones indicada en la Guía del Proceso.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "OXIDANDO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "CALENTAR",
+        "siguiente" : "OXIDANDO"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      } ]
+    }
+  }
+}

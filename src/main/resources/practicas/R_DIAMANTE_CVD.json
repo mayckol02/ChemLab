@@ -1,0 +1,196 @@
+{
+  "idReaccion" : "R_DIAMANTE_CVD",
+  "practica" : {
+    "dificultad" : "AVANZADO",
+    "aprendizaje" : "Analiza Producción de diamante CVD y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar C (Diamante) (Diamante)",
+      "producto" : "DIAMANTE",
+      "gramos" : 9.6088
+    },
+    "equipo" : {
+      "nombre" : "Reactor CVD con Plasma de Microondas (2.45 GHz)",
+      "tipo" : "CAMARA_SELLADA",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 1000.0,
+      "presion" : 0.05,
+      "ph" : 7.0,
+      "atmosfera" : "VACIO"
+    },
+    "materiales" : [ {
+      "sustancia" : "H2",
+      "gramos" : 20.0
+    }, {
+      "sustancia" : "CH4",
+      "gramos" : 16.043
+    } ],
+    "etapas" : [ {
+      "id" : "PLASMA",
+      "nombre" : "Plasma de Microondas Ionizado",
+      "equipoTecnico" : "Reactor CVD (Plasma violeta de hidrógeno activo)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1000.0,
+      "presionActual" : 0.05,
+      "presionObjetivo" : 0.05,
+      "atmosferaRequerida" : "Plasma de hidrógeno/metano",
+      "catalizadorEstado" : "Radicales H* y CH₃* activos",
+      "explicacion" : "El plasma de microondas ha IONIZADO la mezcla gaseosa. El hidrógeno se disocia en radicales atómicos H* que destruyen selectivamente cualquier grafito (sp²). Los radicales metilo (CH₃*) están listos para anclarse en red sp³.",
+      "siguienteAccion" : "Ejecuta 'CALENTAR' para calentar el portamuestras del sustrato a 1000 °C.",
+      "reactivosFases" : [ {
+        "formula" : "H*",
+        "nombre" : "Radicales de Hidrógeno",
+        "rol" : "Agente Decapante sp²",
+        "estadoManejo" : "ACTIVADO_EN_PLASMA",
+        "faseFisica" : "Plasma ionizado",
+        "descripcionUbicacion" : "Bola de plasma sobre el sustrato"
+      }, {
+        "formula" : "CH3*",
+        "nombre" : "Radicales Metilo",
+        "rol" : "Precursor de Carbono sp³",
+        "estadoManejo" : "ACTIVADO_EN_PLASMA",
+        "faseFisica" : "Plasma ionizado",
+        "descripcionUbicacion" : "Radicales activados químicamente"
+      }, {
+        "formula" : "Sustrato",
+        "nombre" : "Sustrato de Si",
+        "rol" : "Soporte Térmico",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Sólido a temperatura ambiente",
+        "descripcionUbicacion" : "Listo para calentamiento inductivo"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "Diamante CVD Monocristalino Obtenido",
+      "equipoTecnico" : "Cámara CVD (Enfriada y purgada)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Ambiente purgado con N₂",
+      "catalizadorEstado" : "Finalizado",
+      "explicacion" : "Se ha obtenido una lámina monocristalina de Diamante CVD de alta pureza óptica y electrónica sin impurezas metálicas.",
+      "siguienteAccion" : "Experimento completado y registrado.",
+      "reactivosFases" : [ {
+        "formula" : "DIAMANTE",
+        "nombre" : "Diamante CVD Puro",
+        "rol" : "Película Monocristalina Óptica",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Sólido de pureza óptica 100%",
+        "descripcionUbicacion" : "Película lista sobre el sustrato"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "Evacuación a Vacío e Inyección de Mezcla Gaseosa",
+      "equipoTecnico" : "Cámara de Vacío CVD (0.05 atm)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1000.0,
+      "presionActual" : 0.05,
+      "presionObjetivo" : 0.05,
+      "atmosferaRequerida" : "Vacío tenue CH₄/H₂",
+      "catalizadorEstado" : "Microondas apagadas",
+      "explicacion" : "La cámara se ha evacuado a baja presión (0.05 atm). Los gases se encuentran MEZCLADOS DE FORMA HOMOGÉNEA en flujo continuo (99% H₂ y 1% CH₄). El flujo de H₂ es masivo porque decapará cualquier enlace no diamante que se intente formar.",
+      "siguienteAccion" : "Ejecuta 'INICIAR_PLASMA' para encender el generador de microondas (2.45 GHz) y crear el plasma ionizado.",
+      "reactivosFases" : [ {
+        "formula" : "CH4/H2",
+        "nombre" : "Mezcla CH₄ (1%) + H₂ (99%)",
+        "rol" : "Gases Precursores",
+        "estadoManejo" : "MEZCLADO_HOMOGENEO",
+        "faseFisica" : "Gas a baja presión (0.05 atm)",
+        "descripcionUbicacion" : "Mezcla uniforme en la cámara"
+      }, {
+        "formula" : "Sustrato",
+        "nombre" : "Oblea de Crecimiento",
+        "rol" : "Superficie de Deposición",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Sólido en portamuestras",
+        "descripcionUbicacion" : "Fijado bajo la antena de microondas"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación del Reactor de Plasma CVD",
+      "equipoTecnico" : "Cámara de Deposición Química de Vapor (CVD Microondas)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 1000.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 0.05,
+      "atmosferaRequerida" : "Cámara abierta",
+      "catalizadorEstado" : "Plasma inactivo",
+      "explicacion" : "Los gases precursores (Metano e Hidrógeno) se encuentran aislados en cilindros externos de alta pureza. El sustrato de silicio está preparado y pulido con polvo de diamante en la mesa de montaje.",
+      "siguienteAccion" : "Ejecuta 'CARGAR_REACTIVO' para montar el sustrato en el portamuestras del reactor.",
+      "reactivosFases" : [ {
+        "formula" : "CH4",
+        "nombre" : "Metano",
+        "rol" : "Gas Precursor (Carbono)",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Gas puro en cilindro",
+        "descripcionUbicacion" : "Línea de alimentación de gas"
+      }, {
+        "formula" : "H2",
+        "nombre" : "Hidrógeno",
+        "rol" : "Gas Portador y Decapante",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Gas puro en cilindro",
+        "descripcionUbicacion" : "Línea de alimentación de gas"
+      }, {
+        "formula" : "Sustrato",
+        "nombre" : "Oblea de Silicio/Diamante",
+        "rol" : "Sustrato de Crecimiento",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Sólido pulido",
+        "descripcionUbicacion" : "En portamuestras limpio"
+      } ]
+    }, {
+      "id" : "DEPOSICION",
+      "nombre" : "Deposición Epitaxial Capa por Capa",
+      "equipoTecnico" : "Reactor CVD (1000°C / Plasma activo)",
+      "temperaturaActual" : 1000.0,
+      "temperaturaObjetivo" : 1000.0,
+      "presionActual" : 0.05,
+      "presionObjetivo" : 0.05,
+      "atmosferaRequerida" : "Plasma activo a 1000°C",
+      "catalizadorEstado" : "Radicales en deposición continua",
+      "explicacion" : "A 1000 °C en la superficie del sustrato, los radicales de carbono se DEPOSITAN ÁTOMO POR ÁTOMO en orientación tetraédrica diamantina. El gas efluente H₂ se evacúa continuamente.",
+      "siguienteAccion" : "Ejecuta 'FINALIZAR' para cortar el plasma, enfriar bajo vacío y retirar el diamante CVD puro.",
+      "reactivosFases" : [ {
+        "formula" : "C (sp³)",
+        "nombre" : "Carbono diamantino",
+        "rol" : "Película en Crecimiento",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Sólido monocristalino",
+        "descripcionUbicacion" : "Creciendo epitaxialmente sobre el sustrato"
+      }, {
+        "formula" : "H2",
+        "nombre" : "Gas Hidrógeno",
+        "rol" : "Gas Efluente",
+        "estadoManejo" : "ACTIVADO_EN_PLASMA",
+        "faseFisica" : "Gas caliente efluente",
+        "descripcionUbicacion" : "Evacuado por la bomba de vacío"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "PLASMA",
+        "terminal" : "CALENTAR",
+        "siguiente" : "DEPOSICION"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "INICIAR_PLASMA",
+        "siguiente" : "PLASMA"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      }, {
+        "origen" : "DEPOSICION",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      } ]
+    }
+  }
+}

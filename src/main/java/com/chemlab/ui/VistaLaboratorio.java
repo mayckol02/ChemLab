@@ -64,6 +64,7 @@ public final class VistaLaboratorio extends BorderPane
             DateTimeFormatter.ofPattern("HH:mm:ss");
 
     // --- Estado de juego ---
+    private final CatalogoQuimico catalogo;
     private final SesionJuego sesion;
     private final FabricaExperimento fabricaExperimento;
 
@@ -111,7 +112,7 @@ public final class VistaLaboratorio extends BorderPane
     private Label labelProximaAccion;
 
     public VistaLaboratorio() {
-        CatalogoQuimico catalogo = CatalogoQuimico.predeterminado();
+        this.catalogo = CatalogoQuimico.predeterminado();
         this.sesion = FabricaSesion.crearSesion(
                 catalogo,
                 FabricaAutomata.crearAutomataEstandar()
@@ -513,8 +514,10 @@ public final class VistaLaboratorio extends BorderPane
             return;
         }
 
-        ProtocoloProcedimiento.InfoPasoProcedimiento info =
-                ProtocoloProcedimiento.obtenerProtocoloPaso(idReaccion, estadoAutomataId);
+        ProtocoloProcedimiento.InfoPasoProcedimiento info = ProtocoloProcedimiento.obtenerProtocoloPaso(
+                catalogo.buscarReaccion(idReaccion).orElseThrow(() ->
+                        new IllegalArgumentException("La reacción no existe en el catálogo: " + idReaccion)),
+                estadoAutomataId);
 
         labelEquipoMonitor.setText("🏭 Equipo: " + info.equipoTecnico());
         labelTempMonitor.setText(String.format("🌡 Temp: %.0f / %.0f °C", info.temperaturaActual(), info.temperaturaObjetivo()));
@@ -647,7 +650,7 @@ public final class VistaLaboratorio extends BorderPane
 
         experimentoSeleccionado = fabricaExperimento.crearExperimentoParaReaccion(r);
         reaccionSeleccionada = r;
-        automataSeleccionado = FabricaAutomata.crearAutomataParaReaccion(r.getId());
+        automataSeleccionado = FabricaAutomata.crearAutomataParaReaccion(r);
         log("→ Experimento seleccionado: " + r.getNombre() + " (" + formatearEcuacion(r) + ")");
 
         labelNombreExperimento.setText(
@@ -746,50 +749,24 @@ public final class VistaLaboratorio extends BorderPane
             return;
         }
 
-        CatalogoQuimico catalogo = CatalogoQuimico.predeterminado();
-
-        switch (tipo) {
-            case "agua" -> {
-                experimentoSeleccionado = fabricaExperimento.crearExperimentoSintesisAgua();
-                reaccionSeleccionada = catalogo.buscarReaccion("R_H2O").orElseThrow();
-                automataSeleccionado = FabricaAutomata.crearAutomataEstandar();
-                log("→ Experimento seleccionado: Síntesis de Agua (2H₂ + O₂ → 2H₂O)");
-            }
-            case "carbono" -> {
-                experimentoSeleccionado = fabricaExperimento.crearExperimentoCombustionCarbono();
-                reaccionSeleccionada = catalogo.buscarReaccion("R_CO2").orElseThrow();
-                automataSeleccionado = FabricaAutomata.crearAutomataSimple();
-                log("→ Experimento seleccionado: Combustión de Carbono (C + O₂ → CO₂)");
-            }
-            case "amoniaco" -> {
-                experimentoSeleccionado = fabricaExperimento.crearExperimentoSintesisAmoniaco();
-                reaccionSeleccionada = catalogo.buscarReaccion("R_NH3").orElseThrow();
-                automataSeleccionado = FabricaAutomata.crearAutomataHaberBosch();
-                log("→ Experimento seleccionado: Síntesis de Amoníaco — Haber-Bosch");
-            }
-            case "nacl" -> {
-                experimentoSeleccionado = fabricaExperimento.crearExperimentoSintesisNaCl();
-                reaccionSeleccionada = catalogo.buscarReaccion("R_NaCl").orElseThrow();
-                automataSeleccionado = FabricaAutomata.crearAutomataSimple();
-                log("→ Experimento seleccionado: Síntesis de Cloruro de Sodio");
-            }
-            case "hcl" -> {
-                experimentoSeleccionado = fabricaExperimento.crearExperimentoSintesisHCl();
-                reaccionSeleccionada = catalogo.buscarReaccion("R_HCl").orElseThrow();
-                automataSeleccionado = FabricaAutomata.crearAutomataSintesisHCl();
-                log("→ Experimento seleccionado: Síntesis de Ácido Clorhídrico (H₂ + Cl₂ → 2HCl)");
-            }
-            case "hierro" -> {
-                experimentoSeleccionado = fabricaExperimento.crearExperimentoOxidacionHierro();
-                reaccionSeleccionada = catalogo.buscarReaccion("R_Fe2O3").orElseThrow();
-                automataSeleccionado = FabricaAutomata.crearAutomataOxidacionHierro();
-                log("→ Experimento seleccionado: Oxidación del Hierro");
-            }
-            default -> {
-                log("⚠ Tipo de experimento desconocido: " + tipo);
-                return;
-            }
+        String idReaccion = switch (tipo) {
+            case "agua" -> "R_H2O";
+            case "carbono" -> "R_CO2";
+            case "amoniaco" -> "R_NH3";
+            case "nacl" -> "R_NaCl";
+            case "hcl" -> "R_HCl";
+            case "hierro" -> "R_Fe2O3";
+            default -> null;
+        };
+        if (idReaccion == null) {
+            log("⚠ Tipo de experimento desconocido: " + tipo);
+            return;
         }
+        reaccionSeleccionada = catalogo.buscarReaccion(idReaccion).orElseThrow(() ->
+                new IllegalStateException("La reacción no existe en el catálogo: " + idReaccion));
+        experimentoSeleccionado = fabricaExperimento.crearExperimentoParaReaccion(reaccionSeleccionada);
+        automataSeleccionado = FabricaAutomata.crearAutomataParaReaccion(reaccionSeleccionada);
+        log("→ Experimento seleccionado: " + reaccionSeleccionada.getNombre());
 
         labelNombreExperimento.setText(
                 "Experimento: " + experimentoSeleccionado.getNombre()
@@ -1328,12 +1305,11 @@ public final class VistaLaboratorio extends BorderPane
         contenedor.setPadding(new Insets(12));
         contenedor.setStyle("-fx-background-color: #0d1117; -fx-border-color: #30363d; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
 
-        AutomataQuimico automataRef = null;
-        if (reg.getIdProceso() != null) {
-            try {
-                automataRef = FabricaAutomata.crearAutomataParaReaccion(reg.getIdProceso());
-            } catch (Exception ignored) {}
-        }
+        AutomataQuimico automataRef = reg.getIdProceso() == null
+                ? null
+                : catalogo.buscarReaccion(reg.getIdProceso())
+                        .map(FabricaAutomata::crearAutomataParaReaccion)
+                        .orElse(null);
 
         List<EstadoQuimico> estados = (automataRef != null)
                 ? obtenerSecuenciaEstados(automataRef)

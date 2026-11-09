@@ -31,7 +31,7 @@ class PresentadorModoJuegoTest {
     @Test
     void tutorialConservaExperimentoYTransicionesGuiadas() {
         PresentadorModoJuego presentador = PresentadorModoJuego.para(ModoJuego.TUTORIAL);
-        var automata = FabricaAutomata.crearAutomataParaReaccion(reaccion.getId());
+        var automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
 
         assertInstanceOf(PresentadorModoTutorial.class, presentador);
         assertFalse(presentador.permiteAccesoLibre());
@@ -45,12 +45,12 @@ class PresentadorModoJuegoTest {
     @Test
     void dificilUsaExperimentoVacioYOperacionesDelEquipoSinProtocolo() {
         PresentadorModoJuego presentador = PresentadorModoJuego.para(ModoJuego.DIFICIL);
-        var automata = FabricaAutomata.crearAutomataParaReaccion(reaccion.getId());
+        var automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
 
         assertInstanceOf(PresentadorModoDificil.class, presentador);
         assertTrue(presentador.permiteAccesoLibre());
         assertFalse(presentador.mostrarEcuacionReaccion());
-        assertNull(presentador.obtenerProtocolo(reaccion.getId(), automata.getEstadoActual().getId()));
+        assertNull(presentador.obtenerProtocolo(reaccion, automata.getEstadoActual().getId()));
         assertTrue(presentador.crearExperimento(fabrica, reaccion)
                 .getInventario().obtenerCantidades().isEmpty());
 

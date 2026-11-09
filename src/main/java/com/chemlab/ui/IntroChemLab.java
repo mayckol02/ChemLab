@@ -9,8 +9,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
@@ -30,7 +30,6 @@ public final class IntroChemLab extends StackPane {
 
     private static final String LOGO_RESOURCE = "/images/chemlab-logo.png";
     private static final String AUDIO_RESOURCE = "/audio/intro.mp3";
-    private static final Duration DURACION = Duration.seconds(7);
 
     private final Runnable alTerminar;
     private final ImageView logo;
@@ -41,8 +40,6 @@ public final class IntroChemLab extends StackPane {
     private final Label subtitulo;
     private final Label indicacion;
     private final Label audioInfo;
-    private final Region progreso;
-    private final Region fundido;
     private final Timeline animacion;
     private final EventHandler<KeyEvent> manejadorTeclado = this::alPresionarTecla;
     private Scene escena;
@@ -109,10 +106,10 @@ public final class IntroChemLab extends StackPane {
         StackPane.setMargin(subtitulo, new Insets(0, 16, 102, 16));
         subtitulo.setOpacity(0);
 
-        indicacion = new Label("Presiona una tecla o haz clic para continuar");
+        indicacion = new Label("Presiona ESPACIO o ENTER para continuar");
         indicacion.setTextFill(Color.web("#819493"));
         indicacion.setFont(Font.font("Segoe UI", 11));
-        indicacion.setOpacity(0);
+        indicacion.setOpacity(1);
 
         audioInfo = new Label();
         audioInfo.setTextFill(Color.web("#617472"));
@@ -123,23 +120,8 @@ public final class IntroChemLab extends StackPane {
         StackPane.setAlignment(pie, Pos.BOTTOM_CENTER);
         StackPane.setMargin(pie, new Insets(0, 16, 36, 16));
 
-        progreso = new Region();
-        progreso.setMinHeight(3);
-        progreso.setPrefHeight(3);
-        progreso.setMaxHeight(3);
-        progreso.setStyle("-fx-background-color: #53d88c;");
-        progreso.setMaxWidth(Double.MAX_VALUE);
-        progreso.setScaleX(0);
-        StackPane.setAlignment(progreso, Pos.BOTTOM_LEFT);
-
-        fundido = new Region();
-        fundido.setStyle("-fx-background-color: #050b10;");
-        fundido.setOpacity(0);
-        fundido.setMinSize(0, 0);
-        fundido.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        fundido.setMouseTransparent(true);
         getChildren().addAll(halo, orbit, tablaPeriodica, logo, fichasAnimadas,
-                marca, subtitulo, pie, progreso, fundido);
+                marca, subtitulo, pie);
 
         animacion = new Timeline(
                 new KeyFrame(Duration.ZERO,
@@ -155,10 +137,7 @@ public final class IntroChemLab extends StackPane {
                         new KeyValue(fichaLantano.scaleYProperty(), 0.32),
                         new KeyValue(marca.opacityProperty(), 0),
                         new KeyValue(subtitulo.opacityProperty(), 0),
-                        new KeyValue(indicacion.opacityProperty(), 0),
-                        new KeyValue(audioInfo.opacityProperty(), 0),
-                        new KeyValue(progreso.scaleXProperty(), 0),
-                        new KeyValue(fundido.opacityProperty(), 0)),
+                        new KeyValue(audioInfo.opacityProperty(), 0)),
                 new KeyFrame(Duration.seconds(1.1),
                         new KeyValue(fichaCarbono.translateXProperty(), -280, Interpolator.EASE_BOTH),
                         new KeyValue(fichaCarbono.translateYProperty(), -6, Interpolator.EASE_BOTH),
@@ -177,15 +156,7 @@ public final class IntroChemLab extends StackPane {
                         new KeyValue(fichaLantano.opacityProperty(), 0, Interpolator.EASE_OUT),
                         new KeyValue(logo.opacityProperty(), 1, Interpolator.EASE_OUT)),
                 new KeyFrame(Duration.seconds(3.2),
-                        new KeyValue(indicacion.opacityProperty(), 1, Interpolator.EASE_OUT),
-                        new KeyValue(audioInfo.opacityProperty(), 1, Interpolator.EASE_OUT)),
-                new KeyFrame(Duration.seconds(6.6),
-                        new KeyValue(fundido.opacityProperty(), 0)),
-                new KeyFrame(DURACION,
-                        new KeyValue(progreso.scaleXProperty(), 1, Interpolator.LINEAR),
-                        new KeyValue(fundido.opacityProperty(), 1, Interpolator.EASE_IN)));
-        setOnMouseClicked(event -> terminar());
-        setOnKeyPressed(event -> terminar());
+                        new KeyValue(audioInfo.opacityProperty(), 1, Interpolator.EASE_OUT)));
     }
 
     private static Pane crearTablaPeriodica() {
@@ -244,7 +215,6 @@ public final class IntroChemLab extends StackPane {
         escena = Objects.requireNonNull(getScene(), "La intro debe estar asociada a una escena");
         escena.addEventFilter(KeyEvent.KEY_PRESSED, manejadorTeclado);
         iniciarAudio();
-        animacion.setOnFinished(event -> terminar());
         animacion.playFromStart();
         requestFocus();
     }
@@ -267,8 +237,10 @@ public final class IntroChemLab extends StackPane {
     }
 
     private void alPresionarTecla(KeyEvent event) {
-        terminar();
-        event.consume();
+        if (event.getCode() == KeyCode.SPACE || event.getCode() == KeyCode.ENTER) {
+            terminar();
+            event.consume();
+        }
     }
 
     private void iniciarAudio() {

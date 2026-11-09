@@ -48,6 +48,22 @@ public class CuadernoLaboratorio {
         }
     }
 
+    public void restaurar(
+            Set<String> sustancias,
+            Set<String> procesos,
+            List<RegistroExperimento> registros
+    ) {
+        if (sustancias == null || procesos == null || registros == null) {
+            throw new IllegalArgumentException("El progreso del cuaderno no puede contener null.");
+        }
+        sustancias.forEach(id -> sustanciasDescubiertas.add(
+                java.util.Objects.requireNonNull(id, "El id de sustancia no puede ser null")));
+        procesos.forEach(id -> procesosCompletados.add(
+                java.util.Objects.requireNonNull(id, "El id de proceso no puede ser null")));
+        registros.forEach(registro -> historial.add(
+                java.util.Objects.requireNonNull(registro, "El registro no puede ser null")));
+    }
+
     public boolean haDescubierto(Sustancia sustancia) {
         return sustancia != null && sustanciasDescubiertas.contains(sustancia.getId());
     }

@@ -1,0 +1,192 @@
+{
+  "idReaccion" : "R_NH3",
+  "practica" : {
+    "dificultad" : "AVANZADO",
+    "aprendizaje" : "Analiza Síntesis de amoníaco (Haber-Bosch) y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar al menos 17 g de amoníaco",
+      "producto" : "NH3",
+      "gramos" : 17.0
+    },
+    "equipo" : {
+      "nombre" : "Reactor de alta presión",
+      "tipo" : "REACTOR",
+      "capacidad" : 5000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 450.0,
+      "presion" : 200.0,
+      "ph" : 7.0,
+      "atmosfera" : "NITROGENO"
+    },
+    "materiales" : [ {
+      "sustancia" : "N2",
+      "gramos" : 28.014
+    }, {
+      "sustancia" : "H2",
+      "gramos" : 6.048
+    } ],
+    "etapas" : [ {
+      "id" : "PREPARADO",
+      "nombre" : "Gases Cargados en Proporción 1:3",
+      "equipoTecnico" : "Reactor Haber-Bosch (Cámara de mezcla)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 450.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 200.0,
+      "atmosferaRequerida" : "Mezcla gaseosa N₂/H₂",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "Los gases N₂ y H₂ se han MEZCLADO HOMOGÉNEAMENTE en la cámara en proporción exacta 1:3. Sin catalizador ni compresión, la reacción no puede ocurrir por la enorme fuerza del triple enlace N≡N.",
+      "siguienteAccion" : "Ejecuta 'AGREGAR_CATALIZADOR' para activar el lecho de óxido de hierro promovido con K₂O/Al₂O₃.",
+      "reactivosFases" : [ {
+        "formula" : "N2 + 3H2",
+        "nombre" : "Mezcla estequiométrica",
+        "rol" : "Reactivos cargados",
+        "estadoManejo" : "MEZCLADO_HOMOGENEO",
+        "faseFisica" : "Gas homogéneo",
+        "descripcionUbicacion" : "Mezcla en el bucle de circulación"
+      } ]
+    }, {
+      "id" : "MEZCLADO",
+      "nombre" : "Amoníaco NH₃ Sintetizado",
+      "equipoTecnico" : "Condensador de Amoníaco",
+      "temperaturaActual" : -33.0,
+      "temperaturaObjetivo" : -33.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Gas inerte recuperado",
+      "catalizadorEstado" : "Fe regenerado",
+      "explicacion" : "El amoníaco se ha sintetizado y licuado por condensación criogénica.",
+      "siguienteAccion" : "Experimento completado exitosamente.",
+      "reactivosFases" : [ {
+        "formula" : "NH3",
+        "nombre" : "Amoníaco líquido",
+        "rol" : "Producto final",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Líquido licuado",
+        "descripcionUbicacion" : "Tanque criogénico de almacenamiento"
+      } ]
+    }, {
+      "id" : "COMPRIMIDO",
+      "nombre" : "Compresión Hiperbárica a 200 atm",
+      "equipoTecnico" : "Reactor Haber-Bosch (Compresor multietapa a 200 atm)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 450.0,
+      "presionActual" : 200.0,
+      "presionObjetivo" : 200.0,
+      "atmosferaRequerida" : "N₂ + 3H₂ a 200 atm",
+      "catalizadorEstado" : "Catalizador Fe listo",
+      "explicacion" : "La mezcla de gases se ha COMPRIMIDO a 200 atmósferas. Según el principio de Le Chatelier, la alta presión favorece la formación de amoníaco porque 4 moles de gas se convierten en 2 moles de producto.",
+      "siguienteAccion" : "Ejecuta 'CALENTAR' para calentar el reactor catalítico a 450 °C.",
+      "reactivosFases" : [ {
+        "formula" : "N2 + 3H2",
+        "nombre" : "Gases a 200 atm",
+        "rol" : "Reactivos comprimidos",
+        "estadoManejo" : "MEZCLADO_HOMOGENEO",
+        "faseFisica" : "Gas denso hiperbárico",
+        "descripcionUbicacion" : "En contacto con el lecho de Fe"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "Amoníaco NH₃ Sintetizado",
+      "equipoTecnico" : "Condensador de Amoníaco",
+      "temperaturaActual" : -33.0,
+      "temperaturaObjetivo" : -33.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Gas inerte recuperado",
+      "catalizadorEstado" : "Fe regenerado",
+      "explicacion" : "El amoníaco se ha sintetizado y licuado por condensación criogénica.",
+      "siguienteAccion" : "Experimento completado exitosamente.",
+      "reactivosFases" : [ {
+        "formula" : "NH3",
+        "nombre" : "Amoníaco líquido",
+        "rol" : "Producto final",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Líquido licuado",
+        "descripcionUbicacion" : "Tanque criogénico de almacenamiento"
+      } ]
+    }, {
+      "id" : "REACCIONANDO",
+      "nombre" : "Síntesis Catalítica Heterogénea a 450°C",
+      "equipoTecnico" : "Reactor Catalítico Haber-Bosch (450°C / 200 atm)",
+      "temperaturaActual" : 450.0,
+      "temperaturaObjetivo" : 450.0,
+      "presionActual" : 200.0,
+      "presionObjetivo" : 200.0,
+      "atmosferaRequerida" : "Mezcla en reacción",
+      "catalizadorEstado" : "Catalizador de Fe activo",
+      "explicacion" : "A 450 °C y 200 atm sobre el hierro poroso, las moléculas de N₂ y H₂ se quimisorben en la superficie del catalizador rompiendo el triple enlace N≡N y recombinándose en amoníaco (NH₃).",
+      "siguienteAccion" : "Ejecuta 'FINALIZAR' para condensar el amoníaco a líquido (-33 °C) y recolectarlo.",
+      "reactivosFases" : [ {
+        "formula" : "N2 + 3H2",
+        "nombre" : "Moléculas quimisorbidas",
+        "rol" : "En disociación superficial",
+        "estadoManejo" : "EN_REACCION_TERMICA",
+        "faseFisica" : "Gas en superficie de Fe",
+        "descripcionUbicacion" : "Adsorbidas en la red del catalizador"
+      }, {
+        "formula" : "NH3",
+        "nombre" : "Amoníaco gas",
+        "rol" : "Producto sintetizado",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Gas caliente a 200 atm",
+        "descripcionUbicacion" : "Fluyendo hacia el condensador"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación de Gases Reactivos",
+      "equipoTecnico" : "Reactor de Alta Presión Haber-Bosch",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 450.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 200.0,
+      "atmosferaRequerida" : "Líneas de alimentación",
+      "catalizadorEstado" : "Lecho catalítico en espera",
+      "explicacion" : "El Nitrógeno y el Hidrógeno se encuentran en sus respectivos cilindros de almacenamiento por separado. Deben dosificarse en la estequiometría exacta 1:3 antes de comprimir.",
+      "siguienteAccion" : "Ejecuta 'CARGAR_REACTIVO' para dosificar y cargar los gases en el reactor.",
+      "reactivosFases" : [ {
+        "formula" : "N2",
+        "nombre" : "Nitrógeno",
+        "rol" : "Reactivo (1 mol)",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Gas inerte",
+        "descripcionUbicacion" : "Cilindro presurizado"
+      }, {
+        "formula" : "H2",
+        "nombre" : "Hidrógeno",
+        "rol" : "Reactivo (3 mol)",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Gas combustible",
+        "descripcionUbicacion" : "Cilindro presurizado"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "PREPARADO",
+        "terminal" : "MEZCLAR",
+        "siguiente" : "MEZCLADO"
+      }, {
+        "origen" : "MEZCLADO",
+        "terminal" : "COMPRIMIR",
+        "siguiente" : "COMPRIMIDO"
+      }, {
+        "origen" : "COMPRIMIDO",
+        "terminal" : "CALENTAR",
+        "siguiente" : "REACCIONANDO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "REACCIONANDO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "PREPARADO"
+      } ]
+    }
+  }
+}

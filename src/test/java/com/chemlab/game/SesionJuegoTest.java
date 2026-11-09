@@ -34,7 +34,7 @@ class SesionJuegoTest {
         );
 
         experimento = new FabricaExperimento(catalogo)
-                .crearExperimentoSintesisAgua();
+                .crearExperimentoParaReaccion(catalogo.buscarReaccion("R_H2O").orElseThrow());
 
         reaccion = catalogo.buscarReaccion("R_H2O").orElseThrow();
     }
@@ -65,7 +65,7 @@ class SesionJuegoTest {
         sesion.iniciar(experimento, reaccion, FabricaAutomata.crearAutomataSimple());
 
         Experimento otro = new FabricaExperimento(catalogo)
-                .crearExperimentoSintesisAgua();
+                .crearExperimentoParaReaccion(catalogo.buscarReaccion("R_H2O").orElseThrow());
 
         assertThrows(
                 IllegalStateException.class,
@@ -179,7 +179,7 @@ class SesionJuegoTest {
                 FabricaAutomata.crearAutomataSimple()
         );
         Experimento exp2 = new FabricaExperimento(catalogo)
-                .crearExperimentoCombustionCarbono();
+                .crearExperimentoParaReaccion(catalogo.buscarReaccion("R_CO2").orElseThrow());
         Reaccion reaccion2 = catalogo.buscarReaccion("R_CO2").orElseThrow();
 
         // El cuaderno de sesion solo registra sus propios experimentos
@@ -189,7 +189,7 @@ class SesionJuegoTest {
         sesion2.abandonar();
 
         assertEquals(1, sesion2.getCuaderno().getHistorial().size());
-        assertEquals("Combustión de Carbono",
+        assertEquals(reaccion2.getNombre(),
                 sesion2.getCuaderno().getHistorial().get(0).getNombreExperimento());
     }
 
@@ -199,7 +199,7 @@ class SesionJuegoTest {
         sesion.abandonar();
 
         assertEquals(
-                "Síntesis de Agua",
+                reaccion.getNombre(),
                 sesion.getCuaderno().getHistorial().get(0).getNombreExperimento()
         );
     }

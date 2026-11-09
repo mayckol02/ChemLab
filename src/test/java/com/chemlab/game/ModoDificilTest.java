@@ -200,7 +200,7 @@ class ModoDificilTest {
         Reaccion combustion = catalogo.buscarReaccion("R_CO2").orElseThrow();
         Experimento experimento = fabrica.crearExperimentoParaReaccion(combustion);
         SesionJuego sesion = crearSesionDificil();
-        sesion.iniciar(experimento, combustion, FabricaAutomata.crearAutomataParaReaccion(combustion.getId()));
+        sesion.iniciar(experimento, combustion, FabricaAutomata.crearAutomataParaReaccion(combustion));
 
         sesion.registrarEntradaPuesto("Mesa de síntesis", TipoEquipo.MATRAZ);
         assertTrue(sesion.ejecutarAccion(AccionLaboratorio.CARGAR_REACTIVO).isExitoso());

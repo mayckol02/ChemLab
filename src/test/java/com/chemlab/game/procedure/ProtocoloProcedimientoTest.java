@@ -53,16 +53,18 @@ class ProtocoloProcedimientoTest {
     @Test
     @DisplayName("El procedimiento HPHT debe reflejar condiciones extremas y separación física de elementos")
     void procedimientoHphtReflejaCondicionesReales() {
-        var pasoPrep = ProtocoloProcedimiento.obtenerProtocoloPaso("R_DIAMANTE_HPHT", "PREPARACION");
+        Reaccion reaccion = CatalogoQuimico.predeterminado()
+                .buscarReaccion("R_DIAMANTE_HPHT").orElseThrow();
+        var pasoPrep = ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion, "PREPARACION");
         assertEquals(55000.0, pasoPrep.presionObjetivo(), 1.0);
         assertEquals(1500.0, pasoPrep.temperaturaObjetivo(), 1.0);
         assertTrue(pasoPrep.explicacionManejo().contains("SEPARADOS"));
 
-        var pasoCargado = ProtocoloProcedimiento.obtenerProtocoloPaso("R_DIAMANTE_HPHT", "CARGADO");
+        var pasoCargado = ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion, "CARGADO");
         assertTrue(pasoCargado.reactivosFases().stream()
                 .anyMatch(rf -> rf.estadoManejo() == ProtocoloProcedimiento.EstadoManejo.SEPARADO_EN_CAMARA));
 
-        var pasoFinal = ProtocoloProcedimiento.obtenerProtocoloPaso("R_DIAMANTE_HPHT", "qF");
+        var pasoFinal = ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion, "COMPLETADO");
         assertTrue(pasoFinal.reactivosFases().stream()
                 .anyMatch(rf -> rf.estadoManejo() == ProtocoloProcedimiento.EstadoManejo.PRODUCTO_FORMADO));
     }
@@ -70,7 +72,9 @@ class ProtocoloProcedimientoTest {
     @Test
     @DisplayName("El procedimiento CVD debe operar a baja presión con plasma y gases homogéneos")
     void procedimientoCvdReflejaCondicionesReales() {
-        var pasoPlasma = ProtocoloProcedimiento.obtenerProtocoloPaso("R_DIAMANTE_CVD", "PLASMA");
+        Reaccion reaccion = CatalogoQuimico.predeterminado()
+                .buscarReaccion("R_DIAMANTE_CVD").orElseThrow();
+        var pasoPlasma = ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion, "PLASMA");
         assertEquals(0.05, pasoPlasma.presionObjetivo(), 0.01);
         assertEquals(1000.0, pasoPlasma.temperaturaObjetivo(), 1.0);
         assertTrue(pasoPlasma.equipoTecnico().contains("Plasma") || pasoPlasma.equipoTecnico().contains("CVD"));
@@ -85,7 +89,8 @@ class ProtocoloProcedimientoTest {
         assertEquals(25, catalogo.obtenerReacciones().size(), "Deben existir 25 reacciones en el catálogo");
 
         for (Reaccion r : catalogo.obtenerReacciones()) {
-            var pasoPrep = ProtocoloProcedimiento.obtenerProtocoloPaso(r.getId(), "q0");
+            String estadoInicial = r.getDefinicionPractica().orElseThrow().estadoInicialId();
+            var pasoPrep = ProtocoloProcedimiento.obtenerProtocoloPaso(r, estadoInicial);
             assertNotNull(pasoPrep, "Protocolo no debe ser nulo para " + r.getId());
             assertNotNull(pasoPrep.equipoTecnico(), "Equipo no debe ser nulo para " + r.getId());
             assertFalse(pasoPrep.reactivosFases().isEmpty(), "Debe tener reactivos para " + r.getId());
@@ -101,7 +106,7 @@ class ProtocoloProcedimientoTest {
         FabricaExperimento fabrica = new FabricaExperimento(catalogo);
 
         for (Reaccion r : catalogo.obtenerReacciones()) {
-            var automata = FabricaAutomata.crearAutomataParaReaccion(r.getId());
+            var automata = FabricaAutomata.crearAutomataParaReaccion(r);
             assertNotNull(automata, "Autómata debe existir para " + r.getId());
             assertFalse(automata.getEstados().isEmpty(), "Autómata debe tener estados para " + r.getId());
 
@@ -110,5 +115,19 @@ class ProtocoloProcedimientoTest {
             assertNotNull(exp.getCondiciones(), "Condiciones deben existir para " + r.getId());
             assertFalse(exp.getInventario().estaVacio(), "Inventario debe tener reactivos para " + r.getId());
         }
+    }
+
+    @Test
+    void protocoloDeclarativoSeConstruyeDesdeElContenidoDeLaPractica() {
+        Reaccion reaccion = CatalogoQuimico.predeterminado()
+                .buscarReaccion("R_MgO").orElseThrow();
+        assertTrue(reaccion.getDefinicionPractica().isPresent());
+
+        var protocolo = ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion, "CARGADO");
+
+        assertEquals("CARGADO", protocolo.estadoAutomataId());
+        assertEquals("Cámara de combustión sellada", protocolo.equipoTecnico());
+        assertTrue(protocolo.explicacionManejo().contains("atmósfera"));
+        assertTrue(protocolo.accionSiguienteSugerida().contains("ignición"));
     }
 }

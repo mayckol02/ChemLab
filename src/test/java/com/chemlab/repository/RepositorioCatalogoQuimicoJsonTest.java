@@ -19,6 +19,8 @@ class RepositorioCatalogoQuimicoJsonTest {
 
         assertEquals(36, catalogo.obtenerSustancias().size());
         assertEquals(25, catalogo.obtenerReacciones().size());
+        assertTrue(catalogo.obtenerReacciones().stream()
+                .allMatch(reaccion -> reaccion.getDefinicionPractica().isPresent()));
 
         Sustancia agua = catalogo.buscarSustancia("H2O")
                 .orElseThrow();
@@ -32,6 +34,12 @@ class RepositorioCatalogoQuimicoJsonTest {
                 2,
                 formacionAgua.getProductos().get(agua)
         );
+
+        Reaccion practicaDeclarativa = catalogo.buscarReaccion("R_MgO").orElseThrow();
+        assertTrue(practicaDeclarativa.getDefinicionPractica().isPresent());
+        var definicion = practicaDeclarativa.getDefinicionPractica().orElseThrow();
+        assertEquals("MgO", definicion.objetivo().productoId());
+        assertEquals(4, definicion.etapas().size());
     }
 
     @Test

@@ -100,7 +100,45 @@ public class RegistroExperimento {
             List<String> pistasSolicitadas,
             Map<Sustancia, Cantidad> inventarioFinal
     ) {
-        this.fecha = LocalDateTime.now();
+        this(
+                LocalDateTime.now(),
+                nombreExperimento,
+                idProceso,
+                accionesEjecutadas,
+                resultado,
+                exitoso,
+                estadoInicial,
+                estadosFinales,
+                todosLosEstados,
+                pasosTransicion,
+                modoJuego,
+                estadoFinal,
+                motivoFinalizacion,
+                eventos,
+                pistasSolicitadas,
+                inventarioFinal
+        );
+    }
+
+    public RegistroExperimento(
+            LocalDateTime fecha,
+            String nombreExperimento,
+            String idProceso,
+            Map<String, String> accionesEjecutadas,
+            ResultadoQuimico resultado,
+            boolean exitoso,
+            String estadoInicial,
+            List<String> estadosFinales,
+            List<String> todosLosEstados,
+            List<PasoTransicion> pasosTransicion,
+            ModoJuego modoJuego,
+            EstadoRegistroExperimento estadoFinal,
+            String motivoFinalizacion,
+            List<String> eventos,
+            List<String> pistasSolicitadas,
+            Map<Sustancia, Cantidad> inventarioFinal
+    ) {
+        this.fecha = Objects.requireNonNull(fecha, "La fecha no puede ser null");
         this.nombreExperimento = Objects.requireNonNull(nombreExperimento, "El nombre no puede ser null");
         this.idProceso = idProceso;
         this.accionesEjecutadas = new LinkedHashMap<>(

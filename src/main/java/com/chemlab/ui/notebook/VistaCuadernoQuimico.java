@@ -182,7 +182,7 @@ public final class VistaCuadernoQuimico extends VBox {
         RegistroExperimento ultimoIntento = sesion.getCuaderno().getHistorial().stream()
                 .filter(registro -> reaccion.getId().equals(registro.getIdProceso()))
                 .max(Comparator.comparing(RegistroExperimento::getFecha)).orElse(null);
-        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion.getId());
+        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
         List<TransicionQuimica> transiciones = obtenerTransicionesAlcanzables(automata);
 
         Label estado = new Label(esActivo
@@ -198,8 +198,8 @@ public final class VistaCuadernoQuimico extends VBox {
         int indiceEtapa = 0;
         for (TransicionQuimica transicion : transiciones) {
             ProtocoloProcedimiento.InfoPasoProcedimiento info =
-                    ProtocoloProcedimiento.obtenerProtocoloPaso(reaccion.getId(),
-                            transicion.getEstadoOrigen().getId());
+                    ProtocoloProcedimiento.obtenerProtocoloPaso(
+                            reaccion, transicion.getEstadoOrigen().getId());
             boolean completada = ultimoIntento != null
                     && ultimoIntento.getPasosTransicion().stream().anyMatch(paso ->
                     paso.valida()
@@ -597,7 +597,7 @@ public final class VistaCuadernoQuimico extends VBox {
         tarjetas.add(textoSecundario("El inicio se ramifica por cada método disponible; cada rama muestra los estados y acciones "
                 + "del autómata real de esa ruta y converge en el producto objetivo."));
         if (!rutas.isEmpty()) {
-            ScrollPane diagrama = crearScroll(new LienzoAutomataRutas(rutas, sesion));
+            ScrollPane diagrama = crearScroll(new LienzoAutomataRutas(rutas, sesion, catalogo));
             diagrama.setFitToWidth(false);
             diagrama.setPrefViewportHeight(Math.min(410, 120 + rutas.size() * 108));
             tarjetas.add(diagrama);

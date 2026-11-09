@@ -7,6 +7,7 @@ import com.chemlab.engine.MotorQuimico;
 import com.chemlab.engine.ReglaReaccionBasica;
 import com.chemlab.game.SesionJuego;
 import com.chemlab.game.ModoJuego;
+import com.chemlab.model.entity.CuadernoLaboratorio;
 
 /**
  * Factory que ensambla una {@link SesionJuego} completamente configurada.
@@ -61,6 +62,15 @@ public final class FabricaSesion {
             AutomataQuimico automata,
             ModoJuego modo
     ) {
+        return crearSesion(catalogo, automata, modo, new CuadernoLaboratorio());
+    }
+
+    public static SesionJuego crearSesion(
+            CatalogoQuimico catalogo,
+            AutomataQuimico automata,
+            ModoJuego modo,
+            CuadernoLaboratorio cuaderno
+    ) {
         MotorQuimico motor = new MotorQuimico(
                 new ReglaReaccionBasica()
         );
@@ -68,7 +78,7 @@ public final class FabricaSesion {
         EjecutorAutomataQuimico ejecutor =
                 new EjecutorAutomataQuimico(motor, automata);
 
-        SesionJuego sesion = new SesionJuego(catalogo, ejecutor);
+        SesionJuego sesion = new SesionJuego(catalogo, ejecutor, cuaderno);
         sesion.seleccionarModo(modo);
         return sesion;
     }

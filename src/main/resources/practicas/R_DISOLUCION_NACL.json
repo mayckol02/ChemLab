@@ -1,0 +1,175 @@
+{
+  "idReaccion" : "R_DISOLUCION_NACL",
+  "practica" : {
+    "dificultad" : "INTERMEDIO",
+    "aprendizaje" : "Analiza Disolución de cloruro de sodio en agua y reconoce cómo las acciones del laboratorio conducen a sus productos.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar NaCl (ac) (Solución salina (NaCl ac))",
+      "producto" : "NaCl_AC",
+      "gramos" : 46.752
+    },
+    "equipo" : {
+      "nombre" : "Vaso de Precipitados con Agitador Magnético",
+      "tipo" : "MATRAZ",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 25.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "AIRE"
+    },
+    "materiales" : [ {
+      "sustancia" : "H2O",
+      "gramos" : 18.015
+    }, {
+      "sustancia" : "NaCl",
+      "gramos" : 58.44
+    } ],
+    "etapas" : [ {
+      "id" : "COMPLETADO",
+      "nombre" : "Solución Salina Homogénea Formada",
+      "equipoTecnico" : "Vaso de Precipitados (Solución acuosa)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Disolución completada",
+      "explicacion" : "Los dipolos del agua han rodeado y separado los cationes Na⁺ y aniones Cl⁻, rompiendo la red cristalina y formando una SOLUCIÓN HOMOGÉNEA TRANSPARENTE.",
+      "siguienteAccion" : "Disolución completada con éxito.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl(ac)",
+        "nombre" : "Iones Na⁺ y Cl⁻ solvatados",
+        "rol" : "Solución homogénea",
+        "estadoManejo" : "DISUELTO_EN_SOLVENTE",
+        "faseFisica" : "Fase líquida homogénea",
+        "descripcionUbicacion" : "Completamente disuelto a nivel iónico"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "Sal Cargada en el Vaso",
+      "equipoTecnico" : "Vaso de Precipitados (Fondo con cristales)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Agitador listo",
+      "explicacion" : "La sal sólida está en el fondo del vaso en fase seca. El agua aún no se ha incorporado.",
+      "siguienteAccion" : "Ejecuta 'AGREGAR_AGUA' para verter el agua sobre los cristales.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl",
+        "nombre" : "Cristales de sal",
+        "rol" : "Fase sólida",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Sólido en el fondo",
+        "descripcionUbicacion" : "Descansando en el fondo del vaso"
+      }, {
+        "formula" : "H2O",
+        "nombre" : "Agua destilada",
+        "rol" : "Solvente",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Líquido en probeta",
+        "descripcionUbicacion" : "Lista para verter"
+      } ]
+    }, {
+      "id" : "HUMEDECIDO",
+      "nombre" : "Agua Agregada (Fases heterogéneas separadas)",
+      "equipoTecnico" : "Vaso de Precipitados (Sistema bifásico)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Agitador magnético apagado",
+      "explicacion" : "El sistema tiene DOS FASES SEPARADAS: los cristales pesados están en el fondo y el agua pura está arriba. Aún no se ha producido la disolución completa porque falta agitación mecánica.",
+      "siguienteAccion" : "Ejecuta 'MEZCLAR' para activar el agitador magnético y forzar la solvatación iónica.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl",
+        "nombre" : "Sal en fondo",
+        "rol" : "Fase sólida heterogénea",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Sólido sedimentado",
+        "descripcionUbicacion" : "En el fondo bajo la columna de agua"
+      }, {
+        "formula" : "H2O",
+        "nombre" : "Columna de agua",
+        "rol" : "Fase líquida superior",
+        "estadoManejo" : "EN_CONTACTO_SOLIDO",
+        "faseFisica" : "Líquido sobrenadante",
+        "descripcionUbicacion" : "Capa líquida sin mezclar"
+      } ]
+    }, {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación de Sal y Agua",
+      "equipoTecnico" : "Vaso de Precipitados con Agitador Magnético",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Sin catalizador",
+      "explicacion" : "El cloruro de sodio sólido (cristales blancos) y el agua destilada se encuentran SEPARADOS en sus recipientes de pesaje.",
+      "siguienteAccion" : "Ejecuta 'CARGAR_REACTIVO' para verter los cristales de sal en el fondo del vaso de precipitados.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl",
+        "nombre" : "Cloruro de sodio",
+        "rol" : "Soluto sólido",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Sólido cristalino cúbico",
+        "descripcionUbicacion" : "En cápsula de pesaje"
+      }, {
+        "formula" : "H2O",
+        "nombre" : "Agua destilada",
+        "rol" : "Solvente polar",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Líquido polar",
+        "descripcionUbicacion" : "En probeta graduada"
+      } ]
+    }, {
+      "id" : "DISOLVIENDO",
+      "nombre" : "Solución Salina Homogénea Formada",
+      "equipoTecnico" : "Vaso de Precipitados (Solución acuosa)",
+      "temperaturaActual" : 25.0,
+      "temperaturaObjetivo" : 25.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Aire ambiente",
+      "catalizadorEstado" : "Disolución completada",
+      "explicacion" : "Los dipolos del agua han rodeado y separado los cationes Na⁺ y aniones Cl⁻, rompiendo la red cristalina y formando una SOLUCIÓN HOMOGÉNEA TRANSPARENTE.",
+      "siguienteAccion" : "Disolución completada con éxito.",
+      "reactivosFases" : [ {
+        "formula" : "NaCl(ac)",
+        "nombre" : "Iones Na⁺ y Cl⁻ solvatados",
+        "rol" : "Solución homogénea",
+        "estadoManejo" : "DISUELTO_EN_SOLVENTE",
+        "faseFisica" : "Fase líquida homogénea",
+        "descripcionUbicacion" : "Completamente disuelto a nivel iónico"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "AGREGAR_AGUA",
+        "siguiente" : "HUMEDECIDO"
+      }, {
+        "origen" : "HUMEDECIDO",
+        "terminal" : "MEZCLAR",
+        "siguiente" : "DISOLVIENDO"
+      }, {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      }, {
+        "origen" : "DISOLVIENDO",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      } ]
+    }
+  }
+}

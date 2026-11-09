@@ -1,107 +1,108 @@
 package com.chemlab.factory;
 
 import com.chemlab.automata.AutomataQuimico;
+import com.chemlab.catalogo.CatalogoQuimico;
 import com.chemlab.model.enums.AccionLaboratorio;
 import com.chemlab.model.enums.Atmosfera;
 import com.chemlab.model.entity.CondicionesExperimentales;
 import com.chemlab.model.entity.Inventario;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class FabricaAutomataTest {
 
     @Test
-    void automataEstandarDebeEmpezarEnPreparacion() {
+    void automataEstandarDebeAceptarLaSecuenciaComunCompleta() {
         AutomataQuimico automata = FabricaAutomata.crearAutomataEstandar();
+        var condiciones = new CondicionesExperimentales(25, 1, 7, Atmosfera.AIRE);
 
-        assertEquals(
-                "PREPARACION",
-                automata.getEstadoActual().getId()
-        );
-    }
-
-    @Test
-    void automataEstandarDebeAceptarCargarReactivoEnEstadoInicial() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataEstandar();
-
-        assertTrue(
-                automata.puedeTransicionar(
-                        AccionLaboratorio.CARGAR_REACTIVO,
-                        new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE),
-                        new Inventario()
-                )
-        );
-    }
-
-    @Test
-    void automataEstandarNoDebeEstarEnEstadoFinalAlInicio() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataEstandar();
+        assertEquals("PREPARACION", automata.getEstadoInicial().getId());
         assertFalse(automata.esEstadoFinalActual());
-    }
+        automata.transicionar(AccionLaboratorio.CARGAR_REACTIVO, condiciones, new Inventario());
+        automata.transicionar(AccionLaboratorio.MEZCLAR, condiciones, new Inventario());
+        automata.transicionar(AccionLaboratorio.CALENTAR, condiciones, new Inventario());
+        automata.transicionar(AccionLaboratorio.FINALIZAR, condiciones, new Inventario());
 
-    @Test
-    void automataSimpleDebeEmpezarEnEstadoInicial() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataSimple();
-
-        assertEquals(
-                "INICIAL",
-                automata.getEstadoActual().getId()
-        );
-    }
-
-    @Test
-    void automataSimpleDebeLlegarAEstadoFinalConUnaAccion() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataSimple();
-
-        automata.transicionar(
-                AccionLaboratorio.CARGAR_REACTIVO,
-                new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario()
-        );
-
-        assertTrue(automata.esEstadoFinalActual());
-    }
-
-    @Test
-    void automataEstandarDebeCompletarseEnCuatroAcciones() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataEstandar();
-
-        automata.transicionar(AccionLaboratorio.CARGAR_REACTIVO, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
-        automata.transicionar(AccionLaboratorio.MEZCLAR, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
-        automata.transicionar(AccionLaboratorio.CALENTAR, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
-        automata.transicionar(AccionLaboratorio.FINALIZAR, new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE), new Inventario());
         assertTrue(automata.esEstadoFinalActual());
         assertEquals("COMPLETADO", automata.getEstadoActual().getId());
     }
 
     @Test
-    void automataDiamanteHPHTDebeTenerEstadosInicialYFinalBienDefinidos() {
-        AutomataQuimico automata = FabricaAutomata.crearAutomataDiamanteHPHT();
+    void automataSimpleDebeCompletarConUnaAccion() {
+        AutomataQuimico automata = FabricaAutomata.crearAutomataSimple();
 
-        assertNotNull(automata.getEstadoInicial());
-        assertEquals("PREPARACION", automata.getEstadoInicial().getId());
-        assertEquals(1, automata.getEstadosFinales().size());
-        assertTrue(automata.getEstadosFinales().stream().anyMatch(e -> e.getId().equals("COMPLETADO")));
-
-        CondicionesExperimentales cond = new CondicionesExperimentales(25.0, 1.0, 7.0, Atmosfera.AIRE);
-        Inventario inv = new Inventario();
-
-        automata.transicionar(AccionLaboratorio.CARGAR_REACTIVO, cond, inv);
-        automata.transicionar(AccionLaboratorio.AGREGAR_CATALIZADOR, cond, inv);
-        automata.transicionar(AccionLaboratorio.COMPRIMIR, cond, inv);
-        automata.transicionar(AccionLaboratorio.CALENTAR, cond, inv);
-        automata.transicionar(AccionLaboratorio.FINALIZAR, cond, inv);
+        automata.transicionar(
+                AccionLaboratorio.CARGAR_REACTIVO,
+                new CondicionesExperimentales(25, 1, 7, Atmosfera.AIRE),
+                new Inventario());
 
         assertTrue(automata.esEstadoFinalActual());
     }
 
     @Test
-    void automataParaReaccionesDebeResolverTodasLasReaccionesDelUniverso() {
-        assertNotNull(FabricaAutomata.crearAutomataParaReaccion("R_H2O"));
-        assertNotNull(FabricaAutomata.crearAutomataParaReaccion("R_CH4"));
-        assertNotNull(FabricaAutomata.crearAutomataParaReaccion("R_DIAMANTE_HPHT"));
-        assertNotNull(FabricaAutomata.crearAutomataParaReaccion("R_DIAMANTE_CVD"));
-        assertNotNull(FabricaAutomata.crearAutomataParaReaccion("R_SO2"));
-        assertNotNull(FabricaAutomata.crearAutomataParaReaccion("R_CuO"));
+    void todasLasPracticasDelCatalogoCompilanSuGramaticaDeclarativa() {
+        var catalogo = CatalogoQuimico.predeterminado();
+
+        assertEquals(25, catalogo.obtenerReacciones().size());
+        for (var reaccion : catalogo.obtenerReacciones()) {
+            var definicion = reaccion.getDefinicionPractica().orElseThrow(
+                    () -> new AssertionError("Falta práctica JSON para " + reaccion.getId()));
+            AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
+
+            assertEquals(definicion.etapas().size(), automata.getEstados().size(), reaccion.getId());
+            assertEquals(1, automata.getEstadosFinales().size(), reaccion.getId());
+            var terminales = definicion.producciones().stream()
+                    .filter(produccion -> produccion.terminal() != null)
+                    .map(produccion -> produccion.origenId() + ":" + produccion.terminal()
+                            + ":" + produccion.siguienteId())
+                    .toList();
+            var transiciones = automata.getEstados().stream()
+                    .flatMap(estado -> automata.getTransicionesDesdeEstado(estado).stream()
+                            .map(transicion -> estado.getId() + ":" + transicion.getAccion()
+                                    + ":" + transicion.getEstadoDestino().getId()))
+                    .toList();
+            assertEquals(terminales.size(), transiciones.size(), reaccion.getId());
+            assertTrue(terminales.containsAll(transiciones), reaccion.getId());
+        }
+    }
+
+    @Test
+    void automataHphtConservaSuSecuenciaDeclarada() {
+        var reaccion = CatalogoQuimico.predeterminado()
+                .buscarReaccion("R_DIAMANTE_HPHT").orElseThrow();
+        AutomataQuimico automata = FabricaAutomata.crearAutomataParaReaccion(reaccion);
+        var condiciones = new CondicionesExperimentales(25, 1, 7, Atmosfera.AIRE);
+
+        List<AccionLaboratorio> secuencia = List.of(
+                AccionLaboratorio.CARGAR_REACTIVO,
+                AccionLaboratorio.AGREGAR_CATALIZADOR,
+                AccionLaboratorio.COMPRIMIR,
+                AccionLaboratorio.CALENTAR,
+                AccionLaboratorio.FINALIZAR);
+        for (AccionLaboratorio accion : secuencia) {
+            automata.transicionar(accion, condiciones, new Inventario());
+        }
+
+        assertTrue(automata.esEstadoFinalActual());
+    }
+
+    @Test
+    void reaccionSinPracticaDeclarativaFallaEnLugarDeUsarAutómataAproximado() {
+        var reaccion = CatalogoQuimico.predeterminado().obtenerReacciones().getFirst();
+        var sinDefinicion = new com.chemlab.model.entity.Reaccion(
+                reaccion.getId(),
+                reaccion.getNombre(),
+                reaccion.getTipo(),
+                reaccion.getReactivos(),
+                reaccion.getProductos(),
+                reaccion.getCondicionesRequeridas());
+
+        IllegalStateException error = assertThrows(
+                IllegalStateException.class,
+                () -> FabricaAutomata.crearAutomataParaReaccion(sinDefinicion));
+        assertTrue(error.getMessage().contains("práctica declarativa"));
     }
 }

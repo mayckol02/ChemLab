@@ -29,7 +29,7 @@ public sealed interface PresentadorModoJuego
 
     Experimento crearExperimento(FabricaExperimento fabrica, Reaccion reaccion);
 
-    ProtocoloProcedimiento.InfoPasoProcedimiento obtenerProtocolo(String reaccionId, String estadoId);
+    ProtocoloProcedimiento.InfoPasoProcedimiento obtenerProtocolo(Reaccion reaccion, String estadoId);
 
     List<TransicionQuimica> obtenerTransiciones(AutomataQuimico automata, TipoEquipo equipo);
 

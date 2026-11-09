@@ -1,0 +1,130 @@
+{
+  "idReaccion" : "R_MgO",
+  "practica" : {
+    "dificultad" : "INTERMEDIO",
+    "aprendizaje" : "Relaciona la ignición del magnesio con oxígeno con la formación de un óxido sólido.",
+    "objetivo" : {
+      "descripcion" : "Sintetizar al menos 64.4864 g de MgO",
+      "producto" : "MgO",
+      "gramos" : 64.4864
+    },
+    "equipo" : {
+      "nombre" : "Cámara de Combustión Sellada",
+      "tipo" : "HORNO",
+      "capacidad" : 1000.0
+    },
+    "condicionesIniciales" : {
+      "temperatura" : 400.0,
+      "presion" : 1.0,
+      "ph" : 7.0,
+      "atmosfera" : "OXIGENO"
+    },
+    "materiales" : [ {
+      "sustancia" : "Mg",
+      "gramos" : 48.61
+    }, {
+      "sustancia" : "O2",
+      "gramos" : 31.998
+    } ],
+    "etapas" : [ {
+      "id" : "PREPARACION",
+      "nombre" : "Preparación",
+      "equipoTecnico" : "Cámara de combustión",
+      "temperaturaActual" : 400.0,
+      "temperaturaObjetivo" : 400.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Oxígeno",
+      "catalizadorEstado" : "No requerido",
+      "explicacion" : "Prepara el magnesio y el oxígeno antes de introducirlos en el equipo.",
+      "siguienteAccion" : "Carga los reactivos en la cámara.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_ALMACEN",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "CARGADO",
+      "nombre" : "Cinta de Mg y O₂",
+      "equipoTecnico" : "Cámara de combustión sellada",
+      "temperaturaActual" : 400.0,
+      "temperaturaObjetivo" : 400.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Oxígeno",
+      "catalizadorEstado" : "No requerido",
+      "explicacion" : "Los reactivos están dentro del equipo. Comprueba la atmósfera antes de iniciar la reacción.",
+      "siguienteAccion" : "Activa la ignición para iniciar la oxidación.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "SEPARADO_EN_CAMARA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "IGNICION",
+      "nombre" : "Ignición brillante",
+      "equipoTecnico" : "Cámara de combustión sellada",
+      "temperaturaActual" : 400.0,
+      "temperaturaObjetivo" : 400.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Oxígeno",
+      "catalizadorEstado" : "No requerido",
+      "explicacion" : "La oxidación transforma los reactivos en óxido de magnesio sólido.",
+      "siguienteAccion" : "Finaliza el proceso para registrar el producto.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "EN_REACCION_TERMICA",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    }, {
+      "id" : "COMPLETADO",
+      "nombre" : "MgO obtenido",
+      "equipoTecnico" : "Cámara de combustión sellada",
+      "temperaturaActual" : 400.0,
+      "temperaturaObjetivo" : 400.0,
+      "presionActual" : 1.0,
+      "presionObjetivo" : 1.0,
+      "atmosferaRequerida" : "Oxígeno",
+      "catalizadorEstado" : "No requerido",
+      "explicacion" : "La práctica terminó. Revisa el óxido producido y las cantidades registradas.",
+      "siguienteAccion" : "Consulta el análisis final de la práctica.",
+      "reactivosFases" : [ {
+        "formula" : "Reactivos",
+        "nombre" : "Reactivos químicos",
+        "rol" : "Fase del proceso",
+        "estadoManejo" : "PRODUCTO_FORMADO",
+        "faseFisica" : "Fase física adecuada",
+        "descripcionUbicacion" : "En reactor de proceso"
+      } ]
+    } ],
+    "gramatica" : {
+      "inicial" : "PREPARACION",
+      "producciones" : [ {
+        "origen" : "PREPARACION",
+        "terminal" : "CARGAR_REACTIVO",
+        "siguiente" : "CARGADO"
+      }, {
+        "origen" : "CARGADO",
+        "terminal" : "ACTIVAR_IGNICION",
+        "siguiente" : "IGNICION"
+      }, {
+        "origen" : "IGNICION",
+        "terminal" : "FINALIZAR",
+        "siguiente" : "COMPLETADO"
+      }, {
+        "origen" : "COMPLETADO",
+        "epsilon" : true
+      } ]
+    }
+  }
+}

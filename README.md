@@ -2,9 +2,9 @@
 
 Juego/laboratorio químico educativo desarrollado con **Java 25 + JavaFX + Maven**.
 
-La aplicación inicia ahora en un prototipo 2D jugable: puedes recorrer el laboratorio, acercarte a los puestos y ejecutar desde ellos los procesos del dominio químico.
+La aplicación inicia con un selector de perfiles y después muestra una intro original con el logo de ChemLab; puedes omitirla con **Espacio** o **Enter**. Cada perfil mantiene su propio progreso de misiones, descubrimientos e historial del cuaderno entre ejecuciones. Los datos se guardan en archivos JSON locales bajo `.chemlab/profiles` dentro de la carpeta personal del usuario, sin usar una base de datos. La pista de audio es opcional: para usar una propia con licencia, consulta `src/main/resources/audio/README.md`.
 
-Al abrirse, el juego muestra una intro original con el logo de ChemLab; puedes omitirla con cualquier tecla o con un clic. La pista de audio es opcional: para usar una propia con licencia, consulta `src/main/resources/audio/README.md`.
+Al entrar al juego puedes recorrer el laboratorio 2D, acercarte a los puestos y ejecutar desde ellos los procesos del dominio químico.
 
 ## Arquitectura inicial
 
@@ -48,7 +48,16 @@ Al pulsar F, `ui/workbench/VistaPuestoLaboratorio` abre una mesa completa con el
 - Arrastra reactivos al recipiente o acciona la herramienta resaltada en la mesa; observa la animación hasta que termine.
 - **E**: abrir inventario y cuaderno de laboratorio.
 - **M**: abrir almacén y seleccionar/iniciar una práctica.
+- **G (Modo Difícil)**: consultar e iniciar la ruta opcional de misiones; al activarla, la siguiente práctica se desbloquea al completar la anterior. En Modo Tutorial, todas las prácticas siguen disponibles sin depender de las misiones.
+- **Cambiar perfil**: volver al selector de perfiles desde la cabecera; el progreso se guarda antes de cambiar.
 - **Esc**: cerrar el menú o el panel de acciones.
+
+La ruta de misiones introductoria tiene cinco prácticas, solo está disponible en Modo Difícil y cada perfil conserva su avance, descubrimientos y registros entre ejecuciones.
+Durante una práctica, la consola del puesto mantiene visible la retroalimentación de cada operación, con explicación y próximo paso en Tutorial, o sugerencias para analizar condiciones y materiales en modo Difícil. También muestra temperatura, presión, pH, atmósfera, el fenómeno modelado y alertas educativas no bloqueantes; estas alertas pertenecen a la simulación y no sustituyen protocolos reales de seguridad.
+
+El catálogo químico de `src/main/resources/catalogo-quimico.json` contiene las sustancias, reacciones y un manifiesto `practicas` con rutas relativas a archivos de práctica. Cada una de las reacciones del catálogo tiene su archivo, como `src/main/resources/practicas/R_MgO.json`, con el `idReaccion` y su definición `practica` (objetivo, equipo, condiciones, materiales, etapas educativas, fases visibles de los reactivos y gramática regular de acciones). El compilador convierte esa gramática en el autómata que valida y ejecuta la secuencia del juego. El cargador valida referencias, determinismo y recorrido antes de habilitar el catálogo.
+
+Para agregar contenido, registra primero las sustancias y la reacción con coeficientes balanceados, crea un archivo JSON bajo `src/main/resources/practicas/` y añade su ruta al arreglo `practicas` del catálogo principal. El archivo debe tener la forma `{ "idReaccion": "ID_REACCION", "practica": { ... } }`; sigue `R_MgO.json` como ejemplo. En `gramatica.producciones`, cada regla indica `origen`, `terminal` (una acción `AccionLaboratorio`) y `siguiente`; el estado final se declara con una producción `{ "origen": "...", "epsilon": true }`. Ejecuta `mvn test` para verificar el catálogo y su recorrido en ambos modos. La validación automática comprueba estructura y referencias, no certifica el balance químico, las condiciones experimentales ni la seguridad: esos aspectos requieren revisión química independiente.
 
 ## Principios de desarrollo
 

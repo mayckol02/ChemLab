@@ -32,7 +32,7 @@ public final class PresentadorModoDificil implements PresentadorModoJuego {
 
     @Override
     public ProtocoloProcedimiento.InfoPasoProcedimiento obtenerProtocolo(
-            String reaccionId,
+            Reaccion reaccion,
             String estadoId
     ) {
         return null;
@@ -54,8 +54,13 @@ public final class PresentadorModoDificil implements PresentadorModoJuego {
     @Override
     public String textoExperimento(Reaccion reaccion, Experimento experimento,
                                    EstacionLaboratorio estacion, boolean disponibles) {
+        String detalleEducativo = reaccion.getDefinicionPractica()
+                .map(definicion -> "\nDificultad: " + definicion.dificultad()
+                        + "\nAprendizaje: " + definicion.aprendizaje())
+                .orElse("");
         return "Experimento seleccionado: " + reaccion.getNombre()
-                + (disponibles ? "" : "\nActiva en el almacén los reactivos de esta práctica.");
+                + (disponibles ? "" : "\nActiva en el almacén los reactivos de esta práctica.")
+                + detalleEducativo;
     }
 
     @Override

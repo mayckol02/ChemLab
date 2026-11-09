@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import com.chemlab.automata.AutomataQuimico;
 import com.chemlab.automata.EstadoQuimico;
 import com.chemlab.automata.TransicionQuimica;
-import com.chemlab.factory.FabricaAutomata;
 import com.chemlab.game.ProgresoAutomata;
 import com.chemlab.model.entity.RegistroExperimento;
 import com.chemlab.model.enums.AccionLaboratorio;
@@ -34,10 +33,6 @@ public final class LienzoAutomataRegistro extends Canvas {
     private final List<Nodo> nodos;
     private final List<Arista> aristas;
 
-    public LienzoAutomataRegistro(RegistroExperimento registro) {
-        this(registro, crearAutomata(registro));
-    }
-
     public LienzoAutomataRegistro(RegistroExperimento registro, AutomataQuimico automata) {
         this.registro = java.util.Objects.requireNonNull(registro, "El registro es obligatorio");
         java.util.Objects.requireNonNull(automata, "El autómata es obligatorio");
@@ -47,13 +42,6 @@ public final class LienzoAutomataRegistro extends Canvas {
         setWidth(ANCHO);
         setHeight(145 + filas * 165);
         dibujar(automata);
-    }
-
-    private static AutomataQuimico crearAutomata(RegistroExperimento registro) {
-        java.util.Objects.requireNonNull(registro, "El registro es obligatorio");
-        return registro.getIdProceso() == null
-                ? FabricaAutomata.crearAutomataEstandar()
-                : FabricaAutomata.crearAutomataParaReaccion(registro.getIdProceso());
     }
 
     private List<Nodo> construirNodos(AutomataQuimico automata) {

@@ -569,5 +569,32 @@
         "CuO": 2
       }
     }
+  ],
+  "practicas": [
+    "practicas/R_H2O.json",
+    "practicas/R_CO2.json",
+    "practicas/R_NH3.json",
+    "practicas/R_NaCl.json",
+    "practicas/R_HCl.json",
+    "practicas/R_Fe2O3.json",
+    "practicas/R_CH4.json",
+    "practicas/R_H2S.json",
+    "practicas/R_CuO.json",
+    "practicas/R_CaO.json",
+    "practicas/R_CaOH2.json",
+    "practicas/R_CaCO3.json",
+    "practicas/R_SiO2.json",
+    "practicas/R_MgO.json",
+    "practicas/R_Al2O3.json",
+    "practicas/R_Ca3PO42.json",
+    "practicas/R_DIAMANTE_HPHT.json",
+    "practicas/R_DIAMANTE_CVD.json",
+    "practicas/R_SO2.json",
+    "practicas/R_CORROSION_FE.json",
+    "practicas/R_CALCINACION_CACO3.json",
+    "practicas/R_DISOLUCION_NACL.json",
+    "practicas/R_SEPARACION_NACL.json",
+    "practicas/R_REDOX_CU.json",
+    "practicas/R_OXIDO_METALICO.json"
   ]
 }
